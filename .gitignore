@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Datos — nunca commitear raw ni snapshots
+tfg-forecasting/data/raw/
+tfg-forecasting/data/snapshots/
+tfg-forecasting/08_results/figures/
+
+# Credenciales
+.env
+*.env.local
+
+# Node
+node_modules/
+.next/
+.turbo/
+
+# Logs
+*.log
+
+# PyTorch Lightning / NeuralForecast — logs de entrenamiento generados automaticamente
+lightning_logs/
+events.out.tfevents.*
+
+# Resultados pesados — parquet de predicciones rolling (reproducibles, no necesitan versionarse)
+tfg-forecasting/03_models_baseline/results/*.parquet
+tfg-forecasting/04_models_deep/results/*.parquet
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store

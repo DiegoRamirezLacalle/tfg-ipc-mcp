@@ -1,0 +1,37 @@
+# Configuración global del experimento — NO modificar entre runs sin versionar
+experiment:
+  name: "ipc_mcp_forecasting"
+  version: "v1"
+
+data:
+  target_series: "IPC_ESP"
+  exog_series:
+    - "ECB_RATE"
+  freq: "MS"
+  date_start: "2002-01-01"
+
+forecast:
+  horizon: 12       # meses
+  step: 1           # rolling step (meses)
+
+conditions:
+  - "C0"            # sin contexto MCP
+  - "C1"            # con contexto MCP
+
+models:
+  - arima
+  - sarima
+  - sarimax
+  - lstm_univariate
+  - lstm_multivariate
+  - timegpt
+  - timesfm
+
+evaluation:
+  metrics: ["MAE", "RMSE", "MASE"]
+  dm_test: true
+  significance_level: 0.05
+
+reproducibility:
+  random_seed: 42
+  freeze_data_before_run: true

@@ -1,0 +1,69 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./tfg-arquitectura/db/init_postgres.sql:/docker-entrypoint-initdb.d/01_init.sql
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./tfg-arquitectura/db/init_mongo.js:/docker-entrypoint-initdb.d/init_mongo.js
+
+  backend:
+    build:
+      context: .
+      dockerfile: tfg-arquitectura/infra/Dockerfile.backend
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    env_file: .env
+    depends_on:
+      - postgres
+      - mongo
+    volumes:
+      - ./tfg-forecasting:/app/tfg-forecasting
+      - ./shared:/app/shared
+
+  gateway:
+    build:
+      context: tfg-arquitectura/gateway
+      dockerfile: ../infra/Dockerfile.gateway
+    ports:
+      - "${GATEWAY_PORT:-3001}:3001"
+    env_file: .env
+    depends_on:
+      - backend
+
+  frontend:
+    build:
+      context: tfg-arquitectura/frontend
+      dockerfile: ../infra/Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    env_file: .env
+    depends_on:
+      - gateway
+
+  mcp_server:
+    build:
+      context: .
+      dockerfile: tfg-arquitectura/infra/Dockerfile.backend
+    command: python tfg-forecasting/05_mcp_pipeline/mcp_server.py
+    ports:
+      - "${MCP_SERVER_PORT:-8080}:8080"
+    env_file: .env
+
+volumes:
+  postgres_data:
+  mongo_data:

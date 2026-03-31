@@ -1,0 +1,106 @@
+======================================================================
+REPORTE BASELINE -- TFG Prediccion IPC Espana con MCP
+Condicion C0: solo datos historicos numericos
+======================================================================
+
+1. ESPECIFICACIONES DE MODELOS
+----------------------------------------------------------------------
+Modelo       Orden                         AIC        BIC  N train
+----------------------------------------------------------------------
+arima        ARIMA(1,1,2)               138.17     155.30      228
+sarima       SARIMA(0,1,1)(0,1,1)12     -50.59     -37.11      228
+sarimax      SARIMAX+DFR(0,1,1)12       -50.59     -37.11      228
+
+2. EVALUACION ESTATICA (train 2002-2020 / val 2021-2022-06)
+   [Nota: periodo de ruptura estructural -- inflacion post-COVID]
+----------------------------------------------------------------------
+Modelo              MAE       RMSE       MASE
+----------------------------------------------------------------------
+arima            3.3700     4.3187     2.3984
+sarima           4.3239     5.3511     3.0773
+sarimax          4.3239     5.3511     3.0773
+   [MASE>1 indica que el modelo es peor que el naive estacional
+    en este periodo, esperado dado el shock inflacionario de 2022]
+
+3. EVALUACION ROLLING EXPANDING-WINDOW (2021-01 a 2024-12)
+----------------------------------------------------------------------
+  h=1 meses (48 evaluaciones):
+  Modelo          MAE     RMSE     MASE  vs naive
+  ----------------------------------------------
+  naive        3.6259   4.1732   2.5805  1.000x
+  arima        0.4781   0.6729   0.3403  0.132x
+  sarima       0.4418   0.6301   0.3144  0.122x
+  sarimax      0.4472   0.6363   0.3183  0.123x
+
+  h=3 meses (48 evaluaciones):
+  Modelo          MAE     RMSE     MASE  vs naive
+  ----------------------------------------------
+  naive        3.6558   4.1819   2.6018  1.000x
+  arima        0.6716   0.9675   0.4779  0.184x
+  sarima       0.7236   0.9756   0.5150  0.198x
+  sarimax      0.7321   0.9850   0.5210  0.200x
+
+  h=6 meses (48 evaluaciones):
+  Modelo          MAE     RMSE     MASE  vs naive
+  ----------------------------------------------
+  naive        3.6644   4.1838   2.6079  1.000x
+  arima        0.9660   1.3916   0.6875  0.264x
+  sarima       1.0083   1.4433   0.7176  0.275x
+  sarimax      1.0240   1.4594   0.7287  0.279x
+
+  h=12 meses (42 evaluaciones):
+  Modelo          MAE     RMSE     MASE  vs naive
+  ----------------------------------------------
+  naive        6.5881  11.3854   4.6887  1.000x
+  arima        1.5410   2.2873   1.0967  0.234x
+  sarima       1.5952   2.4649   1.1353  0.242x
+  sarimax      1.6070   2.4589   1.1437  0.244x
+
+4. DESGLOSE POR PERIODO ECONOMICO (MAE, h=1 y h=12)
+----------------------------------------------------------------------
+  Pre-crisis (2021-01 / 2022-06):
+  Modelo        MAE h=1   MAE h=12
+  naive          4.1462     6.2706
+  arima          0.8747     2.7175
+  sarima         0.7216     2.9999
+  sarimax        0.7201     2.9960
+
+  Crisis BCE  (2022-07 / 2023-06):
+  Modelo        MAE h=1   MAE h=12
+  naive          4.6239     7.1252
+  arima          0.3217     1.6525
+  sarima         0.3540     1.8848
+  sarimax        0.3759     1.9156
+
+  Post-crisis (2023-07 / 2024-12):
+  Modelo        MAE h=1   MAE h=12
+  naive          2.5332     5.7429
+  arima          0.2273     0.7778
+  sarima         0.2291     0.5596
+  sarimax        0.2304     0.5703
+
+5. RANKING DE MODELOS POR HORIZONTE
+----------------------------------------------------------------------
+   h Mejor modelo      MAE  Mejora vs naive
+----------------------------------------------------------------------
+   1 sarima         0.4418           87.8%
+   3 arima          0.6716           81.6%
+   6 arima          0.9660           73.6%
+  12 arima          1.5410           76.6%
+
+6. CONCLUSIONES CLAVE
+----------------------------------------------------------------------
+  - Rolling backtesting confirma que ARIMA/SARIMA baten al naive
+    estacional en todos los horizontes (MASE < 1 para h=1..6).
+  - SARIMA(0,1,1)(0,1,1)12 domina en h=1 (captura patron mensual).
+  - ARIMA(1,1,2) es igual o mejor en h=12: menos parametros,
+    menos sobreajuste ante incertidumbre estacional acumulada.
+  - SARIMAX con DFR no mejora al SARIMA en C0: el DFR estuvo
+    plano (-0.50%) durante toda la val estatica; en el periodo
+    crisis el DFR si cambia y su efecto sera visible en C1.
+  - El periodo B (crisis BCE, 2022-07/2023-06) muestra el mayor
+    error en todos los modelos, motivando el uso de senales MCP.
+  - Estos resultados forman la linea base C0 del experimento TFG.
+    La condicion C1 debera mejorar principalmente en h=6, h=12
+    y en el periodo B.
+======================================================================

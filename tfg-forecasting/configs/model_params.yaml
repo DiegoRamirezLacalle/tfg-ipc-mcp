@@ -1,0 +1,52 @@
+# Hiperparámetros por modelo — fuente de verdad única
+
+arima:
+  max_p: 5
+  max_q: 5
+  max_d: 2
+  seasonal: false
+  information_criterion: "aic"
+
+sarima:
+  max_p: 3
+  max_q: 3
+  max_d: 2
+  max_P: 2
+  max_Q: 2
+  max_D: 1
+  m: 12             # estacionalidad mensual
+  information_criterion: "aic"
+
+sarimax:
+  # mismos órdenes que sarima, añade exógenas
+  m: 12
+  exog: ["ECB_RATE"]
+
+lstm_univariate:
+  input_size: 24    # meses de contexto
+  hidden_size: 64
+  num_layers: 2
+  dropout: 0.2
+  learning_rate: 0.001
+  epochs: 100
+  batch_size: 32
+  early_stopping_patience: 10
+
+lstm_multivariate:
+  input_size: 24
+  hidden_size: 128
+  num_layers: 2
+  dropout: 0.2
+  learning_rate: 0.001
+  epochs: 100
+  batch_size: 32
+  early_stopping_patience: 10
+  exog: ["ECB_RATE"]
+
+timegpt:
+  finetune_steps: 0       # 0 = zero-shot
+  level: [80, 95]         # intervalos de predicción
+
+timesfm:
+  context_length: 128
+  backend: "cpu"          # "gpu" si disponible

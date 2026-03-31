@@ -1,0 +1,14 @@
+# Fechas de corte para backtesting rolling-origin
+# Congeladas — NO cambiar después de iniciar experimentos
+
+splits:
+  train_end: "2020-12-01"
+  val_end:   "2022-06-01"
+  test_end:  "2024-12-01"
+
+# Ventanas de backtesting rolling
+rolling:
+  origin_start: "2021-01-01"   # primer origen de predicción
+  origin_end:   "2024-12-01"   # último origen
+  step_months: 1               # avance entre orígenes
+  horizon: 12                  # meses hacia adelante

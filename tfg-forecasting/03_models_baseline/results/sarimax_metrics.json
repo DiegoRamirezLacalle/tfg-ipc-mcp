@@ -1,0 +1,23 @@
+{
+  "model": "sarimax",
+  "exog": "dfr",
+  "order": [
+    0,
+    1,
+    1
+  ],
+  "seasonal_order": [
+    0,
+    1,
+    1,
+    12
+  ],
+  "aic": -50.5943,
+  "bic": -37.1117,
+  "n_train": 228,
+  "metrics_val": {
+    "MAE": 4.3239,
+    "RMSE": 5.3511,
+    "MASE": 3.0773
+  }
+}

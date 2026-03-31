@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "tfg-ipc-mcp"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+dependencies = [
+    # ETL / datos
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "requests>=2.31",
+    "python-dotenv>=1.0",
+
+    # Series temporales — baseline
+    "statsmodels>=0.14",
+    "pmdarima>=2.0",
+
+    # Deep learning
+    "torch>=2.2",
+
+    # Foundation models
+    "nixtla>=0.5",          # TimeGPT
+    # timesfm se instala aparte (ver tfg-forecasting/requirements.txt)
+
+    # MCP / agente
+    "anthropic>=0.25",
+    "mcp>=1.0",
+
+    # Backend FastAPI
+    "fastapi>=0.111",
+    "uvicorn[standard]>=0.29",
+    "sqlalchemy>=2.0",
+    "alembic>=1.13",
+    "motor>=3.4",           # MongoDB async
+    "pydantic-settings>=2.2",
+
+    # Métricas / evaluación
+    "scikit-learn>=1.4",
+    "scipy>=1.13",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["shared*", "tfg_forecasting*"]
+
+[project.optional-dependencies]
+dev = [
+    "jupyter>=1.0",
+    "ipykernel>=6.29",
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+    "pytest>=8.0",
+    "ruff>=0.4",
+]
