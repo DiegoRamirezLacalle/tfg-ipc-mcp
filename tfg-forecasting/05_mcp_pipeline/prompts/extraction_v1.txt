@@ -1,0 +1,30 @@
+Given this official communication from a central bank or statistics office,
+extract ONLY this JSON with no additional text:
+
+{
+  "decision": "subida|bajada|sin_cambio|dato",
+  "magnitude": number or null,
+  "tone": "hawkish|neutral|dovish|positivo|negativo",
+  "shock_score": float 0-1,
+  "uncertainty_index": float 0-1,
+  "topic": "tipos_interes|inflacion|empleo|pib|otro"
+}
+
+Field rules:
+- decision: "subida" if rates/prices increase, "bajada" if decrease, "sin_cambio" if held, "dato" if publishing data.
+- magnitude: the numeric change (e.g. 0.50 for 50bps rate hike). null if not applicable.
+- tone: "hawkish" = tightening bias, "dovish" = easing bias, "neutral" = balanced, "positivo" = good data, "negativo" = bad data.
+- shock_score: 0.0 = expected event, 1.0 = completely unexpected.
+- uncertainty_index: 0.0 = clear outlook, 1.0 = maximum ambiguity.
+- topic: main category of the communication.
+
+Example input:
+"The ECB raises interest rates by 50 basis points to combat persistent inflation."
+
+Example output:
+{"decision": "subida", "magnitude": 0.50, "tone": "hawkish", "shock_score": 0.30, "uncertainty_index": 0.40, "topic": "tipos_interes"}
+
+If the text is irrelevant to economics, return:
+{"decision": "dato", "magnitude": null, "tone": "neutral", "shock_score": 0.00, "uncertainty_index": 0.50, "topic": "otro"}
+
+IMPORTANT: Return ONLY the JSON object.
