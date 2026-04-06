@@ -29,11 +29,9 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from calendar import monthrange
 
 import feedparser
 import httpx
@@ -664,8 +662,9 @@ def fetch_ine_pdfs(
                     except Exception:
                         pass  # duplicado
 
-                # Guardar tambien en JSON local
-                _save_json("ine_pdf", ym, [doc])
+                # Guardar en JSON local (excluir _id que MongoDB añade al dict)
+                doc_json = {k: v for k, v in doc.items() if k != "_id"}
+                _save_json("ine_pdf", ym, [doc_json])
 
                 total_new += 1
                 print(f"  {ym}: OK — {ipc_str} | {signals['tone']} | shock={signals['shock_score']}")

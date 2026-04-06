@@ -51,6 +51,7 @@ HORIZONS       = [1, 3, 6, 12]
 ORIGINS_START  = "2021-01-01"
 ORIGINS_END    = DATE_TEST_END     # "2024-12-01"
 MODELS         = ["naive", "arima", "sarima", "sarimax"]
+TEST_END_TS    = pd.Timestamp(DATE_TEST_END)
 
 
 # ── Carga de datos ─────────────────────────────────────────────────────────
@@ -90,7 +91,8 @@ def forecast_naive(y_train: pd.Series, h: int) -> np.ndarray:
     """Naive estacional: y[t+s] = y[t+s-12] para s=1..h."""
     preds = []
     for s in range(1, h + 1):
-        idx = -(12 - s) if s <= 12 else s - 12
+        # s=1 -> t-11, ..., s=12 -> t (estacionalidad mensual de 12)
+        idx = -12 + ((s - 1) % 12)
         preds.append(float(y_train.iloc[idx]))
     return np.array(preds)
 
@@ -126,6 +128,11 @@ def run_rolling(df: pd.DataFrame) -> pd.DataFrame:
             continue
 
         for h in HORIZONS:
+            # Horizonte completo debe quedar dentro del test end.
+            horizon_end = origin + pd.DateOffset(months=h)
+            if horizon_end > TEST_END_TS:
+                continue
+
             # Fechas del horizonte
             fc_dates = pd.date_range(
                 start=origin + pd.DateOffset(months=1), periods=h, freq="MS"
