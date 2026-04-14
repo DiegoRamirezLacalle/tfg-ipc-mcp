@@ -250,6 +250,13 @@ def build_c1():
         "bce_tone": "neutral",
         "ine_surprise_score": 0.0,
         "ine_topic": "otro",
+        # derivadas
+        "signal_available": 0.0,
+        "bce_tone_numeric": 0.0,
+        "bce_cumstance": 0.0,
+        "gdelt_tone_ma3": 0.0,
+        "gdelt_tone_ma6": 0.0,
+        "ine_inflacion": 0.0,
     }
     for col_name, val in fill.items():
         if col_name not in df_signals.columns:
@@ -270,6 +277,43 @@ def build_c1():
         return "otro"
 
     df_signals["dominant_topic"] = df_signals.apply(_dominant, axis=1)
+
+    # ── Señales derivadas (feature engineering) ──────────────────
+    # Ordenar por fecha antes de calcular ventanas móviles
+    df_signals = df_signals.sort_values("date").reset_index(drop=True)
+
+    # 1. Indicador de disponibilidad de señal (0 antes de 2015, 1 desde 2015)
+    #    Permite que los modelos distingan "ceros reales" de "sin dato histórico"
+    df_signals["signal_available"] = (
+        df_signals["date"] >= "2015-01"
+    ).astype(float)
+
+    # 2. BCE tone como numérico ordinal: hawkish=1, neutral=0, dovish=-1
+    _tone_map = {"hawkish": 1.0, "neutral": 0.0, "dovish": -1.0}
+    df_signals["bce_tone_numeric"] = (
+        df_signals["bce_tone"].map(_tone_map).fillna(0.0)
+    )
+
+    # 3. Stance acumulada BCE: suma corrida de tone_numeric
+    #    Captura ciclos de endurecimiento (positivo) o relajación (negativo)
+    #    Solo acumula desde 2015 (antes no hay señal)
+    _stance = df_signals["bce_tone_numeric"].copy()
+    _stance[df_signals["signal_available"] == 0] = 0.0
+    df_signals["bce_cumstance"] = _stance.cumsum()
+
+    # 4. Media móvil de GDELT tone (suaviza ruido mensual)
+    #    min_periods=1 para que no produzca NaN en los primeros meses del rango
+    df_signals["gdelt_tone_ma3"] = (
+        df_signals["gdelt_avg_tone"].rolling(3, min_periods=1).mean()
+    )
+    df_signals["gdelt_tone_ma6"] = (
+        df_signals["gdelt_avg_tone"].rolling(6, min_periods=1).mean()
+    )
+
+    # 5. INE topic como binario (1=inflacion, 0=otro)
+    df_signals["ine_inflacion"] = (
+        df_signals["ine_topic"] == "inflacion"
+    ).astype(float)
 
     # Convertir date a datetime para alinear con IPC
     df_signals["date"] = pd.to_datetime(df_signals["date"] + "-01")
@@ -305,8 +349,10 @@ def build_c1():
     for col_name, val in fill.items():
         if col_name in df_signals_lagged.columns:
             df_signals_lagged[col_name] = df_signals_lagged[col_name].fillna(val)
-    # dominant_topic tambien queda NaN en la primera fila
+    # categoricas que quedan NaN en la primera fila tras el shift
     df_signals_lagged["dominant_topic"] = df_signals_lagged["dominant_topic"].fillna("otro")
+    df_signals_lagged["bce_tone"] = df_signals_lagged["bce_tone"].fillna("neutral")
+    df_signals_lagged["ine_topic"] = df_signals_lagged["ine_topic"].fillna("otro")
 
     df_c1 = df_exog.merge(
         df_signals_lagged[["date"] + signal_cols],

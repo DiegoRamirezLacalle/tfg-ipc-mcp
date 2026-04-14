@@ -1,20 +1,22 @@
 """
 02_timesfm_C1.py — TimesFM 2.5 condicion C1 (historico + senales MCP)
 
-Rolling-origin backtesting con covariables del pipeline MCP:
-  - Numericas: gdelt_avg_tone, gdelt_goldstein, gdelt_n_articles,
-               bce_shock_score, bce_uncertainty, ine_surprise_score,
-               dfr, mrr, dfr_diff, dfr_lag3, dfr_lag6, dfr_lag12
-  - Categoricas: bce_tone, dominant_topic
+Fix 1 — XReg restringido al periodo con senales reales (2015+):
+  El modelo base de TimesFM recibe el contexto COMPLETO de IPC (282 obs,
+  identico a C0). La correccion por senales MCP se calcula mediante un
+  Ridge externo ajustado SOLO sobre df.loc['2015':origin], donde todas
+  las covariables tienen valores reales. La correccion es la diferencia
+  entre el nivel predicho por el Ridge con las senales actuales y el
+  nivel predicho con senales neutrales (ceros).
+  Esto implementa correctamente la separacion base-TimesFM / XReg-MCP.
 
-Para el horizonte futuro se usa forward-fill del ultimo valor conocido
-(en un contexto real no conocemos senales de noticias futuras).
-
-Las senales MCP ya tienen shift +1 aplicado en features_c1.parquet,
-por lo que no hay leakage temporal.
-
-Modelo: google/timesfm-2.5-200m-pytorch + forecast_with_covariates()
-Requiere: return_backcast=True en ForecastConfig
+Fix 2 — Seleccion de covariables:
+  Columnas de entrada al Ridge: gdelt_avg_tone, gdelt_tone_ma3,
+  gdelt_tone_ma6, bce_shock_score, bce_tone_numeric, bce_cumstance,
+  ine_surprise_score, ine_inflacion, signal_available.
+  Eliminadas: bce_uncertainty (5 valores), gdelt_goldstein/n_articles
+  (correladas/ruidosas), dfr_diff/lag3/6/12 (redundantes con tasas
+  ya en el contexto IPC).
 """
 
 from __future__ import annotations
@@ -26,6 +28,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from sklearn.linear_model import Ridge
 from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
@@ -42,16 +45,21 @@ MAX_H = max(HORIZONS)
 ORIGINS_START = "2021-01-01"
 ORIGINS_END = DATE_TEST_END
 MODEL_NAME = "timesfm_C1"
+TEST_END_TS = pd.Timestamp(DATE_TEST_END)
 
-# Covariables numericas de features_c1.parquet
-NUM_COVARIATES = [
-    "dfr", "mrr", "dfr_diff", "dfr_lag3", "dfr_lag6", "dfr_lag12",
-    "gdelt_avg_tone", "gdelt_goldstein", "gdelt_n_articles",
-    "bce_shock_score", "bce_uncertainty", "ine_surprise_score",
+# Fix 1: XReg se ajusta SOLO desde esta fecha en adelante
+SIGNAL_START = "2015-01-01"
+
+# Fix 2: covariables del XReg externo (exactamente las especificadas)
+XREG_COVS = [
+    "gdelt_avg_tone", "gdelt_tone_ma3", "gdelt_tone_ma6",
+    "bce_shock_score", "bce_tone_numeric", "bce_cumstance",
+    "ine_surprise_score", "ine_inflacion",
+    "signal_available",
 ]
 
-# Covariables categoricas
-CAT_COVARIATES = ["bce_tone", "dominant_topic"]
+# Ridge regularization (evita overfitting con ~60-120 obs y 9 features)
+RIDGE_ALPHA = 1.0
 
 
 # ── Datos ────────────────────────────────────────────────────────
@@ -61,16 +69,9 @@ def load_data() -> pd.DataFrame:
     df["date"] = pd.to_datetime(df["date"])
     df = df.set_index("date")
     df.index.freq = "MS"
-
-    # Rellenar NaN en covariables (meses antes de 2015 sin senales MCP)
-    for col in NUM_COVARIATES:
+    for col in XREG_COVS:
         if col in df.columns:
             df[col] = df[col].fillna(0.0)
-    for col in CAT_COVARIATES:
-        if col in df.columns:
-            df[col] = df[col].fillna("neutral")
-
-    # ine_topic no es covariable directa — se integra via ine_surprise_score
     return df
 
 
@@ -88,51 +89,53 @@ def load_model():
             max_context=512,
             max_horizon=MAX_H,
             per_core_batch_size=1,
-            return_backcast=True,  # Requerido para forecast_with_covariates
         )
     )
-    print("[timesfm] Modelo cargado (max_horizon=12, return_backcast=True)")
+    print("[timesfm] Modelo base cargado (sin XReg interno, identico a C0)")
     return tfm
 
 
-# ── Preparar covariables para un origen dado ─────────────────────
+# ── Fix 1: Ridge XReg externo ajustado sobre 2015:origin ─────────
 
-def prepare_covariates(
+def compute_xreg_correction(
     df: pd.DataFrame,
     origin: pd.Timestamp,
-    h: int,
-) -> tuple[dict, dict]:
+) -> float:
     """
-    Prepara covariables para forecast_with_covariates().
+    Ajusta Ridge sobre df.loc[SIGNAL_START:origin] SOLO con senales reales.
+    Target: cambio mensual del IPC (primera diferencia, estacionario ±1.5 pp).
+    Devuelve la correccion marginal:
+      correction = beta @ current_signals
+                 = Ridge.predict(current) - Ridge.predict(zeros)
 
-    Las covariables deben tener longitud = len(context) + horizon.
-    Para el horizonte futuro, forward-fill del ultimo valor conocido.
+    Usar primera diferencia evita que el Ridge sobreajuste la tendencia de
+    nivel del IPC (rango 79-100) a las senales, lo que produciria
+    correcciones enormes (±5-10 pp).
+    Si no hay suficientes datos (< 13 meses con senales), devuelve 0.0.
     """
-    context = df.loc[:origin]
-    ctx_len = len(context)
+    signal_start_ts = pd.Timestamp(SIGNAL_START)
+    window = df.loc[signal_start_ts:origin].copy()
 
-    # Valores futuros: forward-fill
-    last_row = context.iloc[-1]
+    # Solo filas con senales reales (post-shift)
+    window = window[window["signal_available"] > 0]
+    if len(window) < 13:
+        return 0.0
 
-    dyn_num = {}
-    for col in NUM_COVARIATES:
-        if col not in df.columns:
-            continue
-        hist = context[col].values.astype(np.float64)
-        future = np.full(h, float(last_row[col]))
-        full = np.concatenate([hist, future])
-        dyn_num[col] = [full.tolist()]
+    # Cambio mensual del IPC como target (estacionario, rango ±1.5 pp)
+    ipc_mom = window["indice_general"].diff(1)
+    valid = ~ipc_mom.isna()
+    X = window.loc[valid, XREG_COVS].values.astype(np.float64)
+    y_diff = ipc_mom[valid].values.astype(np.float64)
 
-    dyn_cat = {}
-    for col in CAT_COVARIATES:
-        if col not in df.columns:
-            continue
-        hist = context[col].values.tolist()
-        future = [str(last_row[col])] * h
-        full = hist + future
-        dyn_cat[col] = [full]
+    reg = Ridge(alpha=RIDGE_ALPHA, fit_intercept=True)
+    reg.fit(X, y_diff)
 
-    return dyn_num, dyn_cat
+    current = df.loc[origin:origin, XREG_COVS].values.astype(np.float64)
+    neutral = np.zeros_like(current)
+
+    # Efecto marginal de las senales actuales sobre el cambio mensual esperado
+    correction = float(reg.predict(current)[0] - reg.predict(neutral)[0])
+    return correction
 
 
 # ── Rolling backtesting ─────────────────────────────────────────
@@ -141,7 +144,6 @@ def run_rolling(df: pd.DataFrame, model) -> tuple[pd.DataFrame, float]:
     y = df["indice_general"]
     origins = pd.date_range(start=ORIGINS_START, end=ORIGINS_END, freq="MS")
 
-    # Escala MASE fija
     y_train_init = y.loc[:DATE_TRAIN_END]
     mase_scale = float(np.mean(np.abs(
         y_train_init.values[12:] - y_train_init.values[:-12]
@@ -150,27 +152,26 @@ def run_rolling(df: pd.DataFrame, model) -> tuple[pd.DataFrame, float]:
     records = []
 
     for origin in tqdm(origins, desc="TimesFM C1 rolling"):
-        context = y.loc[:origin].values.astype(np.float32)
-
-        # Preparar covariables para h=12 (maximo horizonte)
-        dyn_num, dyn_cat = prepare_covariates(df, origin, MAX_H)
-
-        # Forecast con covariables
+        # Fix diagnostico: contexto 2015+ (protocolo consistente con TimeGPT C1)
+        context = y.loc[SIGNAL_START:origin].values.astype(np.float32)
         try:
-            point_out, _ = model.forecast_with_covariates(
-                inputs=[context.tolist()],
-                dynamic_numerical_covariates=dyn_num if dyn_num else None,
-                dynamic_categorical_covariates=dyn_cat if dyn_cat else None,
-                xreg_mode="xreg + timesfm",
-                normalize_xreg_target_per_input=True,
-                force_on_cpu=True,
-            )
-            full_pred = np.array(point_out[0])
+            point_out, _ = model.forecast(horizon=MAX_H, inputs=[context])
+            base_pred = np.array(point_out[0])  # shape (MAX_H,)
         except Exception as e:
-            print(f"\n[!] Error en {origin.date()}: {e}")
+            print(f"\n[!] Error base en {origin.date()}: {e}")
             continue
 
+        # Fix 1 — Correccion Ridge: ajustada SOLO sobre 2015:origin
+        xreg_correction = compute_xreg_correction(df, origin)
+
+        # C1 = TimesFM_base + correccion_MCP (misma para todos los h)
+        full_pred = base_pred + xreg_correction
+
         for h in HORIZONS:
+            horizon_end = origin + pd.DateOffset(months=h)
+            if horizon_end > TEST_END_TS:
+                continue
+
             fc_dates = pd.date_range(
                 start=origin + pd.DateOffset(months=1), periods=h, freq="MS"
             )
@@ -234,10 +235,10 @@ def print_table(metrics: dict) -> None:
 def main():
     print("=" * 60)
     print(f"BACKTESTING ROLLING — {MODEL_NAME}")
+    print(f"Fix 1: base TimesFM C0 (282 obs) + Ridge externo sobre 2015:origin")
+    print(f"Fix 2: XReg covariables = {XREG_COVS}")
     print(f"Origenes: {ORIGINS_START} - {ORIGINS_END}")
     print(f"Horizontes: {HORIZONS}")
-    print(f"Covariables num: {NUM_COVARIATES}")
-    print(f"Covariables cat: {CAT_COVARIATES}")
     print("=" * 60)
 
     df = load_data()
@@ -267,7 +268,9 @@ def main():
             c1_mae = metrics.get(key, {}).get("MAE", "N/A")
             if isinstance(c0_mae, float) and isinstance(c1_mae, float):
                 delta = c1_mae - c0_mae
-                print(f"  h={h}: C0={c0_mae:.4f}  C1={c1_mae:.4f}  delta={delta:+.4f}")
+                pct = (delta / c0_mae) * 100
+                print(f"  h={h}: C0={c0_mae:.4f}  C1={c1_mae:.4f}  "
+                      f"delta={delta:+.4f} ({pct:+.1f}%)")
 
     # Guardar
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)

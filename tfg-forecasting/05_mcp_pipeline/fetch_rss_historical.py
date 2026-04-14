@@ -30,6 +30,7 @@ import argparse
 import json
 import re
 import time
+import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -479,27 +480,63 @@ def _extract_ine_pdf_text(pdf_bytes: bytes) -> str:
     return "\n".join(text_parts)
 
 
+def _normalize_ine_pdf_text(text: str) -> str:
+    """
+    Normaliza texto extraido de PDF para mejorar el parseo numerico.
+
+    Corrige mojibake frecuente (UTF-8 mal decodificado), unifica signos menos
+    Unicode y espacios no estandar, y deja el decimal con punto.
+    """
+    repaired = text
+
+    # Corregir mojibake comun en PDFs (ej. "variaciÃ³n", "â€“0,4").
+    if ("Ã" in repaired) or ("â" in repaired):
+        try:
+            candidate = repaired.encode("latin1", errors="ignore").decode(
+                "utf-8", errors="ignore"
+            )
+            if candidate and candidate.count("\ufffd") <= repaired.count("\ufffd"):
+                repaired = candidate
+        except Exception:
+            pass
+
+    repaired = unicodedata.normalize("NFKC", repaired)
+
+    # Unificar signos menos/dash a '-' ASCII para que regex capture negativos.
+    for ch in ["−", "–", "—", "‑", "‒", "―", "﹣"]:
+        repaired = repaired.replace(ch, "-")
+    for bad in ["â€“", "â€”", "âˆ’"]:
+        repaired = repaired.replace(bad, "-")
+
+    # Espacios no separables y tabuladores.
+    repaired = repaired.replace("\u00a0", " ").replace("\u202f", " ").replace("\t", " ")
+
+    # Normalizar separador decimal espanol.
+    repaired = repaired.replace(",", ".")
+
+    return repaired
+
+
 def _parse_ine_pdf_signals(text: str) -> dict:
     """
     Extrae senales IPC del texto del PDF.
     Los PDFs del INE contienen tasas de variacion anual y mensual
     como datos numericos directos, no necesitan LLM.
     """
-    # Normalizar: comas como separador decimal en espanol
-    text_norm = text.replace(",", ".")
+    text_norm = _normalize_ine_pdf_text(text)
+    number = r"([+\-]?\s*\d+(?:\.\d+)?)"
 
     # Tasa de variacion anual (IPC general)
     annual_rate = None
     for pattern in [
-        r"variaci[oó]n\s+anual[^\d-]*(-?\d+\.?\d*)",
-        r"tasa\s+anual[^\d-]*(-?\d+\.?\d*)",
-        r"IPC[^\d-]*(-?\d+\.?\d*)\s*(?:por\s*ciento|%)",
-        r"(-?\d+\.?\d*)\s*(?:por\s*ciento|%)[^\n]*anual",
+        rf"(?:variaci\w*|tasa)\s+anual[^\d+\-]{{0,120}}{number}\s*(?:por\s*ciento|%)",
+        rf"tasa\s+de\s+variaci\w*\s+anual[^\d+\-]{{0,120}}{number}\s*(?:por\s*ciento|%)",
+        rf"ipc[^\n]{{0,120}}anual[^\d+\-]{{0,120}}{number}\s*(?:por\s*ciento|%)",
     ]:
         m = re.search(pattern, text_norm, re.IGNORECASE)
         if m:
             try:
-                val = float(m.group(1))
+                val = float(m.group(1).replace(" ", ""))
                 if -5.0 <= val <= 15.0:  # rango razonable para IPC espanol
                     annual_rate = val
                     break
@@ -509,14 +546,14 @@ def _parse_ine_pdf_signals(text: str) -> dict:
     # Tasa de variacion mensual
     monthly_rate = None
     for pattern in [
-        r"variaci[oó]n\s+mensual[^\d-]*(-?\d+\.?\d*)",
-        r"tasa\s+mensual[^\d-]*(-?\d+\.?\d*)",
-        r"(-?\d+\.?\d*)\s*(?:por\s*ciento|%)[^\n]*mensual",
+        rf"(?:variaci\w*|tasa)\s+mensual[^\d+\-]{{0,120}}{number}\s*(?:por\s*ciento|%)",
+        rf"tasa\s+de\s+variaci\w*\s+mensual[^\d+\-]{{0,120}}{number}\s*(?:por\s*ciento|%)",
+        rf"mensual[^\d+\-]{{0,120}}{number}\s*(?:por\s*ciento|%)",
     ]:
         m = re.search(pattern, text_norm, re.IGNORECASE)
         if m:
             try:
-                val = float(m.group(1))
+                val = float(m.group(1).replace(" ", ""))
                 if -3.0 <= val <= 3.0:  # rango razonable mensual
                     monthly_rate = val
                     break

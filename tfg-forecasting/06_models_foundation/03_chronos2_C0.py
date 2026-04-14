@@ -38,6 +38,7 @@ ORIGINS_START = "2021-01-01"
 ORIGINS_END = DATE_TEST_END
 MODEL_NAME = "chronos2_C0"
 CHRONOS_MODEL_ID = "amazon/chronos-2"
+TEST_END_TS = pd.Timestamp(DATE_TEST_END)
 
 # 21 cuantiles: [0.01, 0.05, 0.1, ..., 0.5, ..., 0.9, 0.95, 0.99]
 # p10 = idx 2, p50 = idx 10, p90 = idx 18
@@ -93,6 +94,10 @@ def run_rolling(y: pd.Series, model) -> tuple[pd.DataFrame, float]:
         p90 = q[Q_IDX["p90"]]
 
         for h in HORIZONS:
+            horizon_end = origin + pd.DateOffset(months=h)
+            if horizon_end > TEST_END_TS:
+                continue
+
             fc_dates = pd.date_range(
                 start=origin + pd.DateOffset(months=1), periods=h, freq="MS"
             )

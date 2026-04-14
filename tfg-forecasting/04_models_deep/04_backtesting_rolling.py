@@ -39,6 +39,7 @@ RESULTS_DIR = Path(__file__).resolve().parent / "results"
 
 HORIZONS = [1, 3, 6, 12]
 MODEL_NAMES = ["lstm", "nbeats", "nhits"]
+TEST_END_TS = pd.Timestamp(DATE_TEST_END)
 
 # Origenes trimestrales para viabilidad computacional
 ORIGINS_START = "2021-01-01"
@@ -117,6 +118,11 @@ def run_rolling(df_full):
 
             for h in HORIZONS:
                 pbar.set_postfix(origin=str(origin.date()), h=h)
+
+                horizon_end = origin + pd.DateOffset(months=h)
+                if horizon_end > TEST_END_TS:
+                    pbar.update(1)
+                    continue
 
                 fc_dates = pd.date_range(
                     start=origin + pd.DateOffset(months=1), periods=h, freq="MS"

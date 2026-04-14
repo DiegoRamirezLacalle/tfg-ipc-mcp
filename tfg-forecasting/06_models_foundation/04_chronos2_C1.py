@@ -39,6 +39,16 @@ ORIGINS_START = "2021-01-01"
 ORIGINS_END = DATE_TEST_END
 MODEL_NAME = "chronos2_C1"
 CHRONOS_MODEL_ID = "amazon/chronos-2"
+TEST_END_TS = pd.Timestamp(DATE_TEST_END)
+SIGNAL_START = "2015-01-01"   # Fix diagnostico: evitar regimen de ceros pre-2015
+
+# Fix 3: subperiodos para analisis granular de C0 vs C1
+# A = año tranquilo, B = shock BCE (crisis inflacion), C = normalizacion post-shock
+SUBPERIODS = {
+    "A_2021": ("2021-01-01", "2021-12-01"),
+    "B_2022_shock": ("2022-01-01", "2022-12-01"),
+    "C_2023_2024": ("2023-01-01", "2024-12-01"),
+}
 
 # Cuantiles: 21 levels [0.01..0.99]
 Q_IDX = {"p10": 2, "p50": 10, "p90": 18}
@@ -50,6 +60,9 @@ PAST_ONLY_COVS = [
     "dfr_diff", "dfr_lag3", "dfr_lag6", "dfr_lag12",
     "gdelt_avg_tone", "gdelt_goldstein", "gdelt_n_articles",
     "bce_shock_score", "bce_uncertainty", "ine_surprise_score",
+    # señales derivadas
+    "signal_available", "bce_tone_numeric", "bce_cumstance",
+    "gdelt_tone_ma3", "gdelt_tone_ma6", "ine_inflacion",
 ]
 # Categoricas como covariables — Chronos-2 soporta categoricas en numpy
 CAT_COVS = ["bce_tone", "dominant_topic"]
@@ -101,7 +114,8 @@ def prepare_input(
       - past_covariates: dict de arrays (len = context)
       - future_covariates: dict de arrays (len = h), solo para DFR/MRR
     """
-    context_df = df.loc[:origin]
+    # Fix diagnostico: recortar a 2015+ para evitar regimen de ceros pre-2015
+    context_df = df.loc[SIGNAL_START:origin]
     target = context_df["indice_general"].values.astype(np.float64)
 
     # Past covariates: todas (numericas + categoricas)
@@ -170,6 +184,10 @@ def run_rolling(df: pd.DataFrame, model) -> tuple[pd.DataFrame, float]:
         p90 = q[Q_IDX["p90"]]
 
         for h in HORIZONS:
+            horizon_end = origin + pd.DateOffset(months=h)
+            if horizon_end > TEST_END_TS:
+                continue
+
             fc_dates = pd.date_range(
                 start=origin + pd.DateOffset(months=1), periods=h, freq="MS"
             )
@@ -221,6 +239,39 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
     return results
 
 
+def compute_subperiod_metrics(
+    df_preds: pd.DataFrame, mase_scale: float
+) -> dict:
+    """Metricas por subperiodo de origenes (Fix 3)."""
+    results = {}
+    for period_name, (start, end) in SUBPERIODS.items():
+        mask = (
+            (df_preds["origin"] >= pd.Timestamp(start))
+            & (df_preds["origin"] <= pd.Timestamp(end))
+        )
+        period_df = df_preds[mask]
+        if period_df.empty:
+            continue
+        results[period_name] = {}
+        for h in HORIZONS:
+            h_df = period_df[period_df["horizon"] == h]
+            if h_df.empty:
+                continue
+            y_true = h_df["y_true"].values
+            y_pred = h_df["y_pred"].values
+            p10 = h_df["y_pred_p10"].values
+            p90 = h_df["y_pred_p90"].values
+            coverage = float(np.mean((y_true >= p10) & (y_true <= p90)))
+            results[period_name][f"h{h}"] = {
+                "MAE": round(float(np.mean(np.abs(y_true - y_pred))), 4),
+                "RMSE": round(float(np.sqrt(np.mean((y_true - y_pred) ** 2))), 4),
+                "MASE": round(float(np.mean(np.abs(y_true - y_pred)) / mase_scale), 4),
+                "coverage_80": round(coverage, 4),
+                "n_origins": int(len(h_df["origin"].unique())),
+            }
+    return results
+
+
 def print_table(metrics: dict) -> None:
     print(f"\n{'Horizonte':<12} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'Cov80':>6} {'N':>5}")
     print("-" * 52)
@@ -230,6 +281,18 @@ def print_table(metrics: dict) -> None:
             m = metrics[key]
             print(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
                   f"{m['MASE']:8.4f} {m['coverage_80']:6.2%} {m['n_evals']:5d}")
+
+
+def print_subperiod_table(sub_metrics: dict) -> None:
+    print(f"\n{'Periodo':<18} {'h':>3} {'MAE':>8} {'MASE':>8} {'Cov80':>6} {'N':>4}")
+    print("-" * 52)
+    for period_name, hdict in sub_metrics.items():
+        for h in HORIZONS:
+            key = f"h{h}"
+            if key in hdict:
+                m = hdict[key]
+                print(f"{period_name:<18} {h:>3} {m['MAE']:8.4f} {m['MASE']:8.4f} "
+                      f"{m['coverage_80']:6.2%} {m['n_origins']:4d}")
 
 
 # ── Main ─────────────────────────────────────────────────────────
@@ -258,18 +321,24 @@ def main():
         return
 
     metrics = compute_metrics(df_preds, mase_scale)
+    sub_metrics = compute_subperiod_metrics(df_preds, mase_scale)
 
     print("\n" + "=" * 60)
-    print(f"RESULTADOS {MODEL_NAME}")
+    print(f"RESULTADOS GLOBALES — {MODEL_NAME}")
     print("=" * 60)
     print_table(metrics)
 
-    # Comparativa C0 vs C1
+    print("\n" + "=" * 60)
+    print(f"RESULTADOS POR SUBPERIODO — {MODEL_NAME}")
+    print("=" * 60)
+    print_subperiod_table(sub_metrics)
+
+    # Comparativa C0 vs C1 global
     c0_path = RESULTS_DIR / "chronos2_C0_metrics.json"
     if c0_path.exists():
         with open(c0_path) as f:
             c0_metrics = json.load(f).get("chronos2_C0", {})
-        print("\n--- C0 vs C1 (MAE) ---")
+        print("\n--- C0 vs C1 (MAE global) ---")
         for h in HORIZONS:
             key = f"h{h}"
             c0_mae = c0_metrics.get(key, {}).get("MAE", "N/A")
@@ -291,6 +360,11 @@ def main():
     with open(metrics_path, "w") as f:
         json.dump({MODEL_NAME: metrics}, f, indent=2)
     print(f"Metricas:     {metrics_path}")
+
+    sub_path = RESULTS_DIR / f"{MODEL_NAME}_subperiod_metrics.json"
+    with open(sub_path, "w") as f:
+        json.dump({MODEL_NAME: sub_metrics}, f, indent=2)
+    print(f"Subperiodos:  {sub_path}")
 
 
 if __name__ == "__main__":

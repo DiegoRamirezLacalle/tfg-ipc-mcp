@@ -1,32 +1,32 @@
 {
   "chronos2_C1": {
     "h1": {
-      "MAE": 0.5461,
-      "RMSE": 0.7736,
-      "MASE": 0.3887,
-      "coverage_80": 0.7708,
-      "n_evals": 48
+      "MAE": 0.5687,
+      "RMSE": 0.7985,
+      "MASE": 0.4047,
+      "coverage_80": 0.7447,
+      "n_evals": 47
     },
     "h3": {
-      "MAE": 0.8321,
-      "RMSE": 1.113,
-      "MASE": 0.5922,
-      "coverage_80": 0.7083,
-      "n_evals": 48
+      "MAE": 0.8605,
+      "RMSE": 1.1283,
+      "MASE": 0.6124,
+      "coverage_80": 0.7111,
+      "n_evals": 45
     },
     "h6": {
-      "MAE": 1.2136,
-      "RMSE": 1.6615,
-      "MASE": 0.8637,
-      "coverage_80": 0.6424,
-      "n_evals": 48
+      "MAE": 1.3498,
+      "RMSE": 1.787,
+      "MASE": 0.9606,
+      "coverage_80": 0.6786,
+      "n_evals": 42
     },
     "h12": {
-      "MAE": 1.9883,
-      "RMSE": 2.9544,
-      "MASE": 1.4151,
-      "coverage_80": 0.6508,
-      "n_evals": 42
+      "MAE": 2.388,
+      "RMSE": 3.2224,
+      "MASE": 1.6995,
+      "coverage_80": 0.669,
+      "n_evals": 36
     }
   }
 }

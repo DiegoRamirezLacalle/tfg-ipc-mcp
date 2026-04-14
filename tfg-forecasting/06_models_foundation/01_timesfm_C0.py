@@ -34,6 +34,7 @@ MAX_H = max(HORIZONS)
 ORIGINS_START = "2021-01-01"
 ORIGINS_END = DATE_TEST_END  # 2024-12-01
 MODEL_NAME = "timesfm_C0"
+TEST_END_TS = pd.Timestamp(DATE_TEST_END)
 
 
 # ── Datos ────────────────────────────────────────────────────────
@@ -87,6 +88,10 @@ def run_rolling(y: pd.Series, model) -> tuple[pd.DataFrame, float]:
         full_pred = point_out[0]  # shape: (12,)
 
         for h in HORIZONS:
+            horizon_end = origin + pd.DateOffset(months=h)
+            if horizon_end > TEST_END_TS:
+                continue
+
             fc_dates = pd.date_range(
                 start=origin + pd.DateOffset(months=1), periods=h, freq="MS"
             )
