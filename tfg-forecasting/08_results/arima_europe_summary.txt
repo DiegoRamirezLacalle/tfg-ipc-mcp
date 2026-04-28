@@ -1,0 +1,3 @@
+SARIMA(0, 1, 2)x(0, 1, 1, 12)
+AIC=-58.09  BIC=-44.61
+MAE_val=4.3422  RMSE_val=5.3411  MASE_val=2.9826

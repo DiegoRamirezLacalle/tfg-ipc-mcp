@@ -1,0 +1,34 @@
+=================================================================
+INFORME BASELINE — HICP Eurozona
+  Rolling expanding-window | Origenes 2021-01 a 2024-12
+  Metrica principal: MAE (puntos de indice) | MASE (vs naive lag-12)
+=================================================================
+
+Modelo        h= 1 MAE  h= 3 MAE  h= 6 MAE  h=12 MAE
+-------------------------------------------------------
+naive          5.3419    5.4892    5.7298    6.2170 
+sarima         0.4126*   0.7171*   1.2259*   2.4109*
+sarimax        0.4150*   0.7159*   1.2186*   2.3701*
+  (* = bate al naive lag-12)
+
+Modelo        h= 1 MASE  h= 3 MASE  h= 6 MASE  h=12 MASE
+----------------------------------------------------------
+naive           3.6693    3.7705    3.9358    4.2704
+sarima          0.2834    0.4926    0.8421    1.6561
+sarimax         0.2851    0.4918    0.8371    1.6280
+
+--- Beneficio DFR (SARIMAX vs SARIMA) ---
+   h      SARIMA     SARIMAX    Delta%
+--------------------------------------
+   1      0.4126      0.4150     +0.6%
+   3      0.7171      0.7159     -0.2% <mejora
+   6      1.2259      1.2186     -0.6% <mejora
+  12      2.4109      2.3701     -1.7% <mejora
+
+--- Mejor modelo por horizonte ---
+  h=1: sarima      MAE=0.4126
+  h=3: sarimax     MAE=0.7159
+  h=6: sarimax     MAE=1.2186
+  h=12: sarimax     MAE=2.3701
+
+=================================================================

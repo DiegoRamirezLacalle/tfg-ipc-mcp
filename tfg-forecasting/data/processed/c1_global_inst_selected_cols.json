@@ -1,0 +1,16 @@
+[
+  "brent_log_lag1",
+  "brent_log_ma3",
+  "dfr_diff",
+  "dfr_lag1",
+  "dfr_ma3",
+  "fedfunds_lag1",
+  "fedfunds_ma3",
+  "gscpi_lag1",
+  "gscpi_ma3",
+  "imf_comm_lag1",
+  "imf_comm_ma3",
+  "usg10y_lag1",
+  "usg10y_ma3",
+  "vix_ma3"
+]

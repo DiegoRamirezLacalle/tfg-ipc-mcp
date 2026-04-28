@@ -1,0 +1,116 @@
+======================================================================
+REPORTE BASELINE -- CPI Global (mediana cross-country HCPI_M)
+Condicion C0: solo datos historicos numericos
+======================================================================
+
+1. ESPECIFICACIONES DE MODELOS
+----------------------------------------------------------------------
+Modelo       Orden                     AIC        BIC  N train
+----------------------------------------------------------------------
+arima        ARIMA(3,1,0)            69.37      83.07      228
+arima111     ARIMA(1,1,1)            72.38      82.66      228
+arimax       ARIMA(3,1,0)+FEDFUNDS      69.37      83.07      228
+
+  Nota: D=0 (sin diferenciacion estacional). Fs=-0.08 -> la mediana
+  cross-country cancela los patrones estacionales nacionales.
+  FEDFUNDS usado como exogena (analogo al DFR en pipeline Espana).
+
+2. EVALUACION ESTATICA (train 2002-2020 / val 2021-01 a 2022-06)
+   [Ruptura estructural: inflacion post-COVID 2021-2022]
+----------------------------------------------------------------------
+Modelo              MAE       RMSE       MASE
+----------------------------------------------------------------------
+arima            2.9210     3.5566     2.4923
+arima111         2.9275     3.5629     2.4978
+arimax           2.9210     3.5566     2.4923
+   [MASE~2.5 esperado: tasa recorre 1.7%->8.2% y ARIMA converge a
+    ~1.48%. Motiva el uso de senales exogenas en condicion C1.]
+
+3. EVALUACION ROLLING EXPANDING-WINDOW (2021-01 a 2024-12)
+----------------------------------------------------------------------
+  h=1 meses (47 evaluaciones):
+  Modelo          MAE     RMSE     MASE  vs naive
+  ----------------------------------------------
+  naive        3.0243   3.3745   2.5804  1.000x
+  arima        0.1907   0.2481   0.1627  0.063x *
+  arima111     0.1904   0.2527   0.1625  0.063x *
+  arimax       0.1876   0.2456   0.1601  0.062x *
+
+  h=3 meses (45 evaluaciones):
+  Modelo          MAE     RMSE     MASE  vs naive
+  ----------------------------------------------
+  naive        3.1199   3.4424   2.6619  1.000x
+  arima        0.3565   0.4851   0.3042  0.114x *
+  arima111     0.3720   0.5030   0.3174  0.119x *
+  arimax       0.3552   0.4821   0.3031  0.114x *
+
+  h=6 meses (42 evaluaciones):
+  Modelo          MAE     RMSE     MASE  vs naive
+  ----------------------------------------------
+  naive        3.2577   3.5447   2.7795  1.000x
+  arima        0.6821   0.9427   0.5820  0.209x *
+  arima111     0.7032   0.9711   0.6000  0.216x *
+  arimax       0.6805   0.9355   0.5806  0.209x *
+
+  h=12 meses (36 evaluaciones):
+  Modelo          MAE     RMSE     MASE  vs naive
+  ----------------------------------------------
+  naive        3.4604   3.7169   2.9525  1.000x
+  arima        1.5444   2.0271   1.3177  0.446x *
+  arima111     1.5714   2.0725   1.3408  0.454x *
+  arimax       1.5227   2.0242   1.2992  0.440x *
+
+4. DESGLOSE POR PERIODO ECONOMICO (MAE, h=1 y h=12)
+----------------------------------------------------------------------
+  Pre-crisis    (2021-01 / 2022-06):
+  Modelo        MAE h=1   MAE h=12
+  naive          2.6733     3.4221
+  arima          0.1959     1.5683
+  arima111       0.1884     1.5917
+  arimax         0.1856     1.5284
+
+  Shock Fed     (2022-07 / 2023-06):
+  Modelo        MAE h=1   MAE h=12
+  naive          3.0324     3.0324
+  arima          0.2412     1.6361
+  arima111       0.2533     1.6703
+  arimax         0.2481     1.6270
+
+  Normalizacion (2023-07 / 2024-12):
+  Modelo        MAE h=1   MAE h=12
+  naive          3.3503     3.9066
+  arima          0.1521     1.4343
+  arima111       0.1504     1.4578
+  arimax         0.1492     1.4172
+
+5. RANKING DE MODELOS POR HORIZONTE
+----------------------------------------------------------------------
+   h Mejor modelo      MAE  Mejora vs naive
+----------------------------------------------------------------------
+   1 arimax         0.1876           93.8%
+   3 arimax         0.3552           88.6%
+   6 arimax         0.6805           79.1%
+  12 arimax         1.5227           56.0%
+
+6. BENEFICIO FEDFUNDS (ARIMA vs ARIMAX, delta MAE rolling)
+----------------------------------------------------------------------
+     h     MAE ARIMA    MAE ARIMAX     Delta   Mejora%
+  ----------------------------------------------------
+     1        0.1907        0.1876   -0.0031     +1.6% <-- mejora
+     3        0.3565        0.3552   -0.0013     +0.4% <-- mejora
+     6        0.6821        0.6805   -0.0016     +0.2% <-- mejora
+    12        1.5444        1.5227   -0.0217     +1.4% <-- mejora
+
+7. CONCLUSIONES CLAVE
+----------------------------------------------------------------------
+  - Todos los modelos baten al naive estacional en todos los horizontes
+    (MASE < 1 en rolling). Diferencia enorme respecto a val estatica
+    (MASE~2.5): el rolling captura la tendencia de desinflacion 2023.
+  - ARIMA(3,1,0) domina ligeramente frente a ARIMA(1,1,1) en h>=6.
+  - ARIMAX+FEDFUNDS mejora al ARIMA en todos los horizontes, con mayor
+    beneficio en h=1 (+1.6%) y h=12 (+1.4%), confirmando que la
+    politica monetaria de la Fed aporta senal real en el shock 2022-2024.
+  - El periodo B (Shock Fed, 07/22-06/23) concentra el mayor error.
+    Motiva el uso de senales globales (VIX, commodities) en C1.
+  - Estos resultados forman la linea base C0 del experimento TFG global.
+======================================================================

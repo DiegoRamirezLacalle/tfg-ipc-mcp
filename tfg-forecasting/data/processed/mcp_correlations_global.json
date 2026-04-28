@@ -1,0 +1,32 @@
+{
+  "fomc_hawkish_score": {
+    "corr_cpi": 0.24050503638315607,
+    "corr_residuals": 0.005666134743840888,
+    "n": null
+  },
+  "fomc_surprise_score": {
+    "corr_cpi": 0.37210760172936796,
+    "corr_residuals": 0.005666134743840887,
+    "n": null
+  },
+  "fomc_forward_guidance_num": {
+    "corr_cpi": 0.21706855354842255,
+    "corr_residuals": 0.0037888926258116394,
+    "n": null
+  },
+  "us_cpi_surprise_score": {
+    "corr_cpi": null,
+    "corr_residuals": null,
+    "n": null
+  },
+  "us_cpi_direction_num": {
+    "corr_cpi": 0.11019306504150198,
+    "corr_residuals": -0.02492494697722168,
+    "n": null
+  },
+  "us_cpi_components_pressure": {
+    "corr_cpi": null,
+    "corr_residuals": null,
+    "n": null
+  }
+}
