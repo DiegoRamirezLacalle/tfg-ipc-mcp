@@ -1,0 +1,94 @@
+{
+  "chronos2_C1_energy": {
+    "A_2021": {
+      "h1": {
+        "MAE": 0.5473,
+        "RMSE": 0.6703,
+        "MASE": 0.3895,
+        "coverage_80": 0.5,
+        "n_origins": 12
+      },
+      "h3": {
+        "MAE": 1.0028,
+        "RMSE": 1.2807,
+        "MASE": 0.7137,
+        "coverage_80": 0.3333,
+        "n_origins": 12
+      },
+      "h6": {
+        "MAE": 1.8248,
+        "RMSE": 2.2882,
+        "MASE": 1.2987,
+        "coverage_80": 0.2083,
+        "n_origins": 12
+      },
+      "h12": {
+        "MAE": 3.5205,
+        "RMSE": 4.1882,
+        "MASE": 2.5055,
+        "coverage_80": 0.1111,
+        "n_origins": 12
+      }
+    },
+    "B_2022_shock": {
+      "h1": {
+        "MAE": 1.1219,
+        "RMSE": 1.4239,
+        "MASE": 0.7985,
+        "coverage_80": 0.5833,
+        "n_origins": 12
+      },
+      "h3": {
+        "MAE": 1.3824,
+        "RMSE": 1.6581,
+        "MASE": 0.9838,
+        "coverage_80": 0.5278,
+        "n_origins": 12
+      },
+      "h6": {
+        "MAE": 1.5802,
+        "RMSE": 1.9075,
+        "MASE": 1.1246,
+        "coverage_80": 0.5417,
+        "n_origins": 12
+      },
+      "h12": {
+        "MAE": 1.7355,
+        "RMSE": 2.0388,
+        "MASE": 1.2351,
+        "coverage_80": 0.6389,
+        "n_origins": 12
+      }
+    },
+    "C_2023_2024": {
+      "h1": {
+        "MAE": 0.4698,
+        "RMSE": 0.5785,
+        "MASE": 0.3343,
+        "coverage_80": 0.8261,
+        "n_origins": 23
+      },
+      "h3": {
+        "MAE": 0.6248,
+        "RMSE": 0.7809,
+        "MASE": 0.4447,
+        "coverage_80": 0.7619,
+        "n_origins": 21
+      },
+      "h6": {
+        "MAE": 0.6979,
+        "RMSE": 0.8522,
+        "MASE": 0.4967,
+        "coverage_80": 0.8241,
+        "n_origins": 18
+      },
+      "h12": {
+        "MAE": 0.8385,
+        "RMSE": 0.9938,
+        "MASE": 0.5967,
+        "coverage_80": 0.8264,
+        "n_origins": 12
+      }
+    }
+  }
+}

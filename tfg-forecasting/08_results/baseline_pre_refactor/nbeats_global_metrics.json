@@ -1,0 +1,26 @@
+{
+  "h1": {
+    "model": "nbeats_global_h1",
+    "MAE": 0.1969,
+    "RMSE": 0.1969,
+    "MASE": 0.168
+  },
+  "h3": {
+    "model": "nbeats_global_h3",
+    "MAE": 0.2558,
+    "RMSE": 0.2769,
+    "MASE": 0.2183
+  },
+  "h6": {
+    "model": "nbeats_global_h6",
+    "MAE": 0.6944,
+    "RMSE": 0.8223,
+    "MASE": 0.5924
+  },
+  "h12": {
+    "model": "nbeats_global_h12",
+    "MAE": 1.6654,
+    "RMSE": 2.0345,
+    "MASE": 1.4209
+  }
+}
