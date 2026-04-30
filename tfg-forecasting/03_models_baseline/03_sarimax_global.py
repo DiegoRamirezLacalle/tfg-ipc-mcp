@@ -1,34 +1,32 @@
-"""
-03_sarimax_global.py -- ARIMAX con Fed Funds Rate (FEDFUNDS) como exogena
+"""ARIMAX with Federal Funds Rate (FEDFUNDS) as exogenous variable — Global CPI.
 
-Variable exogena: FEDFUNDS (Federal Funds Rate, % anual)
-Fuente: FRED (Federal Reserve Bank of St. Louis)
+Exogenous variable: FEDFUNDS (Federal Funds Rate, % annual)
+Source: FRED (Federal Reserve Bank of St. Louis)
 URL:    https://fred.stlouisfed.org/graph/fredgraph.csv?id=FEDFUNDS
 
-Justificacion economica:
-  El tipo de interes de referencia de la Fed es el instrumento de politica
-  monetaria dominante a nivel global. Un aumento de tipos reduce la demanda
-  agregada y, con retardo, la inflacion. Analogia exacta con el DFR del BCE
-  en el modelo de Espana.
+Economic justification:
+  The Fed reference rate is the dominant global monetary policy instrument.
+  A rate increase reduces aggregate demand and, with a lag, inflation.
+  Exact analogy with ECB DFR in the Spain model.
 
-Nota sobre look-ahead bias:
-  Las decisiones de la Fed se publican el mismo dia del FOMC meeting.
-  Pasar los valores reales del FEDFUNDS como exogena futura en la evaluacion
-  estatica (validation oracle) es correcto; en el rolling backtesting se
-  usaran los valores conocidos en cada origen de prediccion.
+Note on look-ahead bias:
+  Fed decisions are published on the same day as the FOMC meeting.
+  Passing real FEDFUNDS values as future exogenous in static evaluation
+  (validation oracle) is correct; rolling backtesting uses values known
+  at each forecast origin.
 
-Datos guardados en:
+Data saved at:
   data/raw/fedfunds_raw.csv
   data/processed/fedfunds_monthly.parquet
 
-Salida:
+Output:
   08_results/arimax_global_summary.txt
   08_results/arimax_global_metrics.json
 """
 
 import io
-import sys
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -42,7 +40,10 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_VAL_END
+from shared.logger import get_logger
 from shared.metrics import mae, rmse, mase
+
+logger = get_logger(__name__)
 
 RESULTS_DIR  = ROOT / "08_results"
 RAW_DIR      = ROOT / "data" / "raw"
@@ -51,22 +52,17 @@ FEDFUNDS_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=FEDFUNDS"
 EXOG_COL     = "fedfunds"
 
 
-# ── Descarga y procesamiento de FEDFUNDS ──────────────────────────────────
-
 def download_fedfunds() -> pd.Series:
-    """
-    Descarga FEDFUNDS de FRED (CSV publico, sin API key).
-    Devuelve serie mensual indexada por MS desde 2001-01.
-    """
+    """Download FEDFUNDS from FRED (public CSV, no API key). Returns monthly series indexed by MS from 2001-01."""
     raw_path = RAW_DIR / "fedfunds_raw.csv"
 
-    print(f"  Descargando FEDFUNDS desde FRED...")
+    logger.info("  Downloading FEDFUNDS from FRED...")
     r = requests.get(FEDFUNDS_URL, timeout=60)
     r.raise_for_status()
 
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     raw_path.write_text(r.text, encoding="utf-8")
-    print(f"  Guardado raw: {raw_path}")
+    logger.info(f"  Raw saved: {raw_path}")
 
     df = pd.read_csv(io.StringIO(r.text), parse_dates=["observation_date"])
     df = df.rename(columns={"observation_date": "date", "FEDFUNDS": EXOG_COL})
@@ -80,13 +76,9 @@ def download_fedfunds() -> pd.Series:
 
 def prepare_fedfunds(series: pd.Series, date_start="2001-01-01",
                      date_end="2025-01-01") -> pd.Series:
-    """
-    Filtra al rango del proyecto y guarda en processed/.
-    No se aplica shift: el tipo de la Fed se conoce el mismo dia
-    de su anuncio (mismo supuesto que DFR en Espana).
-    """
+    """Filter to project date range and save to processed/. No shift applied: Fed rate is known on announcement day."""
     s = series.loc[date_start:date_end]
-    # Rellenar posibles gaps con forward fill (tipo no cambia entre reuniones)
+    # Forward-fill possible gaps (rate does not change between meetings)
     target_idx = pd.date_range(date_start, date_end, freq="MS")
     s = s.reindex(target_idx).ffill().dropna()
     s.index.freq = "MS"
@@ -94,7 +86,7 @@ def prepare_fedfunds(series: pd.Series, date_start="2001-01-01",
     PROC_DIR.mkdir(parents=True, exist_ok=True)
     out_path = PROC_DIR / "fedfunds_monthly.parquet"
     s.to_frame().to_parquet(out_path)
-    print(f"  Guardado processed: {out_path}")
+    logger.info(f"  Processed saved: {out_path}")
 
     return s
 
@@ -102,7 +94,7 @@ def prepare_fedfunds(series: pd.Series, date_start="2001-01-01",
 def load_or_download_fedfunds() -> pd.Series:
     proc_path = PROC_DIR / "fedfunds_monthly.parquet"
     if proc_path.exists():
-        print(f"  Cargando FEDFUNDS desde cache: {proc_path}")
+        logger.info(f"  Loading FEDFUNDS from cache: {proc_path}")
         s = pd.read_parquet(proc_path)[EXOG_COL]
         s.index.freq = "MS"
         return s
@@ -110,23 +102,20 @@ def load_or_download_fedfunds() -> pd.Series:
     return prepare_fedfunds(raw)
 
 
-# ── Carga de datos ─────────────────────────────────────────────────────────
-
 def load_data():
-    # Serie objetivo
+    # Target series
     df_y = pd.read_parquet(ROOT / "data" / "processed" / "cpi_global_monthly.parquet")
     y = df_y["cpi_global_rate"]
     y.index.freq = "MS"
 
-    # Exogena
+    # Exogenous
     fedfunds = load_or_download_fedfunds()
-    print(f"  FEDFUNDS: {fedfunds.index.min().date()} -> {fedfunds.index.max().date()} "
-          f"({len(fedfunds)} obs)  min={fedfunds.min():.2f}%  max={fedfunds.max():.2f}%")
+    logger.info(f"  FEDFUNDS: {fedfunds.index.min().date()} -> {fedfunds.index.max().date()} "
+                f"({len(fedfunds)} obs)  min={fedfunds.min():.2f}%  max={fedfunds.max():.2f}%")
 
-    # Alinear al indice de y
+    # Align to y index
     fedfunds = fedfunds.reindex(y.index).ffill()
 
-    # Construir DataFrame combinado
     df = pd.DataFrame({"cpi_global_rate": y, EXOG_COL: fedfunds}).dropna()
 
     # Splits
@@ -141,13 +130,8 @@ def load_data():
     return y_train, y_val, X_train, X_val
 
 
-# ── Ajuste ─────────────────────────────────────────────────────────────────
-
 def fit_arimax(y_train: pd.Series, X_train: pd.DataFrame):
-    """
-    auto_arima con exogena. Mismos rangos que script 01 (p/q max=4).
-    d=1, D=0, seasonal=False — confirmado por EDA.
-    """
+    """auto_arima with exogenous. Same ranges as script 01 (p/q max=4). d=1, D=0, seasonal=False."""
     model = pm.auto_arima(
         y_train,
         exogenous=X_train,
@@ -163,25 +147,21 @@ def fit_arimax(y_train: pd.Series, X_train: pd.DataFrame):
     return model
 
 
-# ── Diagnostico ────────────────────────────────────────────────────────────
-
 def diagnose_residuals(model, name="arimax_global"):
     resid = model.resid()
     lb = acorr_ljungbox(resid, lags=[6, 12, 24], return_df=True)
 
-    print(f"\n--- Diagnostico de residuos ({name}) ---")
-    print(f"  Media:    {resid.mean():.6f}")
-    print(f"  Std:      {resid.std():.4f}")
-    print(f"  Min:      {resid.min():.4f}   Max: {resid.max():.4f}")
-    print(f"  Ljung-Box (H0: sin autocorrelacion):")
+    logger.info(f"\n--- Residual diagnostics ({name}) ---")
+    logger.info(f"  Mean:  {resid.mean():.6f}")
+    logger.info(f"  Std:   {resid.std():.4f}")
+    logger.info(f"  Min:   {resid.min():.4f}   Max: {resid.max():.4f}")
+    logger.info(f"  Ljung-Box (H0: no autocorrelation):")
     for lag, row in lb.iterrows():
-        status = "OK" if row["lb_pvalue"] > 0.05 else "AUTOCORRELACION RESIDUAL"
-        print(f"    Lag {lag:2d}: stat={row['lb_stat']:7.3f}  p={row['lb_pvalue']:.4f}  [{status}]")
+        status = "OK" if row["lb_pvalue"] > 0.05 else "RESIDUAL AUTOCORRELATION"
+        logger.info(f"    Lag {lag:2d}: stat={row['lb_stat']:7.3f}  p={row['lb_pvalue']:.4f}  [{status}]")
 
     return resid, lb
 
-
-# ── Prediccion ─────────────────────────────────────────────────────────────
 
 def forecast_and_evaluate(model, y_train, y_val, X_val):
     n_val = len(y_val)
@@ -200,15 +180,13 @@ def forecast_and_evaluate(model, y_train, y_val, X_val):
     return fc_series, ci, metrics
 
 
-# ── Guardar ────────────────────────────────────────────────────────────────
-
 def save_results(model, metrics, resid, lb):
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     summary_path = RESULTS_DIR / "arimax_global_summary.txt"
     with open(summary_path, "w", encoding="utf-8") as f:
         f.write(str(model.summary()))
-    print(f"\nSummary guardado: {summary_path}")
+    logger.info(f"\nSummary saved: {summary_path}")
 
     lb_dict = {
         f"lag_{lag}": {"stat": round(row["lb_stat"], 4), "pvalue": round(row["lb_pvalue"], 4)}
@@ -231,11 +209,9 @@ def save_results(model, metrics, resid, lb):
     metrics_path = RESULTS_DIR / "arimax_global_metrics.json"
     with open(metrics_path, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
-    print(f"Metricas guardadas: {metrics_path}")
+    logger.info(f"Metrics saved: {metrics_path}")
     return out
 
-
-# ── Comparativa con scripts anteriores ────────────────────────────────────
 
 def load_prev_metrics():
     prev = {}
@@ -247,92 +223,83 @@ def load_prev_metrics():
     return prev
 
 
-# ── Main ───────────────────────────────────────────────────────────────────
-
 def main():
-    print("=" * 60)
-    print(f"ARIMAX GLOBAL — Baseline con exogena: {EXOG_COL.upper()}")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info(f"ARIMAX GLOBAL — Baseline with exogenous: {EXOG_COL.upper()}")
+    logger.info("=" * 60)
 
-    print("\nCargando datos...")
+    logger.info("\nLoading data...")
     y_train, y_val, X_train, X_val = load_data()
 
-    print(f"\nTrain: {y_train.index.min().date()} -> {y_train.index.max().date()} ({len(y_train)} obs)")
-    print(f"Val:   {y_val.index.min().date()} -> {y_val.index.max().date()} ({len(y_val)} obs)")
-    print(f"FEDFUNDS train: min={X_train[EXOG_COL].min():.2f}%  max={X_train[EXOG_COL].max():.2f}%")
-    print(f"FEDFUNDS val:   min={X_val[EXOG_COL].min():.2f}%  max={X_val[EXOG_COL].max():.2f}%")
+    logger.info(f"\nTrain: {y_train.index.min().date()} -> {y_train.index.max().date()} ({len(y_train)} obs)")
+    logger.info(f"Val:   {y_val.index.min().date()} -> {y_val.index.max().date()} ({len(y_val)} obs)")
+    logger.info(f"FEDFUNDS train: min={X_train[EXOG_COL].min():.2f}%  max={X_train[EXOG_COL].max():.2f}%")
+    logger.info(f"FEDFUNDS val:   min={X_val[EXOG_COL].min():.2f}%  max={X_val[EXOG_COL].max():.2f}%")
 
-    # Ajuste
-    print("\n--- Busqueda auto_arima con exogena FEDFUNDS ---")
+    logger.info("\n--- auto_arima search with exogenous FEDFUNDS ---")
     model = fit_arimax(y_train, X_train)
 
     order = model.order
-    print(f"\nModelo seleccionado: ARIMAX{order} + {EXOG_COL.upper()}")
-    print(f"AIC: {model.aic():.4f}  |  BIC: {model.bic():.4f}")
-    print(model.summary())
+    logger.info(f"\nSelected model: ARIMAX{order} + {EXOG_COL.upper()}")
+    logger.info(f"AIC: {model.aic():.4f}  |  BIC: {model.bic():.4f}")
+    logger.info(model.summary())
 
-    # Diagnostico
     resid, lb = diagnose_residuals(model, f"ARIMAX{order}")
 
-    # Prediccion
-    print(f"\n--- Prediccion sobre validacion ({len(y_val)} meses) ---")
+    logger.info(f"\n--- Forecast on validation ({len(y_val)} months) ---")
     fc, ci, metrics = forecast_and_evaluate(model, y_train, y_val, X_val)
 
-    print(f"\nMetricas sobre validacion:")
+    logger.info(f"\nValidation metrics:")
     for k, v in metrics.items():
-        print(f"  {k}: {v}")
+        logger.info(f"  {k}: {v}")
 
-    print(f"\n{'Fecha':>12} {'Real':>10} {'Pred':>10} {'Error':>10} {'FedFunds':>10}")
-    print("-" * 58)
+    logger.info(f"\n{'Date':>12} {'Actual':>10} {'Pred':>10} {'Error':>10} {'FedFunds':>10}")
+    logger.info("-" * 58)
     for date, real, pred, ff in zip(y_val.index, y_val.values, fc.values, X_val[EXOG_COL].values):
         flag = " <--" if abs(real - pred) > 1.5 else ""
-        print(f"{str(date.date()):>12} {real:10.4f} {pred:10.4f} {real-pred:10.4f} {ff:10.2f}{flag}")
+        logger.info(f"{str(date.date()):>12} {real:10.4f} {pred:10.4f} {real-pred:10.4f} {ff:10.2f}{flag}")
 
-    # Guardar
     result_dict = save_results(model, metrics, resid, lb)
 
-    # Comparativa completa
     prev = load_prev_metrics()
     all_m = {**prev, "arimax_global": result_dict}
 
     if prev:
-        print(f"\n{'=' * 70}")
-        print("COMPARATIVA ARIMA(3,1,0) vs ARIMA(1,1,1) vs ARIMAX + FEDFUNDS")
-        print(f"{'=' * 70}")
+        logger.info(f"\n{'=' * 70}")
+        logger.info("ARIMA(3,1,0) vs ARIMA(1,1,1) vs ARIMAX+FEDFUNDS comparison")
+        logger.info(f"{'=' * 70}")
         names = [k for k in ["arima_global", "arima111_global", "arimax_global"] if k in all_m]
         labels = {"arima_global": "ARIMA(3,1,0)", "arima111_global": "ARIMA(1,1,1)",
                   "arimax_global": f"ARIMAX+{EXOG_COL.upper()}"}
-        header = f"{'Metrica':<8}" + "".join(f" {labels[n]:>16}" for n in names)
-        print(header)
-        print("-" * (8 + 17 * len(names)))
+        header = f"{'Metric':<8}" + "".join(f" {labels[n]:>16}" for n in names)
+        logger.info(header)
+        logger.info("-" * (8 + 17 * len(names)))
         for m_name in ["MAE", "RMSE", "MASE"]:
             row = f"{m_name:<8}"
             for n in names:
                 row += f" {all_m[n]['metrics_val'][m_name]:>16.4f}"
-            print(row)
-        print(f"\n{'AIC':<8}" + "".join(f" {all_m[n]['aic']:>16.4f}" for n in names))
-        print(f"{'BIC':<8}" + "".join(f" {all_m[n]['bic']:>16.4f}" for n in names))
-        print()
+            logger.info(row)
+        logger.info(f"\n{'AIC':<8}" + "".join(f" {all_m[n]['aic']:>16.4f}" for n in names))
+        logger.info(f"{'BIC':<8}" + "".join(f" {all_m[n]['bic']:>16.4f}" for n in names))
 
-        # Beneficio de la exogena
         if "arima_global" in all_m:
             base_mae = all_m["arima_global"]["metrics_val"]["MAE"]
             ax_mae   = metrics["MAE"]
-            mejora   = (base_mae - ax_mae) / base_mae * 100
-            print(f"Beneficio FEDFUNDS sobre ARIMA(3,1,0): {mejora:+.1f}% en MAE val")
-            if mejora > 0:
-                print("=> La exogena monetaria mejora la prediccion en el periodo de validacion.")
+            improvement = (base_mae - ax_mae) / base_mae * 100
+            logger.info(f"FEDFUNDS benefit over ARIMA(3,1,0): {improvement:+.1f}% in val MAE")
+            if improvement > 0:
+                logger.info("=> Monetary exogenous improves forecast over the validation period.")
             else:
-                print("=> La exogena no mejora la prediccion en val estatica.")
-                print("   Nota: FEDFUNDS estuvo cerca de 0% durante 2021 (val period).")
-                print("   Su efecto sera mas visible en el rolling backtesting (2022-2024).")
+                logger.info("=> Exogenous does not improve forecast on static validation.")
+                logger.info("   Note: FEDFUNDS was near 0% during 2021 (val period).")
+                logger.info("   Its effect will be more visible in rolling backtesting (2022-2024).")
 
-    print(f"\n{'=' * 60}")
-    print(f"RESUMEN ARIMAX GLOBAL")
-    print(f"  Modelo:  ARIMAX{order} + {EXOG_COL.upper()}")
-    print(f"  AIC: {result_dict['aic']}  BIC: {result_dict['bic']}")
-    print(f"  MAE val: {metrics['MAE']}  RMSE: {metrics['RMSE']}  MASE: {metrics['MASE']}")
-    print(f"{'=' * 60}")
+    logger.info(f"\n{'=' * 60}")
+    logger.info("ARIMAX GLOBAL SUMMARY")
+    logger.info(f"  Model:    ARIMAX{order} + {EXOG_COL.upper()}")
+    logger.info(f"  AIC: {result_dict['aic']}  BIC: {result_dict['bic']}")
+    logger.info(f"  MAE val: {metrics['MAE']}  RMSE: {metrics['RMSE']}  MASE: {metrics['MASE']}")
+    logger.info(f"{'=' * 60}")
 
 
 if __name__ == "__main__":

@@ -1,16 +1,15 @@
-"""
-05_metrics_baseline_global.py — Consolidacion y reporte final baseline CPI Global
+"""Consolidated report and final evaluation for Global CPI baseline models (C0).
 
-Analogo a 05_metrics_baseline.py (Espana) pero adaptado al pipeline global:
-  - Modelos: naive, arima (3,1,0), arima111 (1,1,1), arimax (3,1,0)+FEDFUNDS
-  - Metricas estaticas de 08_results/{arima,arima111,arimax}_global_metrics.json
-  - Rolling de 08_results/rolling_metrics_global.json
-  - Periodos economicos:
-      A) Pre-crisis:    2021-01 a 2022-06  (inflacion baja, Fed plano 0-0.25%)
-      B) Shock:         2022-07 a 2023-06  (pico inflacion, Fed sube tipos)
-      C) Normalizacion: 2023-07 a 2024-12  (desinflacion global)
+Analogous to 05_metrics_baseline.py (Spain) but adapted to the global pipeline:
+  - Models: naive, arima (3,1,0), arima111 (1,1,1), arimax (3,1,0)+FEDFUNDS
+  - Static metrics from 08_results/{arima,arima111,arimax}_global_metrics.json
+  - Rolling from 08_results/rolling_metrics_global.json
+  - Economic periods:
+      A) Pre-crisis:     2021-01 to 2022-06  (low inflation, Fed flat 0-0.25%)
+      B) Shock:          2022-07 to 2023-06  (inflation peak, Fed hikes)
+      C) Normalisation:  2023-07 to 2024-12  (global disinflation)
 
-Salida:
+Output:
   08_results/baseline_global_report.txt
   08_results/baseline_global_summary.json
   08_results/figures/rolling_mae_by_horizon_global.png
@@ -30,6 +29,13 @@ import numpy as np
 import pandas as pd
 
 ROOT        = Path(__file__).resolve().parents[1]
+MONOREPO    = ROOT.parent
+sys.path.insert(0, str(MONOREPO))
+
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
+
 RESULTS_DIR = ROOT / "08_results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 
@@ -54,8 +60,6 @@ MODEL_COLORS = {
 }
 
 
-# ── Carga ──────────────────────────────────────────────────────────────────
-
 def load_all():
     static = {}
     for m in ["arima", "arima111", "arimax"]:
@@ -72,8 +76,6 @@ def load_all():
 
     return static, rolling, preds
 
-
-# ── Analisis por periodo ────────────────────────────────────────────────────
 
 def metrics_by_period(preds: pd.DataFrame) -> dict:
     results = {}
@@ -95,8 +97,6 @@ def metrics_by_period(preds: pd.DataFrame) -> dict:
     return results
 
 
-# ── Ranking ────────────────────────────────────────────────────────────────
-
 def build_ranking(rolling: dict) -> dict:
     ranking = {}
     for h in HORIZONS:
@@ -113,8 +113,6 @@ def build_ranking(rolling: dict) -> dict:
     return ranking
 
 
-# ── Beneficio FEDFUNDS ──────────────────────────────────────────────────────
-
 def fedfunds_benefit(rolling: dict) -> list:
     rows = []
     for h in HORIZONS:
@@ -125,11 +123,9 @@ def fedfunds_benefit(rolling: dict) -> list:
             delta  = mae_ax - mae_a
             pct    = -delta / mae_a * 100
             rows.append({"h": h, "mae_arima": mae_a, "mae_arimax": mae_ax,
-                          "delta": delta, "mejora_pct": pct})
+                          "delta": delta, "improvement_pct": pct})
     return rows
 
-
-# ── Reporte texto ──────────────────────────────────────────────────────────
 
 def write_report(static, rolling, period_metrics, ranking, ff_benefit):
     sep  = "=" * 70
@@ -226,10 +222,10 @@ def write_report(static, rolling, period_metrics, ranking, ff_benefit):
         f"  {'-'*52}",
     ]
     for r in ff_benefit:
-        mark = " <-- mejora" if r["mejora_pct"] > 0 else ""
+        mark = " <-- mejora" if r["improvement_pct"] > 0 else ""
         lines.append(
             f"  {r['h']:>4}  {r['mae_arima']:>12.4f}  {r['mae_arimax']:>12.4f}"
-            f"  {r['delta']:>+8.4f}  {r['mejora_pct']:>+7.1f}%{mark}"
+            f"  {r['delta']:>+8.4f}  {r['improvement_pct']:>+7.1f}%{mark}"
         )
 
     lines += [
@@ -251,11 +247,9 @@ def write_report(static, rolling, period_metrics, ranking, ff_benefit):
     path = RESULTS_DIR / "baseline_global_report.txt"
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
-    print(f"Reporte guardado: {path}")
+    logger.info(f"Report saved: {path}")
     return text
 
-
-# ── Graficos ───────────────────────────────────────────────────────────────
 
 def plot_mae_by_horizon(rolling: dict) -> None:
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -271,8 +265,8 @@ def plot_mae_by_horizon(rolling: dict) -> None:
 
     ax.set_xticks(x)
     ax.set_xticklabels([f"h={h}" for h in HORIZONS])
-    ax.set_ylabel("MAE (pp tasa YoY)")
-    ax.set_title("MAE Rolling por horizonte — Baseline C0 Global")
+    ax.set_ylabel("MAE (pp YoY rate)")
+    ax.set_title("MAE rolling by horizon — Baseline C0 Global")
     ax.legend(loc="upper left")
     ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
     ax.grid(axis="y", alpha=0.3)
@@ -280,7 +274,7 @@ def plot_mae_by_horizon(rolling: dict) -> None:
     path = FIGURES_DIR / "rolling_mae_by_horizon_global.png"
     fig.savefig(path, dpi=150)
     plt.close(fig)
-    print(f"Grafico: {path}")
+    logger.info(f"Plot saved: {path}")
 
 
 def plot_error_by_period(period_metrics: dict) -> None:
@@ -312,17 +306,17 @@ def plot_error_by_period(period_metrics: dict) -> None:
         ax.set_xticks(x)
         ax.set_xticklabels(["Pre-crisis\n01/21-06/22", "Shock Fed\n07/22-06/23",
                              "Normaliz.\n07/23-12/24"], fontsize=8)
-        ax.set_ylabel("MAE (pp tasa YoY)")
-        ax.set_title(f"MAE por periodo — h={h} mes{'es' if h > 1 else ''}")
+        ax.set_ylabel("MAE (pp YoY rate)")
+        ax.set_title(f"MAE by period — h={h} month{'s' if h > 1 else ''}")
         ax.legend(fontsize=8)
         ax.grid(axis="y", alpha=0.3)
 
-    fig.suptitle("Comportamiento por periodo economico — Baseline C0 Global", fontsize=11)
+    fig.suptitle("Performance by economic period — Baseline C0 Global", fontsize=11)
     fig.tight_layout()
     path = FIGURES_DIR / "error_by_period_global.png"
     fig.savefig(path, dpi=150)
     plt.close(fig)
-    print(f"Grafico: {path}")
+    logger.info(f"Plot saved: {path}")
 
 
 def plot_rolling_errors_over_time(preds: pd.DataFrame) -> None:
@@ -344,29 +338,29 @@ def plot_rolling_errors_over_time(preds: pd.DataFrame) -> None:
 
         ax.axvspan(pd.Timestamp("2022-07-01"), pd.Timestamp("2023-06-01"),
                    alpha=0.08, color="red", label="_Shock Fed")
-        ax.set_ylabel("Error absoluto (pp)")
-        ax.set_title(f"Error absoluto rolling — h={h} mes{'es' if h > 1 else ''}")
+        ax.set_ylabel("Absolute error (pp)")
+        ax.set_title(f"Rolling absolute error — h={h} month{'s' if h > 1 else ''}")
         ax.legend(ncol=5, fontsize=8)
         ax.grid(alpha=0.3)
 
-    fig.suptitle("Evolucion del error rolling — Baseline C0 Global", fontsize=11)
+    fig.suptitle("Rolling error over time — Baseline C0 Global", fontsize=11)
     fig.tight_layout()
     path = FIGURES_DIR / "rolling_errors_h1_h12_global.png"
     fig.savefig(path, dpi=150)
     plt.close(fig)
-    print(f"Grafico: {path}")
+    logger.info(f"Plot saved: {path}")
 
 
 def plot_fedfunds_benefit(ff_benefit: list) -> None:
     hs     = [r["h"] for r in ff_benefit]
-    deltas = [r["mejora_pct"] for r in ff_benefit]
+    deltas = [r["improvement_pct"] for r in ff_benefit]
 
     fig, ax = plt.subplots(figsize=(6, 4))
     colors  = ["#4CAF50" if d > 0 else "#F44336" for d in deltas]
     ax.bar([f"h={h}" for h in hs], deltas, color=colors, alpha=0.85, edgecolor="white")
     ax.axhline(0, color="black", linewidth=0.8)
-    ax.set_ylabel("Mejora MAE ARIMAX vs ARIMA (%)")
-    ax.set_title("Beneficio FEDFUNDS en rolling — CPI Global")
+    ax.set_ylabel("MAE improvement ARIMAX vs ARIMA (%)")
+    ax.set_title("FEDFUNDS benefit in rolling — CPI Global")
     ax.grid(axis="y", alpha=0.3)
     for i, (h, d) in enumerate(zip(hs, deltas)):
         ax.text(i, d + 0.05 * (1 if d >= 0 else -1), f"{d:+.1f}%",
@@ -375,15 +369,13 @@ def plot_fedfunds_benefit(ff_benefit: list) -> None:
     path = FIGURES_DIR / "fedfunds_benefit_global.png"
     fig.savefig(path, dpi=150)
     plt.close(fig)
-    print(f"Grafico: {path}")
+    logger.info(f"Plot saved: {path}")
 
-
-# ── Main ───────────────────────────────────────────────────────────────────
 
 def main():
-    print("=" * 60)
-    print("CONSOLIDACION BASELINE — CPI Global")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("BASELINE CONSOLIDATION — CPI Global")
+    logger.info("=" * 60)
 
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -393,8 +385,7 @@ def main():
     ff_benefit     = fedfunds_benefit(rolling)
 
     report = write_report(static, rolling, period_metrics, ranking, ff_benefit)
-    print()
-    print(report)
+    logger.info("\n" + report)
 
     summary = {
         "static_val":     {m: static[m]["metrics_val"] for m in ["arima", "arima111", "arimax"]},
@@ -406,21 +397,21 @@ def main():
     summary_path = RESULTS_DIR / "baseline_global_summary.json"
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
-    print(f"Summary JSON: {summary_path}")
+    logger.info(f"Summary JSON: {summary_path}")
 
-    print("\nGenerando graficos...")
+    logger.info("Generating plots...")
     plot_mae_by_horizon(rolling)
     plot_error_by_period(period_metrics)
     plot_rolling_errors_over_time(preds)
     plot_fedfunds_benefit(ff_benefit)
 
-    print("\nArchivos generados en 08_results/:")
+    logger.info("Files generated in 08_results/:")
     for p in sorted(RESULTS_DIR.glob("*global*")):
         if p.is_file():
-            print(f"  {p.name}")
+            logger.info(f"  {p.name}")
     for p in sorted(FIGURES_DIR.glob("*global*")):
         if p.is_file():
-            print(f"  figures/{p.name}")
+            logger.info(f"  figures/{p.name}")
 
 
 if __name__ == "__main__":
