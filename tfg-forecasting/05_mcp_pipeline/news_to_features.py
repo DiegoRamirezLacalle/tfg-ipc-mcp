@@ -1,16 +1,12 @@
-"""
-news_to_features.py
--------------------
-Orquestador del pipeline MCP completo:
+"""MCP pipeline orchestrator: acquire data, process with LLM, build C1 features.
 
-  --acquire     Descarga GDELT + RSS y almacena en MongoDB
-  --process     Extrae senales LLM de comunicados RSS no procesados
-  --build-c1    Agrega a frecuencia mensual y exporta news_signals.parquet
+  --acquire     Download GDELT + RSS and store in MongoDB
+  --process     Extract LLM signals from unprocessed RSS releases
+  --build-c1    Aggregate to monthly frequency and export news_signals.parquet
 
-Principio clave: SEPARACION TOTAL entre adquisicion (Internet) y ejecucion.
-Control de leakage: ingestion_timestamp < t para cada origen de backtesting.
+Leakage control: all news signals are shifted +1 month before merging with exog features.
 
-Esquema final news_signals.parquet:
+Output schema (news_signals.parquet):
   date | gdelt_avg_tone | gdelt_goldstein | gdelt_n_articles |
        | bce_shock_score | bce_uncertainty | bce_tone |
        | ine_surprise_score | ine_topic | dominant_topic
@@ -19,34 +15,33 @@ Esquema final news_signals.parquet:
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from collections import Counter
-from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 from pymongo import MongoClient
 
-# ── Rutas ──────────────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_PROC = PROJECT_ROOT / "data" / "processed"
 SIGNALS_PATH = DATA_PROC / "news_signals.parquet"
 FEATURES_EXOG_PATH = DATA_PROC / "features_exog.parquet"
 FEATURES_C1_PATH = DATA_PROC / "features_c1.parquet"
 
-sys.path.insert(0, str(PROJECT_ROOT.parent / "shared"))
-from constants import FREQ
+sys.path.insert(0, str(PROJECT_ROOT.parent))
+
+from shared.constants import FREQ
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 MONGO_URI = "mongodb://localhost:27017"
 MONGO_DB = "tfg_ipc_mcp"
 MONGO_COLLECTION = "news_raw"
 
-# Rango historico para GDELT (spec: desde 2015)
 GDELT_START = "2015-01-01"
 GDELT_END = "2024-12-31"
 
-# Fuentes RSS
 RSS_SOURCES = ["bce", "ine", "bde"]
 
 
@@ -56,28 +51,24 @@ def _get_collection():
 
 
 def _month_range(start: str, end: str) -> list[tuple[int, int]]:
-    """Genera lista de (year, month) entre dos fechas mensuales."""
+    """Return list of (year, month) between two monthly dates."""
     periods = pd.date_range(start=start, end=end, freq=FREQ)
     return [(d.year, d.month) for d in periods]
 
 
-# ── Paso 1: Adquisicion ──────────────────────────────────────
+# Step 1: Acquire
+
 def acquire(start_date: str = GDELT_START, end_date: str = GDELT_END):
-    """
-    Descarga GDELT cuantitativo + RSS oficiales via MCP client.
-    Almacena todo en MongoDB.
-    """
+    """Download GDELT (quantitative) + official RSS via MCP client and store in MongoDB."""
     from mcp_client import MCPPipeline
 
     months = _month_range(start_date, end_date)
 
     with MCPPipeline(timeout=300) as pipeline:
-        # 1a. GDELT mes a mes (cada llamada ~2 min, dentro del timeout de 300s)
-        print(f"\n[acquire] GDELT v2: {start_date} - {end_date} ({len(months)} meses)")
+        logger.info(f"[acquire] GDELT v2: {start_date} - {end_date} ({len(months)} months)")
         cached, downloaded = 0, 0
         for i, (year, month) in enumerate(months):
             ym_start = f"{year:04d}-{month:02d}-01"
-            # Ultimo dia del mes
             from calendar import monthrange
             last_day = monthrange(year, month)[1]
             ym_end = f"{year:04d}-{month:02d}-{last_day:02d}"
@@ -88,30 +79,29 @@ def acquire(start_date: str = GDELT_START, end_date: str = GDELT_END):
                 cached += 1
             else:
                 downloaded += 1
-            print(f"  [{i+1}/{len(months)}] {year}-{month:02d}: {status} "
-                  f"({results[0].get('n_events', 0)} eventos)")
+            logger.info(
+                f"  [{i+1}/{len(months)}] {year}-{month:02d}: {status} "
+                f"({results[0].get('n_events', 0)} events)"
+            )
 
-        print(f"  Total: {cached} cached, {downloaded} nuevos")
+        logger.info(f"  Total: {cached} cached, {downloaded} new")
 
-        # 1b. RSS de cada fuente
         for source in RSS_SOURCES:
-            print(f"\n[acquire] RSS {source.upper()}: {start_date} - {end_date}")
+            logger.info(f"[acquire] RSS {source.upper()}: {start_date} - {end_date}")
             result = pipeline.fetch_rss(source, start_date, end_date)
-            print(f"  Encontrados: {result.get('articles_found', 0)}")
-            print(f"  Insertados:  {result.get('articles_inserted', 0)}")
+            logger.info(f"  Found:    {result.get('articles_found', 0)}")
+            logger.info(f"  Inserted: {result.get('articles_inserted', 0)}")
 
     col = _get_collection()
     total = col.count_documents({})
     unprocessed = col.count_documents({"processed": False})
-    print(f"\n[acquire] MongoDB total: {total} docs ({unprocessed} sin procesar)")
+    logger.info(f"[acquire] MongoDB total: {total} docs ({unprocessed} unprocessed)")
 
 
-# ── Paso 2: Procesamiento LLM ────────────────────────────────
+# Step 2: LLM processing
+
 def process_rss():
-    """
-    Busca comunicados RSS sin procesar en MongoDB,
-    extrae senales con Qwen3:4b, actualiza el documento.
-    """
+    """Find unprocessed RSS releases in MongoDB and extract signals with Qwen3:4b."""
     from agent_extractor import extract_signals
 
     col = _get_collection()
@@ -121,15 +111,15 @@ def process_rss():
     }))
 
     if not pending:
-        print("[process] No hay comunicados RSS pendientes.")
+        logger.info("[process] No pending RSS releases.")
         return
 
-    print(f"[process] {len(pending)} comunicados por procesar con qwen3:4b")
+    logger.info(f"[process] {len(pending)} releases to process with qwen3:4b")
 
     for i, doc in enumerate(pending):
         text = f"{doc.get('title', '')} {doc.get('body', '')}"
         source = doc.get("source", "")
-        print(f"  [{i+1}/{len(pending)}] {source}: {doc.get('title', '')[:60]}...")
+        logger.info(f"  [{i+1}/{len(pending)}] {source}: {doc.get('title', '')[:60]}...")
 
         signals = extract_signals(text, source=source)
 
@@ -138,18 +128,16 @@ def process_rss():
             {"$set": {"processed": True, "signals": signals}},
         )
 
-    print(f"[process] Completado. {len(pending)} comunicados procesados.")
+    logger.info(f"[process] Done. {len(pending)} releases processed.")
 
 
-# ── Paso 3: Construccion del parquet ──────────────────────────
+# Step 3: Build parquet
+
 def build_c1():
-    """
-    Lee MongoDB, agrega a frecuencia mensual, exporta news_signals.parquet.
-    Genera features_c1.parquet = features_exog + news_signals.
-    """
+    """Read MongoDB, aggregate to monthly frequency, export news_signals.parquet and features_c1.parquet."""
     col = _get_collection()
 
-    # ── GDELT: senales cuantitativas ──
+    # GDELT: quantitative signals
     gdelt_docs = list(col.find({"raw_source": "gdelt_v2", "processed": True}))
     gdelt_rows = []
     for doc in gdelt_docs:
@@ -165,8 +153,8 @@ def build_c1():
         columns=["date", "gdelt_avg_tone", "gdelt_goldstein", "gdelt_n_articles"]
     )
 
-    # ── RSS + PDF: senales por fuente y mes ──
-    # Incluye: rss (tiempo real), rss_historical (scraping), pdf_historical (INE PDFs)
+    # RSS + PDF signals by source and month
+    # Includes: rss (real-time), rss_historical (scraped), pdf_historical (INE PDFs)
     rss_docs = list(col.find({
         "raw_source": {"$in": ["rss", "rss_historical", "pdf_historical"]},
         "processed": True,
@@ -195,11 +183,10 @@ def build_c1():
                 "topic": signals.get("topic", "otro"),
             })
 
-    # Agregar BCE mensual (media de scores, moda de tone)
+    # Aggregate BCE monthly (mean scores, mode of tone)
     df_bce_agg = pd.DataFrame(columns=["date", "bce_shock_score", "bce_uncertainty", "bce_tone"])
     if bce_rows:
         df_bce = pd.DataFrame(bce_rows)
-        tone_map = {"hawkish": 1, "neutral": 0, "dovish": -1, "positivo": 0.5, "negativo": -0.5}
 
         def _agg_bce(grp):
             tones = grp["tone"].tolist()
@@ -212,7 +199,7 @@ def build_c1():
 
         df_bce_agg = df_bce.groupby("date").apply(_agg_bce, include_groups=False).reset_index()
 
-    # Agregar INE mensual
+    # Aggregate INE monthly
     df_ine_agg = pd.DataFrame(columns=["date", "ine_surprise_score", "ine_topic"])
     if ine_rows:
         df_ine = pd.DataFrame(ine_rows)
@@ -227,8 +214,7 @@ def build_c1():
 
         df_ine_agg = df_ine.groupby("date").apply(_agg_ine, include_groups=False).reset_index()
 
-    # ── Merge todo por fecha ──
-    # Generar indice de meses completo
+    # Merge all by date
     all_months = pd.date_range(start=GDELT_START, end=GDELT_END, freq=FREQ)
     df_base = pd.DataFrame({"date": all_months.strftime("%Y-%m")})
 
@@ -240,7 +226,7 @@ def build_c1():
     if not df_ine_agg.empty:
         df_signals = df_signals.merge(df_ine_agg, on="date", how="left")
 
-    # Rellenar NaN
+    # Fill NaN with defaults
     fill = {
         "gdelt_avg_tone": 0.0,
         "gdelt_goldstein": 0.0,
@@ -250,7 +236,7 @@ def build_c1():
         "bce_tone": "neutral",
         "ine_surprise_score": 0.0,
         "ine_topic": "otro",
-        # derivadas
+        # derived
         "signal_available": 0.0,
         "bce_tone_numeric": 0.0,
         "bce_cumstance": 0.0,
@@ -266,9 +252,7 @@ def build_c1():
 
     df_signals["gdelt_n_articles"] = df_signals["gdelt_n_articles"].astype(int)
 
-    # ── FIX dominant_topic: captura meses de politica monetaria estable ──
-    # bce_shock_score > 0 indica que hubo reunion y decision relevante,
-    # aunque el tono sea neutral (sin cambio de tipos pero con comunicado)
+    # dominant_topic: captures stable monetary policy months where BCE shock > 0
     def _dominant(row):
         if row["bce_tone"] in ("hawkish", "dovish") or row["bce_shock_score"] > 0:
             return "tipos_interes"
@@ -278,78 +262,58 @@ def build_c1():
 
     df_signals["dominant_topic"] = df_signals.apply(_dominant, axis=1)
 
-    # ── Señales derivadas (feature engineering) ──────────────────
-    # Ordenar por fecha antes de calcular ventanas móviles
+    # Derived features — sort by date before computing rolling windows
     df_signals = df_signals.sort_values("date").reset_index(drop=True)
 
-    # 1. Indicador de disponibilidad de señal (0 antes de 2015, 1 desde 2015)
-    #    Permite que los modelos distingan "ceros reales" de "sin dato histórico"
-    df_signals["signal_available"] = (
-        df_signals["date"] >= "2015-01"
-    ).astype(float)
+    # 1. Signal availability indicator (0 before 2015, 1 from 2015)
+    #    Lets models distinguish "real zeros" from "no historical data"
+    df_signals["signal_available"] = (df_signals["date"] >= "2015-01").astype(float)
 
-    # 2. BCE tone como numérico ordinal: hawkish=1, neutral=0, dovish=-1
+    # 2. BCE tone as ordinal numeric: hawkish=1, neutral=0, dovish=-1
     _tone_map = {"hawkish": 1.0, "neutral": 0.0, "dovish": -1.0}
-    df_signals["bce_tone_numeric"] = (
-        df_signals["bce_tone"].map(_tone_map).fillna(0.0)
-    )
+    df_signals["bce_tone_numeric"] = df_signals["bce_tone"].map(_tone_map).fillna(0.0)
 
-    # 3. Stance acumulada BCE: suma corrida de tone_numeric
-    #    Captura ciclos de endurecimiento (positivo) o relajación (negativo)
-    #    Solo acumula desde 2015 (antes no hay señal)
+    # 3. BCE cumulative stance: running sum of tone_numeric
+    #    Captures tightening (positive) or easing (negative) cycles
     _stance = df_signals["bce_tone_numeric"].copy()
     _stance[df_signals["signal_available"] == 0] = 0.0
     df_signals["bce_cumstance"] = _stance.cumsum()
 
-    # 4. Media móvil de GDELT tone (suaviza ruido mensual)
-    #    min_periods=1 para que no produzca NaN en los primeros meses del rango
-    df_signals["gdelt_tone_ma3"] = (
-        df_signals["gdelt_avg_tone"].rolling(3, min_periods=1).mean()
-    )
-    df_signals["gdelt_tone_ma6"] = (
-        df_signals["gdelt_avg_tone"].rolling(6, min_periods=1).mean()
-    )
+    # 4. GDELT tone moving averages (smooth monthly noise)
+    #    min_periods=1 avoids NaN in early months of the range
+    df_signals["gdelt_tone_ma3"] = df_signals["gdelt_avg_tone"].rolling(3, min_periods=1).mean()
+    df_signals["gdelt_tone_ma6"] = df_signals["gdelt_avg_tone"].rolling(6, min_periods=1).mean()
 
-    # 5. INE topic como binario (1=inflacion, 0=otro)
-    df_signals["ine_inflacion"] = (
-        df_signals["ine_topic"] == "inflacion"
-    ).astype(float)
+    # 5. INE topic as binary (1=inflacion, 0=other)
+    df_signals["ine_inflacion"] = (df_signals["ine_topic"] == "inflacion").astype(float)
 
-    # Convertir date a datetime para alinear con IPC
     df_signals["date"] = pd.to_datetime(df_signals["date"] + "-01")
 
-    # Guardar news_signals.parquet (sin shift: contiene senales del mes t)
     DATA_PROC.mkdir(parents=True, exist_ok=True)
     df_signals.to_parquet(SIGNALS_PATH, index=False)
-    print(f"[build-c1] news_signals.parquet: {len(df_signals)} filas")
-    print(f"           Columnas: {list(df_signals.columns)}")
+    logger.info(f"[build-c1] news_signals.parquet: {len(df_signals)} rows")
+    logger.info(f"           Columns: {list(df_signals.columns)}")
 
-    # ── Merge con features_exog para features_c1 ──
+    # Merge with features_exog to build features_c1
     if not FEATURES_EXOG_PATH.exists():
-        print("[build-c1] WARN: features_exog.parquet no existe. Solo se genero news_signals.")
+        logger.warning("[build-c1] features_exog.parquet not found. Only news_signals generated.")
         return
 
     df_exog = pd.read_parquet(FEATURES_EXOG_PATH)
     if "date" not in df_exog.columns:
-        # La fecha esta en el indice (con o sin nombre)
         df_exog = df_exog.reset_index()
         df_exog = df_exog.rename(columns={df_exog.columns[0]: "date"})
     df_exog["date"] = pd.to_datetime(df_exog["date"])
 
-    # ── FIX LEAKAGE: shift +1 mes sobre todas las senales ──
-    # Las senales del mes t (GDELT, BCE, INE) no estan disponibles
-    # hasta despues de que acaba el mes t. Al predecir IPC(t) con
-    # origen en t, solo podemos usar senales de t-1.
-    # El shift mueve la senal del mes t a la fila del mes t+1,
-    # de modo que features_c1[t] contiene senales de t-1.
+    # Leakage fix: shift signals +1 month
+    # Signals from month t are not available until after month t ends.
+    # Shifting moves signal[t] to row[t+1], so features_c1[t] contains signals[t-1].
     signal_cols = [c for c in df_signals.columns if c != "date"]
     df_signals_lagged = df_signals.copy()
     df_signals_lagged[signal_cols] = df_signals_lagged[signal_cols].shift(1)
-    # La primera fila queda NaN tras el shift -> rellenar con defaults
     for col_name, val in fill.items():
         if col_name in df_signals_lagged.columns:
             df_signals_lagged[col_name] = df_signals_lagged[col_name].fillna(val)
-    # categoricas que quedan NaN en la primera fila tras el shift
     df_signals_lagged["dominant_topic"] = df_signals_lagged["dominant_topic"].fillna("otro")
     df_signals_lagged["bce_tone"] = df_signals_lagged["bce_tone"].fillna("neutral")
     df_signals_lagged["ine_topic"] = df_signals_lagged["ine_topic"].fillna("otro")
@@ -360,7 +324,6 @@ def build_c1():
         how="left",
     )
 
-    # Rellenar NaN de meses fuera del rango de senales con defaults
     for col_name, val in fill.items():
         if col_name in df_c1.columns:
             df_c1[col_name] = df_c1[col_name].fillna(val)
@@ -368,35 +331,36 @@ def build_c1():
         df_c1["dominant_topic"] = df_c1["dominant_topic"].fillna("otro")
 
     df_c1.to_parquet(FEATURES_C1_PATH, index=False)
-    print(f"\n[build-c1] features_c1.parquet: {len(df_c1)} filas, {len(df_c1.columns)} cols")
-    print(f"           [leakage fix] senales shifteadas +1 mes (senales[t] en fila[t+1])")
-    print(f"           Columnas: {list(df_c1.columns)}")
+    logger.info(f"[build-c1] features_c1.parquet: {len(df_c1)} rows, {len(df_c1.columns)} cols")
+    logger.info(f"           [leakage fix] signals shifted +1 month (signals[t] in row[t+1])")
+    logger.info(f"           Columns: {list(df_c1.columns)}")
 
 
-# ── CLI ───────────────────────────────────────────────────────
+# CLI
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Pipeline MCP: adquisicion, procesamiento LLM y features C1"
+        description="MCP pipeline: acquire, LLM process, and build C1 features"
     )
     parser.add_argument(
         "--acquire", action="store_true",
-        help="Descargar GDELT + RSS y almacenar en MongoDB (requiere Internet)",
+        help="Download GDELT + RSS and store in MongoDB (requires Internet)",
     )
     parser.add_argument(
         "--process", action="store_true",
-        help="Procesar comunicados RSS pendientes con Qwen3:4b (requiere Ollama)",
+        help="Process pending RSS releases with Qwen3:4b (requires Ollama)",
     )
     parser.add_argument(
         "--build-c1", action="store_true",
-        help="Agregar senales mensuales y exportar parquet",
+        help="Aggregate monthly signals and export parquet",
     )
     parser.add_argument(
         "--start", type=str, default=GDELT_START,
-        help=f"Fecha inicio (default: {GDELT_START})",
+        help=f"Start date (default: {GDELT_START})",
     )
     parser.add_argument(
         "--end", type=str, default=GDELT_END,
-        help=f"Fecha fin (default: {GDELT_END})",
+        help=f"End date (default: {GDELT_END})",
     )
 
     args = parser.parse_args()
