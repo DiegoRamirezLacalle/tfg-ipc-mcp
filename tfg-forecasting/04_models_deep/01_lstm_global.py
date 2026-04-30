@@ -1,18 +1,17 @@
-"""
-01_lstm_global.py -- LSTM univariante para CPI Global
+"""LSTM univariate for CPI Global.
 
-Analogo a 01_lstm_univariate.py (Espana) sobre la serie global
-(mediana cross-country HCPI_M, 2002-2024).
+Analogous to 01_lstm_univariate.py (Spain) on the global series
+(cross-country median HCPI_M, 2002-2024).
 
-Configuracion:
-  - input_size = 24 (2 anos de contexto)
+Configuration:
+  - input_size = 24 (2 years of context)
   - encoder_hidden_size = 64
   - decoder_hidden_size = 64
   - max_steps = 500
   - horizons: 1, 3, 6, 12
 
-Entrada:  data/processed/cpi_global_monthly.parquet
-Salida:   08_results/lstm_global_metrics.json
+Input:  data/processed/cpi_global_monthly.parquet
+Output: 08_results/lstm_global_metrics.json
 """
 
 import json
@@ -27,6 +26,9 @@ warnings.filterwarnings("ignore")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _helpers_global import RESULTS_DIR, load_nf_format_global, evaluate_forecast, print_comparison
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 HORIZONS = [1, 3, 6, 12]
 
@@ -60,33 +62,33 @@ def train_and_evaluate(horizon):
 
 
 def main():
-    print("=" * 60)
-    print("LSTM UNIVARIANTE — CPI Global")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("LSTM UNIVARIATE — CPI Global")
+    logger.info("=" * 60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     all_metrics = {}
 
     for h in HORIZONS:
-        print(f"\n--- Horizonte h={h} ---")
+        logger.info(f"\n--- Horizon h={h} ---")
         metrics, dates, y_true, y_pred = train_and_evaluate(h)
         all_metrics[f"h{h}"] = metrics
-        print(f"  MAE={metrics['MAE']}  RMSE={metrics['RMSE']}  MASE={metrics['MASE']}")
+        logger.info(f"  MAE={metrics['MAE']}  RMSE={metrics['RMSE']}  MASE={metrics['MASE']}")
         print_comparison(dates, y_true, y_pred)
 
     out_path = RESULTS_DIR / "lstm_global_metrics.json"
     with open(out_path, "w") as f:
         json.dump(all_metrics, f, indent=2)
-    print(f"\nMetricas guardadas: {out_path}")
+    logger.info(f"\nMetrics saved: {out_path}")
 
-    print(f"\n{'=' * 60}")
-    print("RESUMEN LSTM GLOBAL")
-    print(f"{'h':>4} {'MAE':>8} {'RMSE':>8} {'MASE':>8}")
-    print("-" * 30)
+    logger.info(f"\n{'=' * 60}")
+    logger.info("LSTM GLOBAL SUMMARY")
+    logger.info(f"{'h':>4} {'MAE':>8} {'RMSE':>8} {'MASE':>8}")
+    logger.info("-" * 30)
     for h in HORIZONS:
         m = all_metrics[f"h{h}"]
-        print(f"{h:>4} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} {m['MASE']:>8.4f}")
-    print("=" * 60)
+        logger.info(f"{h:>4} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} {m['MASE']:>8.4f}")
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":
