@@ -1,23 +1,19 @@
-"""
-04_backtesting_rolling.py — Backtesting expanding-window
+"""Rolling expanding-window backtesting for baseline models.
 
-Evaluacion rigurosa de los modelos baseline mediante rolling origin.
+Design:
+  - Expanding window: at each origin t, train on all data up to t
+  - Fixed orders determined by auto_arima in 01/02/03 (no re-selection
+    at each step — avoids look-ahead bias and reduces compute time)
+  - Models: ARIMA(1,1,2), SARIMA(0,1,1)(0,1,1)12, SARIMAX with dfr, seasonal naive
+  - Horizons: h = 1, 3, 6, 12 months
+  - Origins: 2021-01 to 2024-12 (48 points; for h=12 last useful origin is 2023-12)
 
-Diseno:
-  - Ventana expandiente: en cada origen t se entrena con todos los datos hasta t
-  - Ordenes fijos determinados por auto_arima en 01/02/03 (sin re-seleccion en
-    cada paso, evita look-ahead bias y reduce tiempo de computo)
-  - Modelos: ARIMA(1,1,2), SARIMA(0,1,1)(0,1,1)12, SARIMAX con dfr, naive estacional
-  - Horizontes: h = 1, 3, 6, 12 meses
-  - Origenes: 2021-01 hasta 2024-12 (48 puntos; para h=12 el ultimo util es 2023-12)
+Note SARIMAX: DFR is public in real time (ECB decisions published same day),
+so passing real DFR values as future exogenous does not introduce look-ahead bias.
 
-Nota SARIMAX: el DFR es publico en tiempo real (decisiones del BCE se publican
-el mismo dia), por lo que pasar los valores reales del DFR como exogena futura
-no introduce look-ahead bias.
-
-Salida:
-  results/rolling_predictions.parquet  — predicciones tidy (origin, horizon, model)
-  results/rolling_metrics.json         — MAE/RMSE/MASE por modelo x horizonte
+Output:
+  results/rolling_predictions.parquet  — tidy predictions (origin, horizon, model)
+  results/rolling_metrics.json         — MAE/RMSE/MASE per model x horizon
 """
 
 import json
@@ -37,32 +33,31 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.logger import get_logger
 from shared.metrics import mae, rmse, mase
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 
-# ── Ordenes fijados por auto_arima ─────────────────────────────────────────
+# Fixed orders from auto_arima
 ARIMA_ORDER   = (1, 1, 2)
 SARIMA_ORDER  = (0, 1, 1)
 SARIMA_SORDER = (0, 1, 1, 12)
 EXOG_COL      = "dfr"
 
-HORIZONS       = [1, 3, 6, 12]
-ORIGINS_START  = "2021-01-01"
-ORIGINS_END    = DATE_TEST_END     # "2024-12-01"
-MODELS         = ["naive", "arima", "sarima", "sarimax"]
-TEST_END_TS    = pd.Timestamp(DATE_TEST_END)
+HORIZONS      = [1, 3, 6, 12]
+ORIGINS_START = "2021-01-01"
+ORIGINS_END   = DATE_TEST_END
+MODELS        = ["naive", "arima", "sarima", "sarimax"]
+TEST_END_TS   = pd.Timestamp(DATE_TEST_END)
 
-
-# ── Carga de datos ─────────────────────────────────────────────────────────
 
 def load_data():
     df = pd.read_parquet(ROOT / "data" / "processed" / "features_exog.parquet")
     df.index = pd.DatetimeIndex(df.index, freq="MS")
     return df
 
-
-# ── Ajuste statsmodels (ordenes fijos, rapido) ─────────────────────────────
 
 def fit_arima(y_train: pd.Series):
     mod = SM_SARIMAX(y_train, order=ARIMA_ORDER, trend="c")
@@ -82,22 +77,20 @@ def fit_sarimax(y_train: pd.Series, x_train: pd.DataFrame):
 
 
 def forecast_fixed(result, h: int, x_future=None) -> np.ndarray:
-    """Prediccion h pasos desde el final del train."""
+    """Forecast h steps from end of train."""
     fc = result.forecast(steps=h, exog=x_future)
     return fc.values
 
 
 def forecast_naive(y_train: pd.Series, h: int) -> np.ndarray:
-    """Naive estacional: y[t+s] = y[t+s-12] para s=1..h."""
+    """Seasonal naive: y[t+s] = y[t+s-12] for s=1..h."""
     preds = []
     for s in range(1, h + 1):
-        # s=1 -> t-11, ..., s=12 -> t (estacionalidad mensual de 12)
+        # s=1 -> t-11, ..., s=12 -> t (monthly seasonality of 12)
         idx = -12 + ((s - 1) % 12)
         preds.append(float(y_train.iloc[idx]))
     return np.array(preds)
 
-
-# ── Bucle principal ────────────────────────────────────────────────────────
 
 def run_rolling(df: pd.DataFrame) -> pd.DataFrame:
     y = df["indice_general"]
@@ -105,7 +98,7 @@ def run_rolling(df: pd.DataFrame) -> pd.DataFrame:
 
     origins = pd.date_range(start=ORIGINS_START, end=ORIGINS_END, freq="MS")
 
-    # Escala MASE: naive estacional sobre el train set inicial (fija)
+    # MASE scale: seasonal naive over initial train set (fixed)
     y_train_init = y.loc[:DATE_TRAIN_END]
     mase_scale = float(np.mean(np.abs(
         y_train_init.values[12:] - y_train_init.values[:-12]
@@ -113,40 +106,35 @@ def run_rolling(df: pd.DataFrame) -> pd.DataFrame:
 
     records = []
 
-    for origin in tqdm(origins, desc="Origenes"):
-        # Datos disponibles hasta el origen (inclusive)
+    for origin in tqdm(origins, desc="Origins"):
         y_train = y.loc[:origin]
         x_train = X.loc[:origin]
 
-        # Ajuste de los tres modelos parametricos
         try:
             res_arima   = fit_arima(y_train)
             res_sarima  = fit_sarima(y_train)
             res_sarimax = fit_sarimax(y_train, x_train)
         except Exception as e:
-            print(f"\n[!] Error en {origin.date()}: {e}")
+            logger.warning(f"\n[!] Error at {origin.date()}: {e}")
             continue
 
         for h in HORIZONS:
-            # Horizonte completo debe quedar dentro del test end.
+            # Full horizon must fit within test end.
             horizon_end = origin + pd.DateOffset(months=h)
             if horizon_end > TEST_END_TS:
                 continue
 
-            # Fechas del horizonte
             fc_dates = pd.date_range(
                 start=origin + pd.DateOffset(months=1), periods=h, freq="MS"
             )
 
-            # Actuals disponibles para este horizonte
             y_actual = y.reindex(fc_dates)
             if y_actual.isna().any():
-                continue   # actuals aun no disponibles
+                continue   # actuals not yet available
 
-            y_true = y_actual.values
-            x_future = X.reindex(fc_dates)  # DFR real (sin look-ahead bias)
+            y_true   = y_actual.values
+            x_future = X.reindex(fc_dates)  # real DFR (no look-ahead bias)
 
-            # Predicciones de cada modelo
             preds = {
                 "naive":   forecast_naive(y_train, h),
                 "arima":   forecast_fixed(res_arima, h),
@@ -173,10 +161,8 @@ def run_rolling(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(records), mase_scale
 
 
-# ── Metricas agregadas ─────────────────────────────────────────────────────
-
 def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
-    """MAE, RMSE, MASE por modelo x horizonte."""
+    """MAE, RMSE, MASE per model x horizon."""
     results = {}
     for model in MODELS:
         results[model] = {}
@@ -188,82 +174,78 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
             y_true = h_df["y_true"].values
             y_pred = h_df["y_pred"].values
             results[model][f"h{h}"] = {
-                "MAE":    round(float(np.mean(np.abs(y_true - y_pred))), 4),
-                "RMSE":   round(float(np.sqrt(np.mean((y_true - y_pred) ** 2))), 4),
-                "MASE":   round(float(np.mean(np.abs(y_true - y_pred)) / mase_scale), 4),
+                "MAE":     round(float(np.mean(np.abs(y_true - y_pred))), 4),
+                "RMSE":    round(float(np.sqrt(np.mean((y_true - y_pred) ** 2))), 4),
+                "MASE":    round(float(np.mean(np.abs(y_true - y_pred)) / mase_scale), 4),
                 "n_evals": int(len(h_df["origin"].unique())),
             }
     return results
 
 
-# ── Impresion de resultados ────────────────────────────────────────────────
-
 def print_table(metrics: dict) -> None:
     for h in HORIZONS:
         key = f"h{h}"
-        print(f"\n--- Horizonte h={h} ---")
-        print(f"{'Modelo':<10} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'N':>5}")
-        print("-" * 42)
+        logger.info(f"\n--- Horizon h={h} ---")
+        logger.info(f"{'Model':<10} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'N':>5}")
+        logger.info("-" * 42)
         for model in MODELS:
             if key in metrics.get(model, {}):
                 m = metrics[model][key]
-                print(f"{model:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
-                      f"{m['MASE']:8.4f} {m['n_evals']:5d}")
+                logger.info(f"{model:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
+                             f"{m['MASE']:8.4f} {m['n_evals']:5d}")
 
-
-# ── Main ───────────────────────────────────────────────────────────────────
 
 def main():
-    print("=" * 60)
-    print("BACKTESTING ROLLING — Modelos baseline")
-    print(f"Origenes: {ORIGINS_START} - {ORIGINS_END}")
-    print(f"Horizontes: {HORIZONS}")
-    print(f"Modelos: {MODELS}")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("ROLLING BACKTESTING — baseline models")
+    logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END}")
+    logger.info(f"Horizons: {HORIZONS}")
+    logger.info(f"Models: {MODELS}")
+    logger.info("=" * 60)
 
     df = load_data()
-    print(f"Datos cargados: {df.index.min().date()} - {df.index.max().date()} ({len(df)} obs)")
+    logger.info(f"Data loaded: {df.index.min().date()} - {df.index.max().date()} ({len(df)} obs)")
 
     df_preds, mase_scale = run_rolling(df)
 
-    print(f"\nTotal predicciones generadas: {len(df_preds)}")
+    logger.info(f"\nTotal predictions generated: {len(df_preds)}")
 
     metrics = compute_metrics(df_preds, mase_scale)
 
-    print("\n" + "=" * 60)
-    print("RESULTADOS ROLLING BACKTESTING")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("ROLLING BACKTESTING RESULTS")
+    logger.info("=" * 60)
     print_table(metrics)
 
-    # Comparativa MASE vs naive (benchmark relativo)
-    print("\n--- MASE relativo al naive estacional (naive=1.00) ---")
-    print(f"{'Modelo':<10}", end="")
+    # MASE relative to seasonal naive (relative benchmark)
+    logger.info("\n--- MASE relative to seasonal naive (naive=1.00) ---")
+    header = f"{'Model':<10}"
     for h in HORIZONS:
-        print(f"  h={h:>2}", end="")
-    print()
-    print("-" * 42)
+        header += f"  h={h:>2}"
+    logger.info(header)
+    logger.info("-" * 42)
     for model in ["arima", "sarima", "sarimax"]:
-        print(f"{model:<10}", end="")
+        row = f"{model:<10}"
         for h in HORIZONS:
             key = f"h{h}"
             if key in metrics.get(model, {}) and key in metrics.get("naive", {}):
                 ratio = metrics[model][key]["MASE"] / metrics["naive"][key]["MASE"]
-                print(f"  {ratio:>5.3f}", end="")
+                row += f"  {ratio:>5.3f}"
             else:
-                print(f"  {'N/A':>5}", end="")
-        print()
+                row += f"  {'N/A':>5}"
+        logger.info(row)
 
-    # Guardar
+    # Save
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     preds_path = RESULTS_DIR / "rolling_predictions.parquet"
     df_preds.to_parquet(preds_path, index=False)
-    print(f"\nPredicciones guardadas: {preds_path}")
+    logger.info(f"\nPredictions saved: {preds_path}")
 
     metrics_path = RESULTS_DIR / "rolling_metrics.json"
     with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=2)
-    print(f"Metricas guardadas:     {metrics_path}")
+    logger.info(f"Metrics saved:     {metrics_path}")
 
 
 if __name__ == "__main__":

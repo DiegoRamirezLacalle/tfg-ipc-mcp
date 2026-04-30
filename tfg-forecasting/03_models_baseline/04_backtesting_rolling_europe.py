@@ -1,20 +1,19 @@
-"""
-04_backtesting_rolling_europe.py — Backtesting expanding-window HICP Eurozona
+"""Rolling expanding-window backtesting — HICP Eurozone.
 
-Diseno identico al pipeline de Espana y Global:
-  - Ventana expandiente: entrena con todos los datos hasta el origen t
-  - Ordenes FIJOS del auto_arima (script 01)
-  - Horizontes: h = 1, 3, 6, 12 meses
-  - Origenes: 2021-01 hasta 2024-12 (48 puntos)
+Identical design to Spain and Global pipelines:
+  - Expanding window: train on all data up to origin t
+  - Fixed orders from auto_arima (script 01)
+  - Horizons: h = 1, 3, 6, 12 months
+  - Origins: 2021-01 to 2024-12 (48 points)
 
-Modelos:
-  naive   — lag-12 estacional
-  sarima  — SARIMA con orden del auto_arima
-  sarimax — SARIMA + DFR (valores reales conocidos, sin leakage)
+Models:
+  naive   — seasonal lag-12
+  sarima  — SARIMA with auto_arima order
+  sarimax — SARIMA + DFR (real values known, no leakage)
 
-MASE scale: fijada sobre el train inicial (2002-01 a 2020-12).
+MASE scale: fixed over initial train set (2002-01 to 2020-12).
 
-Salida:
+Output:
   08_results/rolling_predictions_europe.parquet
   08_results/rolling_metrics_europe.json
 """
@@ -36,6 +35,9 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 RESULTS_DIR   = ROOT / "08_results"
 HORIZONS      = [1, 3, 6, 12]
@@ -51,11 +53,11 @@ def load_orders():
         saved = json.loads(path.read_text())
         order          = tuple(saved["order"])
         seasonal_order = tuple(saved["seasonal_order"])
-        print(f"  Orden auto_arima: SARIMA{order}x{seasonal_order}")
+        logger.info(f"  auto_arima order: SARIMA{order}x{seasonal_order}")
     else:
         order          = (2, 1, 1)
         seasonal_order = (1, 1, 1, 12)
-        print(f"  Orden fallback:   SARIMA{order}x{seasonal_order}")
+        logger.info(f"  Fallback order:   SARIMA{order}x{seasonal_order}")
     return order, seasonal_order
 
 
@@ -87,10 +89,10 @@ def run_rolling(y: pd.Series, dfr: pd.Series, order: tuple, seasonal_order: tupl
     mase_scale = float(np.mean(np.abs(
         y_train_init.values[12:] - y_train_init.values[:-12]
     )))
-    print(f"  MASE scale: {mase_scale:.4f}")
+    logger.info(f"  MASE scale: {mase_scale:.4f}")
 
     records = []
-    for origin in tqdm(origins, desc="Origenes"):
+    for origin in tqdm(origins, desc="Origins"):
         y_train   = y.loc[:origin]
         dfr_train = dfr.loc[:origin].values.reshape(-1, 1)
 
@@ -104,7 +106,7 @@ def run_rolling(y: pd.Series, dfr: pd.Series, order: tuple, seasonal_order: tupl
                 order=order, seasonal_order=seasonal_order, trend="n"
             ).fit(disp=False)
         except Exception as e:
-            print(f"\n[!] Error en {origin.date()}: {e}")
+            logger.warning(f"\n[!] Error at {origin.date()}: {e}")
             continue
 
         for h in HORIZONS:
@@ -170,66 +172,65 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 
 def print_results(metrics: dict) -> None:
-    print(f"\n  {'Modelo':<10}", end="")
+    header = f"\n  {'Model':<10}"
     for h in HORIZONS:
-        print(f"   h={h:>2} MAE", end="")
-    print()
-    print(f"  {'-'*55}")
+        header += f"   h={h:>2} MAE"
+    logger.info(header)
+    logger.info(f"  {'-'*55}")
     for model in MODELS:
-        print(f"  {model:<10}", end="")
+        row = f"  {model:<10}"
         for h in HORIZONS:
             key = f"h{h}"
             if key in metrics.get(model, {}):
                 v = metrics[model][key]["MAE"]
                 ref = metrics["naive"][key]["MAE"]
                 mark = "*" if v < ref else " "
-                print(f"  {v:>7.4f}{mark}", end="")
+                row += f"  {v:>7.4f}{mark}"
             else:
-                print(f"  {'N/A':>8}", end="")
-        print()
-    print("  (* = bate al naive lag-12)")
+                row += f"  {'N/A':>8}"
+        logger.info(row)
+    logger.info("  (* = beats lag-12 naive)")
 
-    # DFR benefit
-    print(f"\n  BENEFICIO DFR (SARIMAX vs SARIMA):")
-    print(f"  {'h':>4}  {'MAE SARIMA':>12}  {'MAE SARIMAX':>13}  {'Delta%':>8}")
-    print(f"  {'-'*42}")
+    logger.info(f"\n  DFR BENEFIT (SARIMAX vs SARIMA):")
+    logger.info(f"  {'h':>4}  {'MAE SARIMA':>12}  {'MAE SARIMAX':>13}  {'Delta%':>8}")
+    logger.info(f"  {'-'*42}")
     for h in HORIZONS:
         key = f"h{h}"
         if key in metrics.get("sarima", {}) and key in metrics.get("sarimax", {}):
             ms = metrics["sarima"][key]["MAE"]
             mx = metrics["sarimax"][key]["MAE"]
             pct = (mx - ms) / ms * 100
-            mark = " <-- mejora" if pct < 0 else ""
-            print(f"  {h:>4}  {ms:>12.4f}  {mx:>13.4f}  {pct:>+7.1f}%{mark}")
+            mark = " <-- improvement" if pct < 0 else ""
+            logger.info(f"  {h:>4}  {ms:>12.4f}  {mx:>13.4f}  {pct:>+7.1f}%{mark}")
 
 
 def main():
-    print("=" * 60)
-    print("BACKTESTING ROLLING — HICP Eurozona")
-    print(f"  Origenes: {ORIGINS_START} - {ORIGINS_END}")
-    print(f"  Horizontes: {HORIZONS}")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("ROLLING BACKTESTING — HICP Eurozone")
+    logger.info(f"  Origins:  {ORIGINS_START} - {ORIGINS_END}")
+    logger.info(f"  Horizons: {HORIZONS}")
+    logger.info("=" * 60)
 
     order, seasonal_order = load_orders()
     y, dfr = load_data()
-    print(f"\nHICP: {y.index.min().date()} - {y.index.max().date()} ({len(y)} obs)")
-    print(f"DFR:  {dfr.index.min().date()} - {dfr.index.max().date()}\n")
+    logger.info(f"\nHICP: {y.index.min().date()} - {y.index.max().date()} ({len(y)} obs)")
+    logger.info(f"DFR:  {dfr.index.min().date()} - {dfr.index.max().date()}\n")
 
     df_preds, mase_scale = run_rolling(y, dfr, order, seasonal_order)
-    print(f"\nRegistros: {len(df_preds)}")
+    logger.info(f"\nRecords: {len(df_preds)}")
 
     metrics = compute_metrics(df_preds, mase_scale)
 
-    print("\n" + "=" * 60)
-    print("RESULTADOS")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("RESULTS")
+    logger.info("=" * 60)
     print_results(metrics)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     df_preds.to_parquet(RESULTS_DIR / "rolling_predictions_europe.parquet", index=False)
     with open(RESULTS_DIR / "rolling_metrics_europe.json", "w") as f:
         json.dump(metrics, f, indent=2)
-    print(f"\nGuardado en {RESULTS_DIR}")
+    logger.info(f"\nSaved to {RESULTS_DIR}")
 
 
 if __name__ == "__main__":

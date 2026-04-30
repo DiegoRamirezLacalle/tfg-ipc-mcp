@@ -1,20 +1,19 @@
+"""ARIMA baseline (non-seasonal) via auto_arima (pmdarima).
+
+Search ranges informed by ACF/PACF analysis (notebook 04):
+  - d=1 confirmed by ADF/KPSS/PP
+  - p candidates: 0-3 (PACF significant at lag 1)
+  - q candidates: 0-3 (ACF significant at lag 1)
+
+Final selection by AIC. Seasonal component handled in 02_sarima.
+
+Input:  data/processed/ipc_spain_index.parquet
+Output: 03_models_baseline/results/arima_summary.txt
+        03_models_baseline/results/arima_metrics.json
 """
-01_arima_auto.py -- ARIMA no estacional via auto_arima (pmdarima)
 
-Rangos de busqueda informados por el analisis ACF/PACF (notebook 04):
-  - d=1 confirmado por ADF/KPSS/PP
-  - p candidato: 0-3 (PACF significativo en lag 1)
-  - q candidato: 0-3 (ACF significativo en lag 1)
-
-Seleccion final por AIC. Sin componente estacional (eso va en 02_sarima).
-
-Entrada:  data/processed/ipc_spain_index.parquet
-Salida:   03_models_baseline/results/arima_summary.txt
-          03_models_baseline/results/arima_metrics.json
-"""
-
-import sys
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -22,12 +21,15 @@ import pandas as pd
 import pmdarima as pm
 from statsmodels.stats.diagnostic import acorr_ljungbox
 
-ROOT = Path(__file__).resolve().parents[1]       # tfg-forecasting/
-MONOREPO = ROOT.parent                           # tfg-ipc-mcp/
+ROOT     = Path(__file__).resolve().parents[1]
+MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_VAL_END, FORECAST_HORIZON
+from shared.logger import get_logger
 from shared.metrics import mae, rmse, mase
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 
@@ -38,20 +40,20 @@ def load_data():
     y.index.freq = "MS"
 
     train = y.loc[:DATE_TRAIN_END]
-    val = y.loc[DATE_TRAIN_END:DATE_VAL_END].iloc[1:]
-    test = y.loc[DATE_VAL_END:].iloc[1:]
+    val   = y.loc[DATE_TRAIN_END:DATE_VAL_END].iloc[1:]
+    test  = y.loc[DATE_VAL_END:].iloc[1:]
 
     return y, train, val, test
 
 
 def fit_arima(train):
-    """auto_arima con rangos informados por ACF/PACF."""
+    """Fit auto_arima with ranges informed by ACF/PACF."""
     model = pm.auto_arima(
         train,
         start_p=0, max_p=3,
         start_q=0, max_q=3,
-        d=1,                    # fijado por tests de estacionariedad
-        seasonal=False,         # sin componente estacional (va en 02_sarima)
+        d=1,                    # fixed by stationarity tests
+        seasonal=False,         # seasonal component handled in 02_sarima
         information_criterion="aic",
         stepwise=True,
         suppress_warnings=True,
@@ -61,109 +63,105 @@ def fit_arima(train):
 
 
 def diagnose_residuals(model, model_name):
-    """Diagnostico de residuos: Ljung-Box y estadisticas basicas."""
+    """Residual diagnostics: Ljung-Box and basic statistics."""
     resid = model.resid()
     lb = acorr_ljungbox(resid, lags=[6, 12, 24], return_df=True)
 
-    print(f"\n--- Diagnostico de residuos ({model_name}) ---")
-    print(f"  Media:     {resid.mean():.6f}")
-    print(f"  Std:       {resid.std():.4f}")
-    print(f"  Ljung-Box:")
+    logger.info(f"\n--- Residual diagnostics ({model_name}) ---")
+    logger.info(f"  Mean:  {resid.mean():.6f}")
+    logger.info(f"  Std:   {resid.std():.4f}")
+    logger.info(f"  Ljung-Box:")
     for lag, row in lb.iterrows():
-        status = "OK" if row["lb_pvalue"] > 0.05 else "AUTOCORRELACION"
-        print(f"    Lag {lag:2d}: stat={row['lb_stat']:.2f}  p={row['lb_pvalue']:.4f}  [{status}]")
+        status = "OK" if row["lb_pvalue"] > 0.05 else "AUTOCORRELATION"
+        logger.info(f"    Lag {lag:2d}: stat={row['lb_stat']:.2f}  p={row['lb_pvalue']:.4f}  [{status}]")
 
     return lb
 
 
 def forecast_and_evaluate(model, train, val):
-    """Prediccion sobre validacion y calculo de metricas."""
+    """Forecast on validation set and compute metrics."""
     n_val = len(val)
     fc, ci = model.predict(n_periods=n_val, return_conf_int=True, alpha=0.05)
 
     fc_series = pd.Series(fc, index=val.index, name="forecast")
 
-    y_true = val.values
-    y_pred = fc_series.values
-    y_train = train.values
-
     metrics = {
-        "MAE": round(mae(y_true, y_pred), 4),
-        "RMSE": round(rmse(y_true, y_pred), 4),
-        "MASE": round(mase(y_true, y_pred, y_train, m=12), 4),
+        "MAE":  round(mae(val.values, fc_series.values), 4),
+        "RMSE": round(rmse(val.values, fc_series.values), 4),
+        "MASE": round(mase(val.values, fc_series.values, train.values, m=12), 4),
     }
 
     return fc_series, ci, metrics
 
 
 def save_results(model, metrics, model_name):
-    """Guarda summary e metricas."""
+    """Save model summary and metrics."""
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Summary del modelo
+    # Model summary
     summary_path = RESULTS_DIR / f"{model_name}_summary.txt"
     with open(summary_path, "w", encoding="utf-8") as f:
         f.write(str(model.summary()))
-    print(f"\nSummary guardado en: {summary_path}")
+    logger.info(f"\nSummary saved: {summary_path}")
 
-    # Metricas JSON
+    # Metrics JSON
     metrics_out = {
-        "model": model_name,
-        "order": list(model.order),
-        "aic": round(model.aic(), 4),
-        "bic": round(model.bic(), 4),
-        "n_train": int(model.nobs_),
+        "model":      model_name,
+        "order":      list(model.order),
+        "aic":        round(model.aic(), 4),
+        "bic":        round(model.bic(), 4),
+        "n_train":    int(model.nobs_),
         "metrics_val": metrics,
     }
     metrics_path = RESULTS_DIR / f"{model_name}_metrics.json"
     with open(metrics_path, "w", encoding="utf-8") as f:
         json.dump(metrics_out, f, indent=2)
-    print(f"Metricas guardadas en: {metrics_path}")
+    logger.info(f"Metrics saved: {metrics_path}")
 
     return metrics_out
 
 
 def main():
-    print("=" * 60)
-    print("ARIMA AUTO — Modelo baseline sin estacionalidad")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("ARIMA AUTO — non-seasonal baseline")
+    logger.info("=" * 60)
 
     y, train, val, test = load_data()
-    print(f"Train: {train.index.min().date()} -> {train.index.max().date()} ({len(train)} obs)")
-    print(f"Val:   {val.index.min().date()} -> {val.index.max().date()} ({len(val)} obs)")
-    print(f"Test:  {test.index.min().date()} -> {test.index.max().date()} ({len(test)} obs)")
+    logger.info(f"Train: {train.index.min().date()} -> {train.index.max().date()} ({len(train)} obs)")
+    logger.info(f"Val:   {val.index.min().date()} -> {val.index.max().date()} ({len(val)} obs)")
+    logger.info(f"Test:  {test.index.min().date()} -> {test.index.max().date()} ({len(test)} obs)")
 
-    # Ajuste
-    print("\n--- Busqueda auto_arima ---")
+    # Fit
+    logger.info("\n--- auto_arima search ---")
     model = fit_arima(train)
-    print(f"\nModelo seleccionado: ARIMA{model.order}")
-    print(f"AIC: {model.aic():.2f}  |  BIC: {model.bic():.2f}")
-    print(model.summary())
+    logger.info(f"\nSelected model: ARIMA{model.order}")
+    logger.info(f"AIC: {model.aic():.2f}  |  BIC: {model.bic():.2f}")
+    logger.info(str(model.summary()))
 
-    # Diagnostico
+    # Diagnostics
     diagnose_residuals(model, "arima")
 
-    # Prediccion sobre validacion
-    print(f"\n--- Prediccion sobre validacion ({len(val)} meses) ---")
+    # Forecast on validation
+    logger.info(f"\n--- Forecast on validation ({len(val)} months) ---")
     fc, ci, metrics = forecast_and_evaluate(model, train, val)
 
-    print(f"\nMetricas sobre validacion:")
+    logger.info("\nValidation metrics:")
     for k, v in metrics.items():
-        print(f"  {k}: {v}")
+        logger.info(f"  {k}: {v}")
 
-    # Comparacion punto a punto
-    print(f"\n{'Fecha':>12} {'Real':>10} {'Pred':>10} {'Error':>10}")
-    print("-" * 45)
+    # Point-by-point comparison
+    logger.info(f"\n{'Date':>12} {'Actual':>10} {'Pred':>10} {'Error':>10}")
+    logger.info("-" * 45)
     for date, real, pred in zip(val.index, val.values, fc.values):
-        print(f"{str(date.date()):>12} {real:10.3f} {pred:10.3f} {real - pred:10.3f}")
+        logger.info(f"{str(date.date()):>12} {real:10.3f} {pred:10.3f} {real - pred:10.3f}")
 
-    # Guardar
+    # Save
     result = save_results(model, metrics, "arima")
 
-    print(f"\n{'=' * 60}")
-    print(f"RESUMEN: ARIMA{model.order}")
-    print(f"  AIC={result['aic']}  MAE={metrics['MAE']}  RMSE={metrics['RMSE']}  MASE={metrics['MASE']}")
-    print(f"{'=' * 60}")
+    logger.info(f"\n{'=' * 60}")
+    logger.info(f"SUMMARY: ARIMA{model.order}")
+    logger.info(f"  AIC={result['aic']}  MAE={metrics['MAE']}  RMSE={metrics['RMSE']}  MASE={metrics['MASE']}")
+    logger.info(f"{'=' * 60}")
 
 
 if __name__ == "__main__":
