@@ -1,25 +1,22 @@
-"""
-01_lstm_univariate.py -- LSTM univariante como referencia historica
+"""LSTM univariate as historical deep reference.
 
-Incluido porque es el baseline deep mas citado en la literatura de
-prediccion de series temporales. Usa NeuralForecast para consistencia
-con N-BEATS y N-HiTS.
+Included because LSTM is the most cited deep baseline in the time-series
+forecasting literature. Uses NeuralForecast for consistency with N-BEATS and N-HiTS.
 
-Configuracion:
-  - input_size = 24 (2 anos de contexto)
+Configuration:
+  - input_size = 24 (2 years of context)
   - hidden_size = 64
   - max_steps = 500
-  - horizons evaluados: 1, 3, 6, 12
+  - horizons: 1, 3, 6, 12
 
-Entrada:  data/processed/ipc_spain_index.parquet
-Salida:   04_models_deep/results/lstm_metrics.json
+Input:  data/processed/ipc_spain_index.parquet
+Output: 04_models_deep/results/lstm_metrics.json
 """
 
 import json
 import warnings
 from pathlib import Path
 
-import pandas as pd
 from neuralforecast import NeuralForecast
 from neuralforecast.models import LSTM
 
@@ -28,12 +25,15 @@ warnings.filterwarnings("ignore")
 from _helpers import (
     RESULTS_DIR, load_nf_format, evaluate_forecast, print_comparison
 )
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 HORIZONS = [1, 3, 6, 12]
 
 
 def train_and_evaluate(horizon):
-    """Entrena LSTM para un horizonte especifico y evalua sobre validacion."""
+    """Train LSTM for a given horizon and evaluate on validation set."""
     df_train, df_val, _, y_train_vals = load_nf_format()
 
     model = LSTM(
@@ -54,7 +54,6 @@ def train_and_evaluate(horizon):
     fc = nf.predict()
     fc = fc.reset_index()
 
-    # Alinear con actuals
     y_pred = fc["LSTM"].values[:horizon]
     y_true = df_val["y"].values[:horizon]
     dates  = df_val["ds"].values[:horizon]
@@ -64,35 +63,34 @@ def train_and_evaluate(horizon):
 
 
 def main():
-    print("=" * 60)
-    print("LSTM UNIVARIANTE — Referencia historica deep")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("LSTM UNIVARIATE — Historical deep reference")
+    logger.info("=" * 60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     all_metrics = {}
 
     for h in HORIZONS:
-        print(f"\n--- Horizonte h={h} ---")
+        logger.info(f"\n--- Horizon h={h} ---")
         metrics, dates, y_true, y_pred = train_and_evaluate(h)
         all_metrics[f"h{h}"] = metrics
 
-        print(f"  MAE={metrics['MAE']}  RMSE={metrics['RMSE']}  MASE={metrics['MASE']}")
+        logger.info(f"  MAE={metrics['MAE']}  RMSE={metrics['RMSE']}  MASE={metrics['MASE']}")
         print_comparison(dates, y_true, y_pred)
 
-    # Guardar
     out_path = RESULTS_DIR / "lstm_metrics.json"
     with open(out_path, "w") as f:
         json.dump(all_metrics, f, indent=2)
-    print(f"\nMetricas guardadas: {out_path}")
+    logger.info(f"\nMetrics saved: {out_path}")
 
-    print(f"\n{'=' * 60}")
-    print("RESUMEN LSTM")
-    print(f"{'h':>4} {'MAE':>8} {'RMSE':>8} {'MASE':>8}")
-    print("-" * 30)
+    logger.info(f"\n{'=' * 60}")
+    logger.info("LSTM SUMMARY")
+    logger.info(f"{'h':>4} {'MAE':>8} {'RMSE':>8} {'MASE':>8}")
+    logger.info("-" * 30)
     for h in HORIZONS:
         m = all_metrics[f"h{h}"]
-        print(f"{h:>4} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} {m['MASE']:>8.4f}")
-    print("=" * 60)
+        logger.info(f"{h:>4} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} {m['MASE']:>8.4f}")
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":

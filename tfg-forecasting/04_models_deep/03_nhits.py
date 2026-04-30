@@ -1,28 +1,25 @@
-"""
-03_nhits.py -- N-HiTS para horizontes largos
+"""N-HiTS for long horizons.
 
-N-HiTS (Challu et al., 2023): extension de N-BEATS con muestreo
-jerarquico multi-resolucion. Diseñado especificamente para capturar
-patrones a distintas escalas temporales, lo que lo hace especialmente
-adecuado para h=12.
+N-HiTS (Challu et al., 2023): extension of N-BEATS with hierarchical
+multi-resolution sampling. Designed to capture patterns at different time
+scales, making it especially suitable for h=12.
 
-Si N-HiTS gana al LSTM en h=12, refuerza el argumento de que los
-foundation models (diseñados para largo plazo) son el escalon natural.
+If N-HiTS outperforms LSTM at h=12, it reinforces the argument that
+foundation models (designed for long horizons) are the natural next step.
 
-Configuracion:
+Configuration:
   - input_size = 24
-  - n_pool_kernel_size = [2, 2, 1]  (pooling jerarquico)
+  - n_pool_kernel_size = [2, 2, 1]  (hierarchical pooling)
   - max_steps = 500
 
-Entrada:  data/processed/ipc_spain_index.parquet
-Salida:   04_models_deep/results/nhits_metrics.json
+Input:  data/processed/ipc_spain_index.parquet
+Output: 04_models_deep/results/nhits_metrics.json
 """
 
 import json
 import warnings
 from pathlib import Path
 
-import pandas as pd
 from neuralforecast import NeuralForecast
 from neuralforecast.models import NHITS
 
@@ -31,6 +28,9 @@ warnings.filterwarnings("ignore")
 from _helpers import (
     RESULTS_DIR, load_nf_format, evaluate_forecast, print_comparison
 )
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 HORIZONS = [1, 3, 6, 12]
 
@@ -64,34 +64,34 @@ def train_and_evaluate(horizon):
 
 
 def main():
-    print("=" * 60)
-    print("N-HiTS -- Modelo deep para horizontes largos")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("N-HiTS — Deep model for long horizons")
+    logger.info("=" * 60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     all_metrics = {}
 
     for h in HORIZONS:
-        print(f"\n--- Horizonte h={h} ---")
+        logger.info(f"\n--- Horizon h={h} ---")
         metrics, dates, y_true, y_pred = train_and_evaluate(h)
         all_metrics[f"h{h}"] = metrics
 
-        print(f"  MAE={metrics['MAE']}  RMSE={metrics['RMSE']}  MASE={metrics['MASE']}")
+        logger.info(f"  MAE={metrics['MAE']}  RMSE={metrics['RMSE']}  MASE={metrics['MASE']}")
         print_comparison(dates, y_true, y_pred)
 
     out_path = RESULTS_DIR / "nhits_metrics.json"
     with open(out_path, "w") as f:
         json.dump(all_metrics, f, indent=2)
-    print(f"\nMetricas guardadas: {out_path}")
+    logger.info(f"\nMetrics saved: {out_path}")
 
-    print(f"\n{'=' * 60}")
-    print("RESUMEN N-HiTS")
-    print(f"{'h':>4} {'MAE':>8} {'RMSE':>8} {'MASE':>8}")
-    print("-" * 30)
+    logger.info(f"\n{'=' * 60}")
+    logger.info("N-HiTS SUMMARY")
+    logger.info(f"{'h':>4} {'MAE':>8} {'RMSE':>8} {'MASE':>8}")
+    logger.info("-" * 30)
     for h in HORIZONS:
         m = all_metrics[f"h{h}"]
-        print(f"{h:>4} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} {m['MASE']:>8.4f}")
-    print("=" * 60)
+        logger.info(f"{h:>4} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} {m['MASE']:>8.4f}")
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":
