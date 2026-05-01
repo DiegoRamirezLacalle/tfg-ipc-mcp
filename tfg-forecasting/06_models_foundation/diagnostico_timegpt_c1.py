@@ -1,15 +1,15 @@
 """
-diagnostico_timegpt_c1.py — Diagnostico completo antes de aplicar fix a TimeGPT C1
+diagnostico_timegpt_c1.py — Full diagnostic before applying fix to TimeGPT C1
 
-4 diagnosticos con presupuesto total de 20 llamadas API:
-  D1: Regimen de ceros (3 variantes x 1 llamada = 3 llamadas)
-  D2: Subconjuntos de senales (5 subconjuntos x 1 llamada = 5 llamadas)
-  D3: Estrategia forward-fill (3 estrategias x 1 llamada = 3 llamadas)
-  D4: C0 baseline (1 llamada)
-  Total: 12 llamadas (margen de 8 para errores/retries)
+4 diagnostics with a total budget of 20 API calls:
+  D1: Zero regime (3 variants x 1 call = 3 calls)
+  D2: Signal subsets (5 subsets x 1 call = 5 calls)
+  D3: Forward-fill strategy (3 strategies x 1 call = 3 calls)
+  D4: C0 baseline (1 call)
+  Total: 12 calls (margin of 8 for errors/retries)
 
-Origenes de prueba: 2022-07 a 2022-11 (5 origenes, pleno shock BCE)
-Metrica: MAE h=1 (la mas sensible a cambios en covariables)
+Test origins: 2022-07 to 2022-11 (5 origins, peak BCE shock period)
+Metric: MAE h=1 (most sensitive to covariate changes)
 """
 
 from __future__ import annotations
@@ -30,6 +30,9 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 SERIES_ID = "ipc_spain"
 MAX_H = 12
@@ -48,7 +51,7 @@ api_calls = 0
 MAX_API_CALLS = 35
 
 
-# ── Datos ──────────────────────────────────────────────────────
+# ── Data ───────────────────────────────────────────────────────
 
 def load_ipc() -> pd.Series:
     df = pd.read_parquet(ROOT / "data" / "processed" / "ipc_spain_index.parquet")
@@ -73,12 +76,15 @@ def get_client():
     load_dotenv(MONOREPO / ".env")
     api_key = os.getenv("NIXTLA_API_KEY")
     if not api_key or api_key == "tu_api_key_aqui":
-        raise ValueError("NIXTLA_API_KEY no configurada.")
+        raise ValueError(
+            "NIXTLA_API_KEY not configured. "
+            "Edit the .env file at the monorepo root."
+        )
     from nixtla import NixtlaClient
     return NixtlaClient(api_key=api_key)
 
 
-# ── Helpers comunes ────────────────────────────────────────────
+# ── Common helpers ─────────────────────────────────────────────
 
 def build_hist_df(
     y: pd.Series,
@@ -87,7 +93,7 @@ def build_hist_df(
     exog_cols: list[str] | None = None,
     start_date: str | None = None,
 ) -> pd.DataFrame:
-    """Construye df historico para Nixtla. Si exog=None, solo serie."""
+    """Build historical df for Nixtla. If exog=None, series only."""
     context_y = y.loc[:origin]
     if start_date:
         context_y = context_y.loc[start_date:]
@@ -100,7 +106,6 @@ def build_hist_df(
 
     if exog is not None and exog_cols:
         context_exog = exog.loc[context_y.index[0]:origin, exog_cols]
-        # Reindex to match exactly
         context_exog = context_exog.reindex(context_y.index)
         for col in exog_cols:
             if col in context_exog.columns:
@@ -117,7 +122,7 @@ def build_future_df(
     exog_cols: list[str] | None = None,
     fill_strategy: str = "forward",
 ) -> pd.DataFrame | None:
-    """Construye future_df para Nixtla. Estrategias: forward, zero, mean3."""
+    """Build future_df for Nixtla. Strategies: forward, zero, mean3."""
     if exog is None or not exog_cols:
         return None
 
@@ -159,13 +164,10 @@ def forecast_one_origin(
     start_date: str | None = None,
     fill_strategy: str = "forward",
 ) -> float | None:
-    """
-    Hace UNA llamada API para un origen.
-    Devuelve la prediccion h=1 (un solo paso adelante).
-    """
+    """Make ONE API call for an origin. Returns the h=1 prediction."""
     global api_calls
     if api_calls >= MAX_API_CALLS:
-        print(f"  [!] Limite de {MAX_API_CALLS} llamadas alcanzado, saltando.")
+        logger.warning(f"  [!] API call limit of {MAX_API_CALLS} reached, skipping.")
         return None
 
     hist = build_hist_df(y, exog, origin, exog_cols, start_date)
@@ -189,7 +191,7 @@ def forecast_one_origin(
         return float(fc["TimeGPT"].iloc[0])  # h=1 prediction
     except Exception as e:
         api_calls += 1
-        print(f"  [!] Error en {origin.date()}: {e}")
+        logger.warning(f"  [!] Error at {origin.date()}: {e}")
         return None
 
 
@@ -197,19 +199,19 @@ def compute_mae_h1(
     preds: list[float | None],
     actuals: list[float],
 ) -> float | None:
-    """MAE h=1 sobre pares validos."""
+    """MAE h=1 over valid pairs."""
     pairs = [(p, a) for p, a in zip(preds, actuals) if p is not None]
     if not pairs:
         return None
     return float(np.mean([abs(p - a) for p, a in pairs]))
 
 
-# ── Diagnostico 1: Regimen de ceros ────────────────────────────
+# ── Diagnostic 1: Zero regime ──────────────────────────────────
 
-def diag1_regimen_ceros(client, y, exog):
-    print("\n" + "=" * 60)
-    print("DIAGNOSTICO 1 — Regimen de ceros pre-2015")
-    print("=" * 60)
+def diag1_zero_regime(client, y, exog):
+    logger.info("\n" + "=" * 60)
+    logger.info("DIAGNOSTIC 1 — Zero regime pre-2015")
+    logger.info("=" * 60)
 
     actuals = []
     for origin in TEST_ORIGINS:
@@ -218,16 +220,16 @@ def diag1_regimen_ceros(client, y, exog):
 
     results = {}
 
-    # Variante A: dataset completo (282 filas, con ceros pre-2015)
-    print("\n[A] Dataset completo (282 filas, ceros pre-2015)...")
+    # Variant A: full dataset (282 rows, with zeros pre-2015)
+    logger.info("\n[A] Full dataset (282 rows, zeros pre-2015)...")
     preds_a = []
     for origin in TEST_ORIGINS:
         p = forecast_one_origin(client, y, origin, exog, ALL_EXOG)
         preds_a.append(p)
     results["A_completo"] = compute_mae_h1(preds_a, actuals)
 
-    # Variante B: recortado desde 2015 (~120 filas, solo senales reales)
-    print("[B] Dataset desde 2015 (~120 filas, solo senales reales)...")
+    # Variant B: clipped from 2015 (~120 rows, real signals only)
+    logger.info("[B] Dataset from 2015 (~120 rows, real signals only)...")
     preds_b = []
     for origin in TEST_ORIGINS:
         p = forecast_one_origin(client, y, origin, exog, ALL_EXOG,
@@ -235,18 +237,13 @@ def diag1_regimen_ceros(client, y, exog):
         preds_b.append(p)
     results["B_desde2015"] = compute_mae_h1(preds_b, actuals)
 
-    # Variante C: NaN pre-2015 (TimeGPT interpola)
-    # Crear copia de exog con NaN en lugar de 0 para pre-2015
-    print("[C] Dataset completo, NaN pre-2015 (TimeGPT interpola)...")
+    # Variant C: NaN pre-2015 (TimeGPT interpolates)
+    logger.info("[C] Full dataset, NaN pre-2015 (TimeGPT interpolates)...")
     exog_nan = exog.copy()
     mask_pre2015 = exog_nan.index < "2015-01-01"
     for col in ALL_EXOG:
         if col in exog_nan.columns and col != "signal_available":
             exog_nan.loc[mask_pre2015, col] = np.nan
-    # signal_available ya deberia ser 0 pre-2015, pero forzamos NaN tambien
-    # para que TimeGPT no vea ningun patron artificial
-    # Nota: Nixtla puede no aceptar NaN en exogenas, en ese caso usamos -999
-    # como missing indicator
     preds_c = []
     for origin in TEST_ORIGINS:
         p = forecast_one_origin(client, y, origin, exog_nan, ALL_EXOG)
@@ -256,12 +253,12 @@ def diag1_regimen_ceros(client, y, exog):
     return results, actuals
 
 
-# ── Diagnostico 2: Subconjuntos de senales ─────────────────────
+# ── Diagnostic 2: Signal subsets ───────────────────────────────
 
-def diag2_subconjuntos(client, y, exog):
-    print("\n" + "=" * 60)
-    print("DIAGNOSTICO 2 — Subconjuntos de senales")
-    print("=" * 60)
+def diag2_subsets(client, y, exog):
+    logger.info("\n" + "=" * 60)
+    logger.info("DIAGNOSTIC 2 — Signal subsets")
+    logger.info("=" * 60)
 
     actuals = []
     for origin in TEST_ORIGINS:
@@ -278,7 +275,7 @@ def diag2_subconjuntos(client, y, exog):
 
     results = {}
     for name, cols in subsets.items():
-        print(f"\n[{name}] Covariables: {cols}")
+        logger.info(f"\n[{name}] Covariates: {cols}")
         preds = []
         for origin in TEST_ORIGINS:
             p = forecast_one_origin(client, y, origin, exog, cols)
@@ -288,12 +285,12 @@ def diag2_subconjuntos(client, y, exog):
     return results, actuals
 
 
-# ── Diagnostico 3: Estrategia forward-fill ─────────────────────
+# ── Diagnostic 3: Fill strategy ────────────────────────────────
 
 def diag3_fill_strategy(client, y, exog):
-    print("\n" + "=" * 60)
-    print("DIAGNOSTICO 3 — Estrategia de relleno del horizonte futuro")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("DIAGNOSTIC 3 — Future horizon fill strategy")
+    logger.info("=" * 60)
 
     actuals = []
     for origin in TEST_ORIGINS:
@@ -304,7 +301,7 @@ def diag3_fill_strategy(client, y, exog):
     results = {}
 
     for strat in strategies:
-        print(f"\n[{strat}] Rellenando horizonte futuro con estrategia '{strat}'...")
+        logger.info(f"\n[{strat}] Filling future horizon with strategy '{strat}'...")
         preds = []
         for origin in TEST_ORIGINS:
             p = forecast_one_origin(client, y, origin, exog, ALL_EXOG,
@@ -315,12 +312,12 @@ def diag3_fill_strategy(client, y, exog):
     return results, actuals
 
 
-# ── Diagnostico 4: C0 baseline ────────────────────────────────
+# ── Diagnostic 4: C0 baseline ─────────────────────────────────
 
 def diag4_c0_baseline(client, y):
-    print("\n" + "=" * 60)
-    print("DIAGNOSTICO 4 — C0 baseline (sin exogenas)")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("DIAGNOSTIC 4 — C0 baseline (no exogenous)")
+    logger.info("=" * 60)
 
     actuals = []
     for origin in TEST_ORIGINS:
@@ -341,38 +338,30 @@ def diag4_c0_baseline(client, y):
 def main():
     global api_calls
 
-    print("=" * 60)
-    print("DIAGNOSTICO TIMEGPT C1 — Identificar causa raiz")
-    print(f"Origenes de prueba: {[o.strftime('%Y-%m') for o in TEST_ORIGINS]}")
-    print(f"Presupuesto API: {MAX_API_CALLS} llamadas")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("DIAGNOSTIC TIMEGPT C1 — Root cause identification")
+    logger.info(f"Test origins: {[o.strftime('%Y-%m') for o in TEST_ORIGINS]}")
+    logger.info(f"API budget: {MAX_API_CALLS} calls")
+    logger.info("=" * 60)
 
     y = load_ipc()
     exog = load_features()
     client = get_client()
 
-    print(f"Serie IPC: {y.index.min().date()} - {y.index.max().date()} ({len(y)} obs)")
-    print(f"Features C1: {exog.index.min().date()} - {exog.index.max().date()} ({len(exog)} obs)")
+    logger.info(f"IPC series: {y.index.min().date()} - {y.index.max().date()} ({len(y)} obs)")
+    logger.info(f"C1 features: {exog.index.min().date()} - {exog.index.max().date()} ({len(exog)} obs)")
 
-    # ── D4 primero (1 llamada, baseline necesario para todo) ────
+    # D4 first (1 call, baseline needed for everything else)
     mae_c0, actuals = diag4_c0_baseline(client, y)
-    print(f"\n  >>> C0 baseline MAE h=1: {mae_c0:.4f}")
-    print(f"  >>> Llamadas API usadas: {api_calls}/{MAX_API_CALLS}")
+    logger.info(f"\n  >>> C0 baseline MAE h=1: {mae_c0:.4f}")
+    logger.info(f"  >>> API calls used: {api_calls}/{MAX_API_CALLS}")
 
-    # ── D1: Regimen de ceros (3 variantes, ~3 llamadas por variante
-    #    pero usamos un solo origin para ahorrar, o todos 5) ────
-    # Optimizacion: para D1 usamos solo 1 llamada por variante (batch)
-    # TimeGPT acepta multiples series, pero aqui hacemos 1 por origen
-    # Ajuste: usar todos los 5 origenes pero contar llamadas
-    d1_results, _ = diag1_regimen_ceros(client, y, exog)
-    print(f"\n  >>> Llamadas API usadas: {api_calls}/{MAX_API_CALLS}")
+    d1_results, _ = diag1_zero_regime(client, y, exog)
+    logger.info(f"\n  >>> API calls used: {api_calls}/{MAX_API_CALLS}")
 
-    # ── D2: Subconjuntos de senales ────
-    # 5 subconjuntos x 5 origenes = 25 llamadas... demasiado
-    # Optimizacion: usar solo 1 origen representativo (2022-09) para D2
-    print("\n[!] D2 optimizado: usando 1 origen representativo (2022-09)")
+    # D2: optimized with 1 representative origin (2022-09)
+    logger.info("\n[!] D2 optimized: using 1 representative origin (2022-09)")
 
-    # Redifinir para usar solo 1 origen
     single_origin = pd.to_datetime(["2022-09-01"])
     target_date = single_origin[0] + pd.DateOffset(months=1)
     single_actual = [float(y.loc[target_date])]
@@ -385,113 +374,114 @@ def main():
         "ALL_9": ALL_EXOG,
     }
 
-    print("\n" + "=" * 60)
-    print("DIAGNOSTICO 2 — Subconjuntos de senales (origen: 2022-09)")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("DIAGNOSTIC 2 — Signal subsets (origin: 2022-09)")
+    logger.info("=" * 60)
 
     d2_results = {}
     for name, cols in subsets.items():
         if api_calls >= MAX_API_CALLS:
-            print(f"  [!] Limite alcanzado, saltando {name}")
+            logger.warning(f"  [!] Limit reached, skipping {name}")
             d2_results[name] = None
             continue
-        print(f"  [{name}] {cols}")
+        logger.info(f"  [{name}] {cols}")
         p = forecast_one_origin(client, y, single_origin[0], exog, cols)
         if p is not None:
             d2_results[name] = abs(p - single_actual[0])
         else:
             d2_results[name] = None
-    print(f"\n  >>> Llamadas API usadas: {api_calls}/{MAX_API_CALLS}")
+    logger.info(f"\n  >>> API calls used: {api_calls}/{MAX_API_CALLS}")
 
-    # ── D3: Estrategia fill (3 estrategias x 1 origen) ────
-    print("\n" + "=" * 60)
-    print("DIAGNOSTICO 3 — Estrategia fill horizonte (origen: 2022-09)")
-    print("=" * 60)
+    # D3: fill strategy (3 strategies x 1 origin)
+    logger.info("\n" + "=" * 60)
+    logger.info("DIAGNOSTIC 3 — Future horizon fill strategy (origin: 2022-09)")
+    logger.info("=" * 60)
 
     d3_results = {}
     for strat in ["forward", "zero", "mean3"]:
         if api_calls >= MAX_API_CALLS:
-            print(f"  [!] Limite alcanzado, saltando {strat}")
+            logger.warning(f"  [!] Limit reached, skipping {strat}")
             d3_results[strat] = None
             continue
-        print(f"  [{strat}]")
+        logger.info(f"  [{strat}]")
         p = forecast_one_origin(client, y, single_origin[0], exog, ALL_EXOG,
                                 fill_strategy=strat)
         if p is not None:
             d3_results[strat] = abs(p - single_actual[0])
         else:
             d3_results[strat] = None
-    print(f"\n  >>> Llamadas API usadas: {api_calls}/{MAX_API_CALLS}")
+    logger.info(f"\n  >>> API calls used: {api_calls}/{MAX_API_CALLS}")
 
-    # ── RESUMEN ────────────────────────────────────────────────
-    print("\n" + "=" * 60)
-    print("DIAGNOSTICO TIMEGPT C1")
-    print("=" * 60)
+    # ── Summary ────────────────────────────────────────────────
+    logger.info("\n" + "=" * 60)
+    logger.info("DIAGNOSTIC TIMEGPT C1")
+    logger.info("=" * 60)
 
     # D4 + D1
-    print(f"\nC0 baseline MAE h=1 (5 origenes): {mae_c0:.4f}" if mae_c0 else
-          "\nC0 baseline: ERROR")
+    if mae_c0:
+        logger.info(f"\nC0 baseline MAE h=1 (5 origins): {mae_c0:.4f}")
+    else:
+        logger.info("\nC0 baseline: ERROR")
 
-    print("\nHipotesis regimen ceros:")
+    logger.info("\nZero regime hypothesis:")
     for name, mae in d1_results.items():
         if mae is not None and mae_c0 is not None:
             delta_pct = (mae - mae_c0) / mae_c0 * 100
-            print(f"  {name:20s}: MAE = {mae:.4f}  (vs C0: {delta_pct:+.1f}%)")
+            logger.info(f"  {name:20s}: MAE = {mae:.4f}  (vs C0: {delta_pct:+.1f}%)")
         elif mae is not None:
-            print(f"  {name:20s}: MAE = {mae:.4f}")
+            logger.info(f"  {name:20s}: MAE = {mae:.4f}")
         else:
-            print(f"  {name:20s}: ERROR")
+            logger.info(f"  {name:20s}: ERROR")
 
-    # Determinar hipotesis
+    # Determine hypothesis
     a = d1_results.get("A_completo")
     b = d1_results.get("B_desde2015")
     if a is not None and b is not None:
         if b < a * 0.90:
-            hyp1 = "CONFIRMADA"
-            hyp1_detail = f"Recortar a 2015+ reduce MAE un {(a-b)/a*100:.1f}%"
+            hyp1 = "CONFIRMED"
+            hyp1_detail = f"Clipping to 2015+ reduces MAE by {(a - b) / a * 100:.1f}%"
         elif b > a * 1.10:
-            hyp1 = "NO CONFIRMADA (recortar empeora)"
-            hyp1_detail = f"Recortar a 2015+ AUMENTA MAE un {(b-a)/a*100:.1f}%"
+            hyp1 = "NOT CONFIRMED (clipping worsens)"
+            hyp1_detail = f"Clipping to 2015+ INCREASES MAE by {(b - a) / a * 100:.1f}%"
         else:
-            hyp1 = "INDETERMINADA (diferencia < 10%)"
-            hyp1_detail = f"Diferencia: {(b-a)/a*100:+.1f}%"
+            hyp1 = "INDETERMINATE (difference < 10%)"
+            hyp1_detail = f"Difference: {(b - a) / a * 100:+.1f}%"
     else:
-        hyp1 = "ERROR en calculo"
+        hyp1 = "ERROR in calculation"
         hyp1_detail = ""
 
-    print(f"\n  >>> Hipotesis regimen ceros: {hyp1}")
+    logger.info(f"\n  >>> Zero regime hypothesis: {hyp1}")
     if hyp1_detail:
-        print(f"      {hyp1_detail}")
+        logger.info(f"      {hyp1_detail}")
 
     # D2
-    print("\nSenales individuales (AE h=1, origen 2022-09):")
+    logger.info("\nIndividual signals (AE h=1, origin 2022-09):")
     d2_sorted = sorted(
         [(k, v) for k, v in d2_results.items() if v is not None],
         key=lambda x: x[1]
     )
-    # C0 ref para este origen
+    # C0 reference for this origin
     c0_ref_p = forecast_one_origin(client, y, single_origin[0])
     c0_ref_ae = abs(c0_ref_p - single_actual[0]) if c0_ref_p is not None else None
 
     if c0_ref_ae is not None:
-        print(f"  {'C0 (sin exog)':20s}: AE = {c0_ref_ae:.4f}  (referencia)")
+        logger.info(f"  {'C0 (no exog)':20s}: AE = {c0_ref_ae:.4f}  (reference)")
     for name, ae in d2_sorted:
         if c0_ref_ae is not None:
             delta = (ae - c0_ref_ae) / c0_ref_ae * 100
-            marker = " <-- MEJOR" if ae < c0_ref_ae else ""
-            print(f"  {name:20s}: AE = {ae:.4f}  (vs C0: {delta:+.1f}%){marker}")
+            marker = " <-- BEST" if ae < c0_ref_ae else ""
+            logger.info(f"  {name:20s}: AE = {ae:.4f}  (vs C0: {delta:+.1f}%){marker}")
         else:
-            print(f"  {name:20s}: AE = {ae:.4f}")
+            logger.info(f"  {name:20s}: AE = {ae:.4f}")
 
-    # Identificar mas daninas y neutras
     if d2_sorted:
         neutrals = [k for k, v in d2_sorted if c0_ref_ae and v <= c0_ref_ae * 1.05]
         harmful = [k for k, v in d2_sorted if c0_ref_ae and v > c0_ref_ae * 1.20]
-        print(f"\n  Senales mas neutras (<=5% degradacion): {neutrals or ['ninguna']}")
-        print(f"  Senales mas daninas (>20% degradacion): {harmful or ['ninguna']}")
+        logger.info(f"\n  Neutral signals (<=5% degradation): {neutrals or ['none']}")
+        logger.info(f"  Harmful signals (>20% degradation): {harmful or ['none']}")
 
     # D3
-    print("\nEstrategia forward-fill horizonte (AE h=1, origen 2022-09):")
+    logger.info("\nFuture horizon fill strategy (AE h=1, origin 2022-09):")
     best_strat = None
     best_ae = float("inf")
     for strat in ["forward", "zero", "mean3"]:
@@ -501,45 +491,44 @@ def main():
             if ae < best_ae:
                 best_ae = ae
                 best_strat = strat
-                marker = " <-- MEJOR"
+                marker = " <-- BEST"
             if c0_ref_ae is not None:
                 delta = (ae - c0_ref_ae) / c0_ref_ae * 100
-                print(f"  {strat:15s}: AE = {ae:.4f}  (vs C0: {delta:+.1f}%){marker}")
+                logger.info(f"  {strat:15s}: AE = {ae:.4f}  (vs C0: {delta:+.1f}%){marker}")
             else:
-                print(f"  {strat:15s}: AE = {ae:.4f}{marker}")
+                logger.info(f"  {strat:15s}: AE = {ae:.4f}{marker}")
         else:
-            print(f"  {strat:15s}: ERROR")
+            logger.info(f"  {strat:15s}: ERROR")
 
     # Conclusion
-    print("\n" + "=" * 60)
-    print("CONCLUSION RECOMENDADA")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("RECOMMENDED CONCLUSION")
+    logger.info("=" * 60)
 
-    # Determinar mejor config
     best_subset = d2_sorted[0][0] if d2_sorted else "ALL_9"
     best_subset_ae = d2_sorted[0][1] if d2_sorted else None
 
     recs = []
-    if hyp1 == "CONFIRMADA":
-        recs.append("Recortar contexto a 2015+ (eliminar regimen de ceros)")
-    elif "NO CONFIRMADA" in hyp1:
-        recs.append("Mantener contexto completo (los ceros no son el problema)")
+    if hyp1 == "CONFIRMED":
+        recs.append("Clip context to 2015+ (remove zero regime)")
+    elif "NOT CONFIRMED" in hyp1:
+        recs.append("Keep full context (zeros are not the problem)")
 
     if best_strat and best_strat != "forward":
-        recs.append(f"Cambiar estrategia fill a '{best_strat}'")
+        recs.append(f"Change fill strategy to '{best_strat}'")
     else:
-        recs.append("Mantener forward-fill (o la mejor de las 3)")
+        recs.append("Keep forward-fill (or best of the 3)")
 
     if best_subset != "ALL_9" and best_subset_ae is not None and c0_ref_ae is not None:
         if best_subset_ae < c0_ref_ae * 1.05:
-            recs.append(f"Usar solo covariables '{best_subset}' (neutrales)")
+            recs.append(f"Use only '{best_subset}' covariates (neutral)")
         else:
-            recs.append("Todas las senales degradan; considerar reducir a 0 (C0 puro)")
+            recs.append("All signals degrade; consider falling back to C0 pure")
 
     for i, r in enumerate(recs, 1):
-        print(f"  {i}. {r}")
+        logger.info(f"  {i}. {r}")
 
-    print(f"\n  Total llamadas API: {api_calls}/{MAX_API_CALLS}")
+    logger.info(f"\n  Total API calls: {api_calls}/{MAX_API_CALLS}")
 
 
 if __name__ == "__main__":

@@ -1,15 +1,15 @@
 """
-08_chronos2_C1_energy_only.py — Chronos-2 C1 solo con variables energeticas
+08_chronos2_C1_energy_only.py — Chronos-2 C1 with energy variables only
 
-Experimento de ablacion: aislar efecto predictivo de energia sin senales MCP.
+Ablation experiment: isolate the predictive effect of energy without MCP signals.
 
-Covariables (3 total, solo energia):
-    brent_ma3       # corr 0.715 con IPC(t+1) en 2015+
-    brent_ret       # captura shocks energeticos rapidos
-    ttf_ma3         # corr 0.541 con IPC(t+1) en 2015+
+Covariates (3 total, energy only):
+    brent_ma3       # corr 0.715 with IPC(t+1) in 2015+
+    brent_ret       # captures rapid energy shocks
+    ttf_ma3         # corr 0.541 with IPC(t+1) in 2015+
 
-Todas con datos reales desde 2002 (proxy backfill). Sin NaN.
-Contexto completo desde 2002 (no recortar a 2015+).
+All with real data from 2002 (proxy backfill). No NaN.
+Full context from 2002 (do not clip to 2015+).
 """
 
 from __future__ import annotations
@@ -31,6 +31,9 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = ROOT / "08_results"
 HORIZONS = [1, 3, 6, 12]
@@ -52,7 +55,7 @@ SUBPERIODS = {
 Q_IDX = {"p10": 2, "p50": 10, "p90": 18}
 
 
-# ── Datos ────────────────────────────────────────────────────────
+# Data
 
 def load_data() -> pd.DataFrame:
     df = pd.read_parquet(ROOT / "data" / "processed" / "features_c1.parquet")
@@ -62,22 +65,22 @@ def load_data() -> pd.DataFrame:
     return df
 
 
-# ── Modelo ───────────────────────────────────────────────────────
+# Model
 
 def load_model():
     from chronos import Chronos2Pipeline
-    print(f"[chronos2] Cargando {CHRONOS_MODEL_ID} ...")
+    logger.info(f"[chronos2] Loading {CHRONOS_MODEL_ID} ...")
     pipeline = Chronos2Pipeline.from_pretrained(
         CHRONOS_MODEL_ID, device_map="cpu",
     )
-    print("[chronos2] Modelo cargado")
+    logger.info("[chronos2] Model loaded")
     return pipeline
 
 
-# ── Preparar inputs ──────────────────────────────────────────────
+# Prepare inputs
 
 def prepare_input(df: pd.DataFrame, origin: pd.Timestamp, h: int) -> dict:
-    """Contexto completo desde 2002 + 3 covariables energia."""
+    """Full context from 2002 + 3 energy covariates."""
     context_df = df.loc[:origin]
     target = context_df["indice_general"].values.astype(np.float64)
 
@@ -86,7 +89,7 @@ def prepare_input(df: pd.DataFrame, origin: pd.Timestamp, h: int) -> dict:
         if col in context_df.columns:
             past_covs[col] = context_df[col].values.astype(np.float64)
 
-    # Future: forward-fill del ultimo valor
+    # Future: forward-fill last known value
     last_row = df.loc[:origin, EXOG_COLS].iloc[-1]
     future_covs = {}
     for col in EXOG_COLS:
@@ -99,7 +102,7 @@ def prepare_input(df: pd.DataFrame, origin: pd.Timestamp, h: int) -> dict:
     }
 
 
-# ── Rolling backtesting ─────────────────────────────────────────
+# Rolling backtesting
 
 def run_rolling(df: pd.DataFrame, model) -> tuple[pd.DataFrame, float]:
     y = df["indice_general"]
@@ -119,7 +122,7 @@ def run_rolling(df: pd.DataFrame, model) -> tuple[pd.DataFrame, float]:
             preds = model.predict([inp], prediction_length=MAX_H)
             q = preds[0].numpy()[0]  # (21, 12)
         except Exception as e:
-            print(f"\n[!] Error en {origin.date()}: {e}")
+            logger.warning(f"\n[!] Error at {origin.date()}: {e}")
             continue
 
         p50 = q[Q_IDX["p50"]]
@@ -158,7 +161,7 @@ def run_rolling(df: pd.DataFrame, model) -> tuple[pd.DataFrame, float]:
     return pd.DataFrame(records), mase_scale
 
 
-# ── Metricas ─────────────────────────────────────────────────────
+# Metrics
 
 def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
     results = {}
@@ -212,93 +215,92 @@ def compute_subperiod_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict
     return results
 
 
-def print_table(metrics: dict) -> None:
-    print(f"\n{'Horizonte':<12} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'Cov80':>6} {'N':>5}")
-    print("-" * 52)
+def log_table(metrics: dict) -> None:
+    logger.info(f"\n{'Horizon':<12} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'Cov80':>6} {'N':>5}")
+    logger.info("-" * 52)
     for h in HORIZONS:
         key = f"h{h}"
         if key in metrics:
             m = metrics[key]
-            print(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
-                  f"{m['MASE']:8.4f} {m['coverage_80']:6.2%} {m['n_evals']:5d}")
+            logger.info(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
+                        f"{m['MASE']:8.4f} {m['coverage_80']:6.2%} {m['n_evals']:5d}")
 
 
-def print_subperiod_table(sub_metrics: dict) -> None:
-    print(f"\n{'Periodo':<18} {'h':>3} {'MAE':>8} {'MASE':>8} {'Cov80':>6} {'N':>4}")
-    print("-" * 52)
+def log_subperiod_table(sub_metrics: dict) -> None:
+    logger.info(f"\n{'Period':<18} {'h':>3} {'MAE':>8} {'MASE':>8} {'Cov80':>6} {'N':>4}")
+    logger.info("-" * 52)
     for period_name, hdict in sub_metrics.items():
         for h in HORIZONS:
             key = f"h{h}"
             if key in hdict:
                 m = hdict[key]
-                print(f"{period_name:<18} {h:>3} {m['MAE']:8.4f} {m['MASE']:8.4f} "
-                      f"{m['coverage_80']:6.2%} {m['n_origins']:4d}")
+                logger.info(f"{period_name:<18} {h:>3} {m['MAE']:8.4f} {m['MASE']:8.4f} "
+                            f"{m['coverage_80']:6.2%} {m['n_origins']:4d}")
 
 
-# ── Main ─────────────────────────────────────────────────────────
+# Main
 
 def main():
-    print("=" * 60)
-    print(f"BACKTESTING — {MODEL_NAME}")
-    print(f"Modelo: {CHRONOS_MODEL_ID}")
-    print(f"Covariables: {EXOG_COLS}")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"Model: {CHRONOS_MODEL_ID}")
+    logger.info(f"Covariates: {EXOG_COLS}")
+    logger.info("=" * 60)
 
     df = load_data()
-    print(f"Datos: {df.index.min().date()} - {df.index.max().date()} ({len(df)} obs)")
+    logger.info(f"Data: {df.index.min().date()} - {df.index.max().date()} ({len(df)} obs)")
 
     model = load_model()
 
     df_preds, mase_scale = run_rolling(df, model)
-    print(f"\nPredicciones: {len(df_preds)}")
+    logger.info(f"\nPredictions: {len(df_preds)}")
 
     if df_preds.empty:
-        print("[!] No se generaron predicciones.")
+        logger.warning("[!] No predictions generated.")
         return
 
     metrics = compute_metrics(df_preds, mase_scale)
     sub_metrics = compute_subperiod_metrics(df_preds, mase_scale)
 
-    print("\n" + "=" * 60)
-    print(f"RESULTADOS GLOBALES — {MODEL_NAME}")
-    print("=" * 60)
-    print_table(metrics)
+    logger.info("\n" + "=" * 60)
+    logger.info(f"GLOBAL RESULTS — {MODEL_NAME}")
+    logger.info("=" * 60)
+    log_table(metrics)
 
-    print("\n" + "=" * 60)
-    print(f"SUBPERIODOS — {MODEL_NAME}")
-    print("=" * 60)
-    print_subperiod_table(sub_metrics)
+    logger.info("\n" + "=" * 60)
+    logger.info(f"SUBPERIODS — {MODEL_NAME}")
+    logger.info("=" * 60)
+    log_subperiod_table(sub_metrics)
 
-    # Comparativa C0
+    # Comparison vs C0
     c0_path = RESULTS_DIR / "chronos2_C0_metrics.json"
     if c0_path.exists():
         with open(c0_path) as f:
             c0_m = json.load(f).get("chronos2_C0", {})
-        print("\n--- C0 vs C1_energy_only (MAE) ---")
+        logger.info("\n--- C0 vs C1_energy_only (MAE) ---")
         for h in HORIZONS:
             key = f"h{h}"
             c0_mae = c0_m.get(key, {}).get("MAE")
             c1_mae = metrics.get(key, {}).get("MAE")
             if c0_mae and c1_mae:
                 delta = c1_mae - c0_mae
-                print(f"  h={h}: C0={c0_mae:.4f}  energy_only={c1_mae:.4f}  "
-                      f"delta={delta:+.4f} ({delta/c0_mae*100:+.1f}%)")
+                logger.info(f"  h={h}: C0={c0_mae:.4f}  energy_only={c1_mae:.4f}  "
+                            f"delta={delta:+.4f} ({delta/c0_mae*100:+.1f}%)")
 
-    # Guardar
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     preds_path = RESULTS_DIR / f"{MODEL_NAME}_predictions.parquet"
     df_preds.to_parquet(preds_path, index=False)
-    print(f"\nPredicciones: {preds_path}")
+    logger.info(f"\nPredictions: {preds_path}")
 
     metrics_path = RESULTS_DIR / f"{MODEL_NAME}_metrics.json"
     with open(metrics_path, "w") as f:
         json.dump({MODEL_NAME: metrics}, f, indent=2)
-    print(f"Metricas: {metrics_path}")
+    logger.info(f"Metrics: {metrics_path}")
 
     sub_path = RESULTS_DIR / f"{MODEL_NAME}_subperiod_metrics.json"
     with open(sub_path, "w") as f:
         json.dump({MODEL_NAME: sub_metrics}, f, indent=2)
-    print(f"Subperiodos: {sub_path}")
+    logger.info(f"Subperiods: {sub_path}")
 
 
 if __name__ == "__main__":

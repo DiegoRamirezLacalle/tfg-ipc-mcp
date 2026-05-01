@@ -1,15 +1,15 @@
 """
-18_chronos2_C0_europe.py — Chronos-2 condicion C0 (solo historico) HICP Eurozona
+18_chronos2_C0_europe.py — Chronos-2 condition C0 (historical only) HICP Eurozone
 
 Rolling-origin backtesting:
-  - 48 origenes: 2021-01 a 2024-12
-  - Horizontes: h=1, 3, 6, 12
-  - Metricas: MAE, RMSE, MASE (naive estacional lag-12)
+  - 48 origins: 2021-01 to 2024-12
+  - Horizons: h=1, 3, 6, 12
+  - Metrics: MAE, RMSE, MASE (seasonal naive lag-12)
 
-Modelo: amazon/chronos-2 (21 cuantiles: 0.01-0.99)
-Serie: hicp_europe_index.parquet (indice en nivel, base 2015=100)
+Model: amazon/chronos-2 (21 quantiles: 0.01-0.99)
+Series: hicp_europe_index.parquet (level index, base 2015=100)
 
-Salida:
+Output:
   08_results/chronos2_C0_europe_predictions.parquet
   08_results/chronos2_C0_europe_metrics.json
 """
@@ -33,6 +33,9 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = ROOT / "08_results"
 HORIZONS = [1, 3, 6, 12]
@@ -43,12 +46,12 @@ MODEL_NAME = "chronos2_C0_europe"
 CHRONOS_MODEL_ID = "amazon/chronos-2"
 TEST_END_TS = pd.Timestamp(DATE_TEST_END)
 
-# 21 cuantiles: [0.01, 0.05, 0.1, ..., 0.5, ..., 0.9, 0.95, 0.99]
+# 21 quantiles: [0.01, 0.05, 0.1, ..., 0.5, ..., 0.9, 0.95, 0.99]
 # p10 = idx 2, p50 = idx 10, p90 = idx 18
 Q_IDX = {"p10": 2, "p50": 10, "p90": 18}
 
 
-# -- Datos -----------------------------------------------------------
+# Data
 
 def load_data() -> pd.Series:
     df = pd.read_parquet(ROOT / "data" / "processed" / "hicp_europe_index.parquet")
@@ -58,21 +61,21 @@ def load_data() -> pd.Series:
     return df["hicp_index"]
 
 
-# -- Modelo ----------------------------------------------------------
+# Model
 
 def load_model():
     from chronos import Chronos2Pipeline
 
-    print(f"[chronos2] Cargando {CHRONOS_MODEL_ID} ...")
+    logger.info(f"[chronos2] Loading {CHRONOS_MODEL_ID} ...")
     pipeline = Chronos2Pipeline.from_pretrained(
         CHRONOS_MODEL_ID,
         device_map="cpu",
     )
-    print("[chronos2] Modelo cargado (21 cuantiles)")
+    logger.info("[chronos2] Model loaded (21 quantiles)")
     return pipeline
 
 
-# -- Rolling backtesting ---------------------------------------------
+# Rolling backtesting
 
 def run_rolling(y: pd.Series, model) -> tuple[pd.DataFrame, float]:
     origins = pd.date_range(start=ORIGINS_START, end=ORIGINS_END, freq="MS")
@@ -81,7 +84,7 @@ def run_rolling(y: pd.Series, model) -> tuple[pd.DataFrame, float]:
     mase_scale = float(np.mean(np.abs(
         y_train_init.values[12:] - y_train_init.values[:-12]
     )))
-    print(f"  MASE scale: {mase_scale:.4f}")
+    logger.info(f"  MASE scale: {mase_scale:.4f}")
 
     records = []
 
@@ -129,7 +132,7 @@ def run_rolling(y: pd.Series, model) -> tuple[pd.DataFrame, float]:
     return pd.DataFrame(records), mase_scale
 
 
-# -- Metricas --------------------------------------------------------
+# Metrics
 
 def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
     results = {}
@@ -153,66 +156,66 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
     return results
 
 
-def print_table(metrics: dict) -> None:
-    print(f"\n{'Horizonte':<12} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'Cov80':>6} {'N':>5}")
-    print("-" * 52)
+def log_table(metrics: dict) -> None:
+    logger.info(f"\n{'Horizon':<12} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'Cov80':>6} {'N':>5}")
+    logger.info("-" * 52)
     for h in HORIZONS:
         key = f"h{h}"
         if key in metrics:
             m = metrics[key]
-            print(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
-                  f"{m['MASE']:8.4f} {m['coverage_80']:6.2%} {m['n_evals']:5d}")
+            logger.info(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
+                        f"{m['MASE']:8.4f} {m['coverage_80']:6.2%} {m['n_evals']:5d}")
 
 
-# -- Main ------------------------------------------------------------
+# Main
 
 def main():
-    print("=" * 60)
-    print(f"BACKTESTING ROLLING — {MODEL_NAME}")
-    print(f"Modelo: {CHRONOS_MODEL_ID}")
-    print(f"Origenes: {ORIGINS_START} - {ORIGINS_END}")
-    print(f"Horizontes: {HORIZONS}")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"Model: {CHRONOS_MODEL_ID}")
+    logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END}")
+    logger.info(f"Horizons: {HORIZONS}")
+    logger.info("=" * 60)
 
     y = load_data()
-    print(f"HICP Europa: {y.index.min().date()} - {y.index.max().date()} ({len(y)} obs)")
+    logger.info(f"HICP Europe: {y.index.min().date()} - {y.index.max().date()} ({len(y)} obs)")
 
     model = load_model()
 
     df_preds, mase_scale = run_rolling(y, model)
-    print(f"\nPredicciones generadas: {len(df_preds)}")
+    logger.info(f"\nPredictions generated: {len(df_preds)}")
 
     metrics = compute_metrics(df_preds, mase_scale)
 
-    print("\n" + "=" * 60)
-    print(f"RESULTADOS {MODEL_NAME}")
-    print("=" * 60)
-    print_table(metrics)
+    logger.info("\n" + "=" * 60)
+    logger.info(f"RESULTS {MODEL_NAME}")
+    logger.info("=" * 60)
+    log_table(metrics)
 
-    # Comparativa vs baseline sarima
+    # Comparison vs SARIMA baseline
     baseline_path = RESULTS_DIR / "rolling_metrics_europe.json"
     if baseline_path.exists():
         baselines = json.loads(baseline_path.read_text())
-        print("\n--- vs SARIMA (MAE) ---")
+        logger.info("\n--- vs SARIMA (MAE) ---")
         for h in HORIZONS:
             key = f"h{h}"
             c2  = metrics.get(key, {}).get("MAE")
             sar = baselines.get("sarima", {}).get(key, {}).get("MAE")
             if c2 and sar:
                 delta = c2 - sar
-                print(f"  h={h}: Chronos2={c2:.4f}  SARIMA={sar:.4f}  "
-                      f"delta={delta:+.4f} ({delta/sar*100:+.1f}%)")
+                logger.info(f"  h={h}: Chronos2={c2:.4f}  SARIMA={sar:.4f}  "
+                            f"delta={delta:+.4f} ({delta/sar*100:+.1f}%)")
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     preds_path = RESULTS_DIR / f"{MODEL_NAME}_predictions.parquet"
     df_preds.to_parquet(preds_path, index=False)
-    print(f"\nPredicciones: {preds_path}")
+    logger.info(f"\nPredictions: {preds_path}")
 
     metrics_path = RESULTS_DIR / f"{MODEL_NAME}_metrics.json"
     with open(metrics_path, "w") as f:
         json.dump({MODEL_NAME: metrics}, f, indent=2)
-    print(f"Metricas:     {metrics_path}")
+    logger.info(f"Metrics:     {metrics_path}")
 
 
 if __name__ == "__main__":

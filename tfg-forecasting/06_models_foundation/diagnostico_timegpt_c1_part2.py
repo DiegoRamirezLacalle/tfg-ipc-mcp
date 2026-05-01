@@ -1,11 +1,11 @@
 """
-diagnostico_timegpt_c1_part2.py — D2 y D3 (continuacion del diagnostico)
+diagnostico_timegpt_c1_part2.py — D2 and D3 (continuation of diagnostic)
 
-D1 ya confirmado: Variante B (2015+) es la mejor, MAE = 0.4038 vs C0 = 0.5646
-Ahora ejecutamos D2 (subconjuntos) y D3 (fill strategy) usando Variante B.
+D1 already confirmed: Variant B (2015+) is best, MAE = 0.4038 vs C0 = 0.5646
+Now running D2 (subsets) and D3 (fill strategy) using Variant B.
 
-Para ahorrar llamadas, usamos 1 origen representativo + Variante B.
-Presupuesto: 12 llamadas (5 subconjuntos + 3 fill + 1 C0 ref + 3 margen).
+To save calls, using 1 representative origin + Variant B.
+Budget: 12 calls (5 subsets + 3 fill + 1 C0 ref + 3 margin).
 """
 
 from __future__ import annotations
@@ -25,13 +25,17 @@ ROOT = Path(__file__).resolve().parents[1]
 MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
+
 SERIES_ID = "ipc_spain"
 MAX_H = 12
 
-# Usar 3 origenes: uno por subperiodo
+# 3 origins: one per sub-period
 TEST_ORIGINS = pd.to_datetime([
-    "2021-06-01",   # periodo tranquilo
-    "2022-09-01",   # pleno shock BCE
+    "2021-06-01",   # quiet period
+    "2022-09-01",   # peak BCE shock
     "2023-09-01",   # post-shock
 ])
 
@@ -75,7 +79,7 @@ def forecast_one(
     client, y, origin, exog=None, exog_cols=None,
     start_date="2015-01-01", fill_strategy="forward",
 ):
-    """Una llamada API. Devuelve prediccion h=1."""
+    """One API call. Returns h=1 prediction."""
     global api_calls
 
     context_y = y.loc[start_date:origin] if start_date else y.loc[:origin]
@@ -88,12 +92,12 @@ def forecast_one(
 
     future = None
     if exog is not None and exog_cols:
-        # Historico
+        # Historical covariates
         ctx_exog = exog.loc[context_y.index[0]:origin, exog_cols].reindex(context_y.index)
         for col in exog_cols:
             hist[col] = ctx_exog[col].values if col in ctx_exog.columns else 0.0
 
-        # Futuro
+        # Future covariates
         fc_dates = pd.date_range(
             start=origin + pd.DateOffset(months=1), periods=MAX_H, freq="MS"
         )
@@ -125,46 +129,50 @@ def forecast_one(
         return float(fc["TimeGPT"].iloc[0])
     except Exception as e:
         api_calls += 1
-        print(f"    [!] Error: {e}")
+        logger.warning(f"    [!] Error: {e}")
         return None
 
 
 def main():
     global api_calls
 
-    print("=" * 60)
-    print("DIAGNOSTICO TIMEGPT C1 — Parte 2 (D2 + D3)")
-    print(f"Origenes: {[o.strftime('%Y-%m') for o in TEST_ORIGINS]}")
-    print("Todas las variantes usan contexto desde 2015 (Variante B)")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("DIAGNOSTIC TIMEGPT C1 — Part 2 (D2 + D3)")
+    logger.info(f"Origins: {[o.strftime('%Y-%m') for o in TEST_ORIGINS]}")
+    logger.info("All variants use context from 2015 (Variant B)")
+    logger.info("=" * 60)
 
     y = load_ipc()
     exog = load_features()
     client = get_client()
 
-    # Actuals para h=1
+    # Actuals for h=1
     actuals = {}
     for origin in TEST_ORIGINS:
         target = origin + pd.DateOffset(months=1)
         actuals[origin] = float(y.loc[target])
 
-    # ── C0 baseline (sin exogenas, contexto completo) ──
-    print("\n--- C0 baseline (contexto completo, sin exogenas) ---")
+    # ── C0 baseline (no exogenous, full context) ──
+    logger.info("\n--- C0 baseline (full context, no exogenous) ---")
     c0_preds = {}
     for origin in TEST_ORIGINS:
         p = forecast_one(client, y, origin, start_date=None)
         c0_preds[origin] = p
         ae = abs(p - actuals[origin]) if p else None
-        print(f"  {origin.strftime('%Y-%m')}: pred={p:.2f}  actual={actuals[origin]:.2f}  AE={ae:.4f}" if p else
-              f"  {origin.strftime('%Y-%m')}: ERROR")
+        if p:
+            logger.info(
+                f"  {origin.strftime('%Y-%m')}: pred={p:.2f}  actual={actuals[origin]:.2f}  AE={ae:.4f}"
+            )
+        else:
+            logger.info(f"  {origin.strftime('%Y-%m')}: ERROR")
 
     c0_mae = np.mean([abs(c0_preds[o] - actuals[o]) for o in TEST_ORIGINS if c0_preds[o]])
-    print(f"  C0 MAE h=1: {c0_mae:.4f}")
+    logger.info(f"  C0 MAE h=1: {c0_mae:.4f}")
 
-    # ── D2: Subconjuntos de senales (Variante B: desde 2015) ──
-    print("\n" + "=" * 60)
-    print("D2 — Subconjuntos de senales (contexto desde 2015)")
-    print("=" * 60)
+    # ── D2: Signal subsets (Variant B: from 2015) ──
+    logger.info("\n" + "=" * 60)
+    logger.info("D2 — Signal subsets (context from 2015)")
+    logger.info("=" * 60)
 
     subsets = {
         "GDELT_3": ["gdelt_avg_tone", "gdelt_tone_ma3", "gdelt_tone_ma6"],
@@ -176,7 +184,7 @@ def main():
 
     d2_results = {}
     for name, cols in subsets.items():
-        print(f"\n  [{name}] {cols}")
+        logger.info(f"\n  [{name}] {cols}")
         preds = {}
         for origin in TEST_ORIGINS:
             p = forecast_one(client, y, origin, exog, cols, start_date="2015-01-01")
@@ -184,16 +192,16 @@ def main():
         mae = np.mean([abs(preds[o] - actuals[o]) for o in TEST_ORIGINS if preds[o]])
         d2_results[name] = mae
         delta = (mae - c0_mae) / c0_mae * 100
-        print(f"    MAE h=1: {mae:.4f}  (vs C0: {delta:+.1f}%)")
+        logger.info(f"    MAE h=1: {mae:.4f}  (vs C0: {delta:+.1f}%)")
 
-    # ── D3: Estrategia fill (con ALL_9, Variante B) ──
-    print("\n" + "=" * 60)
-    print("D3 — Estrategia fill horizonte futuro (ALL_9, desde 2015)")
-    print("=" * 60)
+    # ── D3: Fill strategy (with ALL_9, Variant B) ──
+    logger.info("\n" + "=" * 60)
+    logger.info("D3 — Future horizon fill strategy (ALL_9, from 2015)")
+    logger.info("=" * 60)
 
     d3_results = {}
     for strat in ["forward", "zero", "mean3"]:
-        print(f"\n  [{strat}]")
+        logger.info(f"\n  [{strat}]")
         preds = {}
         for origin in TEST_ORIGINS:
             p = forecast_one(client, y, origin, exog, ALL_EXOG,
@@ -202,56 +210,56 @@ def main():
         mae = np.mean([abs(preds[o] - actuals[o]) for o in TEST_ORIGINS if preds[o]])
         d3_results[strat] = mae
         delta = (mae - c0_mae) / c0_mae * 100
-        print(f"    MAE h=1: {mae:.4f}  (vs C0: {delta:+.1f}%)")
+        logger.info(f"    MAE h=1: {mae:.4f}  (vs C0: {delta:+.1f}%)")
 
-    # ── RESUMEN ──
-    print("\n" + "=" * 60)
-    print("RESUMEN DIAGNOSTICO COMPLETO")
-    print("=" * 60)
+    # ── Summary ──
+    logger.info("\n" + "=" * 60)
+    logger.info("FULL DIAGNOSTIC SUMMARY")
+    logger.info("=" * 60)
 
-    print(f"\nC0 baseline MAE h=1: {c0_mae:.4f}")
+    logger.info(f"\nC0 baseline MAE h=1: {c0_mae:.4f}")
 
-    print("\nD1 (de part1): Hipotesis regimen ceros CONFIRMADA")
-    print("  A_completo:    MAE = 0.4714  (vs C0: -16.5%)")
-    print("  B_desde2015:   MAE = 0.4038  (vs C0: -28.5%)  <-- MEJOR")
-    print("  C_nan_pre2015: MAE = 0.4294  (vs C0: -23.9%)")
+    logger.info("\nD1 (from part1): Zero regime hypothesis CONFIRMED")
+    logger.info("  A_completo:    MAE = 0.4714  (vs C0: -16.5%)")
+    logger.info("  B_desde2015:   MAE = 0.4038  (vs C0: -28.5%)  <-- BEST")
+    logger.info("  C_nan_pre2015: MAE = 0.4294  (vs C0: -23.9%)")
 
-    print("\nD2: Subconjuntos de senales (Variante B):")
+    logger.info("\nD2: Signal subsets (Variant B):")
     d2_sorted = sorted(d2_results.items(), key=lambda x: x[1])
     for name, mae in d2_sorted:
         delta = (mae - c0_mae) / c0_mae * 100
-        marker = " <-- MEJOR" if mae == d2_sorted[0][1] else ""
-        print(f"  {name:15s}: MAE = {mae:.4f}  (vs C0: {delta:+.1f}%){marker}")
+        marker = " <-- BEST" if mae == d2_sorted[0][1] else ""
+        logger.info(f"  {name:15s}: MAE = {mae:.4f}  (vs C0: {delta:+.1f}%){marker}")
 
     neutrals = [k for k, v in d2_sorted if v <= c0_mae * 1.05]
     harmful = [k for k, v in d2_sorted if v > c0_mae * 1.20]
     better = [k for k, v in d2_sorted if v < c0_mae * 0.95]
-    print(f"\n  Mejoran C0 (>5%): {better or ['ninguno']}")
-    print(f"  Neutras (<=5% degradacion): {neutrals or ['ninguna']}")
-    print(f"  Daninas (>20% degradacion): {harmful or ['ninguna']}")
+    logger.info(f"\n  Improve C0 (>5%): {better or ['none']}")
+    logger.info(f"  Neutral (<=5% degradation): {neutrals or ['none']}")
+    logger.info(f"  Harmful (>20% degradation): {harmful or ['none']}")
 
-    print("\nD3: Estrategia fill horizonte:")
+    logger.info("\nD3: Future horizon fill strategy:")
     d3_sorted = sorted(d3_results.items(), key=lambda x: x[1])
     for strat, mae in d3_sorted:
         delta = (mae - c0_mae) / c0_mae * 100
-        marker = " <-- MEJOR" if mae == d3_sorted[0][1] else ""
-        print(f"  {strat:15s}: MAE = {mae:.4f}  (vs C0: {delta:+.1f}%){marker}")
+        marker = " <-- BEST" if mae == d3_sorted[0][1] else ""
+        logger.info(f"  {strat:15s}: MAE = {mae:.4f}  (vs C0: {delta:+.1f}%){marker}")
 
     best_subset = d2_sorted[0][0]
     best_subset_mae = d2_sorted[0][1]
     best_fill = d3_sorted[0][0]
     best_fill_mae = d3_sorted[0][1]
 
-    print("\n" + "=" * 60)
-    print("CONCLUSION RECOMENDADA")
-    print("=" * 60)
-    print(f"  1. Recortar contexto a 2015+ (Variante B)")
-    print(f"  2. Mejor subconjunto de senales: {best_subset} (MAE={best_subset_mae:.4f})")
-    print(f"  3. Mejor estrategia fill: {best_fill} (MAE={best_fill_mae:.4f})")
-    print(f"  4. C0 baseline: MAE={c0_mae:.4f}")
+    logger.info("\n" + "=" * 60)
+    logger.info("RECOMMENDED CONCLUSION")
+    logger.info("=" * 60)
+    logger.info(f"  1. Clip context to 2015+ (Variant B)")
+    logger.info(f"  2. Best signal subset: {best_subset} (MAE={best_subset_mae:.4f})")
+    logger.info(f"  3. Best fill strategy: {best_fill} (MAE={best_fill_mae:.4f})")
+    logger.info(f"  4. C0 baseline: MAE={c0_mae:.4f}")
     delta_best = (best_subset_mae - c0_mae) / c0_mae * 100
-    print(f"  5. Mejora esperada vs C0: {delta_best:+.1f}%")
-    print(f"\n  Total llamadas API: {api_calls}")
+    logger.info(f"  5. Expected improvement vs C0: {delta_best:+.1f}%")
+    logger.info(f"\n  Total API calls: {api_calls}")
 
 
 if __name__ == "__main__":
