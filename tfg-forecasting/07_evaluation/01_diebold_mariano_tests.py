@@ -1,19 +1,19 @@
 """
 01_diebold_mariano_tests.py
 ---------------------------
-Test de Diebold-Mariano (Harvey et al., 1997) para comparar:
-  - C0 vs C1 (¿añadir señales MCP mejora significativamente?)
-  - Cada modelo vs naive estacional (¿baten el baseline?)
+Diebold-Mariano test (Harvey et al., 1997) to compare:
+  - C0 vs C1 (does adding MCP signals significantly improve?)
+  - Each model vs seasonal naive (do they beat the baseline?)
 
-Carga los parquets de predicciones de 08_results/ y los baseline de
+Loads prediction parquets from 08_results/ and baseline from
 03_models_baseline/results/rolling_predictions.parquet.
 
-Los errores se alinean por (origin, horizon, fc_date) para garantizar
-que las comparaciones son sobre las mismas observaciones.
+Errors are aligned by (origin, horizon, fc_date) to ensure
+comparisons are over the same observations.
 
-Salida:
+Output:
   - 08_results/diebold_mariano_results.json
-  - Tabla impresa en consola
+  - Table printed to console
 """
 
 from __future__ import annotations
@@ -29,13 +29,16 @@ ROOT = Path(__file__).resolve().parents[1]
 MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
+from shared.logger import get_logger
 from shared.metrics import diebold_mariano
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = ROOT / "08_results"
 BASELINE_PREDS = ROOT / "03_models_baseline" / "results" / "rolling_predictions.parquet"
 HORIZONS = [1, 3, 6, 12]
 
-# Subperiodos para DM por régimen (mismo esquema que chronos2_C1)
+# Sub-periods for DM by regime (same scheme as chronos2_C1)
 SUBPERIODS = {
     "global": (None, None),
     "A_2021": ("2021-01-01", "2021-12-01"),
@@ -44,10 +47,10 @@ SUBPERIODS = {
 }
 
 
-# ── Carga de predicciones ─────────────────────────────────────────
+# ── Load predictions ──────────────────────────────────────────
 
 def load_foundation_preds() -> dict[str, pd.DataFrame]:
-    """Carga los 6 parquets de modelos foundation."""
+    """Load the foundation model parquet files."""
     models = [
         "timesfm_C0", "timesfm_C1",
         "chronos2_C0", "chronos2_C1",
@@ -67,14 +70,14 @@ def load_foundation_preds() -> dict[str, pd.DataFrame]:
             df["fc_date"] = pd.to_datetime(df["fc_date"])
             preds[m] = df
         else:
-            print(f"[!] No encontrado: {path.name}")
+            logger.warning(f"[!] Not found: {path.name}")
     return preds
 
 
 def load_baseline_preds() -> dict[str, pd.DataFrame]:
-    """Carga predicciones del baseline (naive, arima, sarima, etc.)."""
+    """Load baseline predictions (naive, arima, sarima, etc.)."""
     if not BASELINE_PREDS.exists():
-        print(f"[!] Baseline predictions no encontradas: {BASELINE_PREDS}")
+        logger.warning(f"[!] Baseline predictions not found: {BASELINE_PREDS}")
         return {}
     df = pd.read_parquet(BASELINE_PREDS)
     df["origin"] = pd.to_datetime(df["origin"])
@@ -85,7 +88,7 @@ def load_baseline_preds() -> dict[str, pd.DataFrame]:
     return result
 
 
-# ── Alineación de errores ──────────────────────────────────────────
+# ── Error alignment ────────────────────────────────────────────
 
 def align_errors(
     df1: pd.DataFrame,
@@ -95,8 +98,8 @@ def align_errors(
     period_end: str | None = None,
 ) -> tuple[np.ndarray, np.ndarray] | None:
     """
-    Extrae errores alineados de dos DataFrames de predicciones.
-    Solo horizonte h, intersección de (origin, fc_date).
+    Extract aligned errors from two prediction DataFrames.
+    Only horizon h, intersection of (origin, fc_date).
     """
     h1 = df1[df1["horizon"] == h][["origin", "fc_date", "error"]].copy()
     h2 = df2[df2["horizon"] == h][["origin", "fc_date", "error"]].copy()
@@ -110,14 +113,14 @@ def align_errors(
 
     merged = h1.merge(h2, on=["origin", "fc_date"], suffixes=("_1", "_2"))
     if len(merged) < 10:
-        return None  # Muestra insuficiente
+        return None  # Insufficient sample size
 
     e1 = merged["error_1"].values
     e2 = merged["error_2"].values
     return e1, e2
 
 
-# ── Test DM por par de modelos ────────────────────────────────────
+# ── DM test per model pair ────────────────────────────────────
 
 def run_dm_pair(
     name1: str,
@@ -128,7 +131,7 @@ def run_dm_pair(
     period_start: str | None = None,
     period_end: str | None = None,
 ) -> dict:
-    """Ejecuta DM test para todos los horizontes entre dos modelos."""
+    """Run DM test for all horizons between two models."""
     result = {
         "model1": name1,
         "model2": name2,
@@ -147,12 +150,12 @@ def run_dm_pair(
     return result
 
 
-# ── Tabla de resultados ────────────────────────────────────────────
+# ── Results table ──────────────────────────────────────────────
 
 def print_dm_table(results: list[dict]) -> None:
-    print(f"\n{'Comparacion':<32} {'Periodo':<16} {'h':>3} "
-          f"{'DM-stat':>9} {'p-value':>9} {'Ganador':>10} {'N':>5}")
-    print("-" * 90)
+    logger.info(f"\n{'Comparison':<32} {'Period':<16} {'h':>3} "
+                f"{'DM-stat':>9} {'p-value':>9} {'Winner':>10} {'N':>5}")
+    logger.info("-" * 90)
     for r in results:
         label = f"{r['model1']} vs {r['model2']}"
         for h in HORIZONS:
@@ -161,39 +164,39 @@ def print_dm_table(results: list[dict]) -> None:
                 continue
             m = r[key]
             if m["dm_stat"] is None:
-                print(f"{label:<32} {r['period']:<16} {h:>3} {'—':>9} {'—':>9} "
-                      f"{'insuf':>10} {m.get('n',0):>5}")
+                logger.info(f"{label:<32} {r['period']:<16} {h:>3} {'—':>9} {'—':>9} "
+                            f"{'insuf':>10} {m.get('n', 0):>5}")
                 continue
             sig = "*" if m["p_value"] < 0.10 else ""
             sig += "*" if m["p_value"] < 0.05 else ""
             winner = m["better"]
-            print(f"{label:<32} {r['period']:<16} {h:>3} {m['dm_stat']:>9.4f} "
-                  f"{m['p_value']:>9.4f} {winner:>10}{sig} {m['n']:>5}")
+            logger.info(f"{label:<32} {r['period']:<16} {h:>3} {m['dm_stat']:>9.4f} "
+                        f"{m['p_value']:>9.4f} {winner:>10}{sig} {m['n']:>5}")
 
 
-# ── Main ─────────────────────────────────────────────────────────
+# ── Main ──────────────────────────────────────────────────────
 
 def main():
-    print("=" * 60)
-    print("DIEBOLD-MARIANO TESTS — C0 vs C1 y modelos vs naive")
-    print("Metrica: MAE (power=1), nivel de significancia: 5% (**) / 10% (*)")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("DIEBOLD-MARIANO TESTS — C0 vs C1 and models vs naive")
+    logger.info("Metric: MAE (power=1), significance level: 5% (**) / 10% (*)")
+    logger.info("=" * 60)
 
     foundation = load_foundation_preds()
     baseline = load_baseline_preds()
 
     if not foundation:
-        print("[!] No hay predicciones de foundation models. Ejecuta primero los scripts 01-04.")
+        logger.warning("[!] No foundation model predictions found. Run scripts 01-04 first.")
         return
 
     all_results = []
 
-    # ── 1. C0 vs C1 por modelo y subperiodo ──────────────────────
+    # ── 1. C0 vs C1 per model and sub-period ─────────────────
     for family in ["timesfm", "chronos2", "timegpt"]:
         c0_name = f"{family}_C0"
         c1_name = f"{family}_C1"
         if c0_name not in foundation or c1_name not in foundation:
-            print(f"[!] Falta {c0_name} o {c1_name}, saltando.")
+            logger.warning(f"[!] Missing {c0_name} or {c1_name}, skipping.")
             continue
 
         df_c0 = foundation[c0_name]
@@ -204,12 +207,12 @@ def main():
                             period_name, pstart, pend)
             all_results.append(r)
 
-    # ── 1b. C0 vs C1_energy por modelo y subperiodo ──────────────
+    # ── 1b. C0 vs C1_energy per model and sub-period ─────────
     for family in ["chronos2", "timegpt"]:
         c0_name = f"{family}_C0"
         c1e_name = f"{family}_C1_energy"
         if c0_name not in foundation or c1e_name not in foundation:
-            print(f"[!] Falta {c0_name} o {c1e_name}, saltando.")
+            logger.warning(f"[!] Missing {c0_name} or {c1e_name}, skipping.")
             continue
 
         for period_name, (pstart, pend) in SUBPERIODS.items():
@@ -218,7 +221,7 @@ def main():
                             period_name, pstart, pend)
             all_results.append(r)
 
-    # ── 1c. C1 vs C1_energy (MCP-only vs MCP+energy) ────────────
+    # ── 1c. C1 vs C1_energy (MCP-only vs MCP+energy) ─────────
     for family in ["chronos2", "timegpt"]:
         c1_name = f"{family}_C1"
         c1e_name = f"{family}_C1_energy"
@@ -229,12 +232,12 @@ def main():
                         "global", None, None)
         all_results.append(r)
 
-    # ── 1d. C0 vs C1_energy_only por modelo y subperiodo ────────
+    # ── 1d. C0 vs C1_energy_only per model and sub-period ────
     for family in ["chronos2", "timegpt"]:
         c0_name = f"{family}_C0"
         c1eo_name = f"{family}_C1_energy_only"
         if c0_name not in foundation or c1eo_name not in foundation:
-            print(f"[!] Falta {c0_name} o {c1eo_name}, saltando.")
+            logger.warning(f"[!] Missing {c0_name} or {c1eo_name}, skipping.")
             continue
         for period_name, (pstart, pend) in SUBPERIODS.items():
             r = run_dm_pair(c0_name, c1eo_name,
@@ -253,7 +256,7 @@ def main():
                         "global", None, None)
         all_results.append(r)
 
-    # ── 1f. C1_energy_only vs C1 (energy-only vs MCP-only) ──────
+    # ── 1f. C1_energy_only vs C1 (energy-only vs MCP-only) ───
     for family in ["chronos2", "timegpt"]:
         c1eo_name = f"{family}_C1_energy_only"
         c1_name = f"{family}_C1"
@@ -264,12 +267,12 @@ def main():
                         "global", None, None)
         all_results.append(r)
 
-    # ── 1g. C0 vs C1_inst por modelo y subperiodo ────────────────
+    # ── 1g. C0 vs C1_inst per model and sub-period ───────────
     for family in ["chronos2", "timesfm", "timegpt"]:
         c0_name = f"{family}_C0"
         c1i_name = f"{family}_C1_inst"
         if c0_name not in foundation or c1i_name not in foundation:
-            print(f"[!] Falta {c0_name} o {c1i_name}, saltando.")
+            logger.warning(f"[!] Missing {c0_name} or {c1i_name}, skipping.")
             continue
         for period_name, (pstart, pend) in SUBPERIODS.items():
             r = run_dm_pair(c0_name, c1i_name,
@@ -277,19 +280,19 @@ def main():
                             period_name, pstart, pend)
             all_results.append(r)
 
-    # ── 1h. C0 vs C1_macro por modelo ───────────────────────────
+    # ── 1h. C0 vs C1_macro per model ─────────────────────────
     for family in ["chronos2", "timesfm", "timegpt"]:
         c0_name = f"{family}_C0"
         c1m_name = f"{family}_C1_macro"
         if c0_name not in foundation or c1m_name not in foundation:
-            print(f"[!] Falta {c0_name} o {c1m_name}, saltando.")
+            logger.warning(f"[!] Missing {c0_name} or {c1m_name}, skipping.")
             continue
         r = run_dm_pair(c0_name, c1m_name,
                         foundation[c0_name], foundation[c1m_name],
                         "global", None, None)
         all_results.append(r)
 
-    # ── 2. Foundation C0 vs naive (baseline de referencia) ───────
+    # ── 2. Foundation C0 vs naive (reference baseline) ────────
     naive_df = baseline.get("naive")
     if naive_df is not None:
         for model_name in ["timesfm_C0", "chronos2_C0", "timegpt_C0"]:
@@ -311,7 +314,7 @@ def main():
                             "global", None, None)
             all_results.append(r)
 
-    # ── 3. Cross-model C0 comparisons ─────────────────────────────
+    # ── 3. Cross-model C0 comparisons ─────────────────────────
     c0_pairs = [
         ("timesfm_C0", "chronos2_C0"),
         ("timesfm_C0", "timegpt_C0"),
@@ -323,7 +326,7 @@ def main():
                             "global", None, None)
             all_results.append(r)
 
-    # ── 4. Cross-model C1 comparisons ─────────────────────────────
+    # ── 4. Cross-model C1 comparisons ─────────────────────────
     c1_pairs = [
         ("timesfm_C1", "chronos2_C1"),
         ("timesfm_C1", "timegpt_C1"),
@@ -335,16 +338,16 @@ def main():
                             "global", None, None)
             all_results.append(r)
 
-    # ── Imprimir tabla ────────────────────────────────────────────
+    # ── Print table ────────────────────────────────────────────
     print_dm_table(all_results)
-    print("\nNota: ** p<0.05, * p<0.10. DM-stat<0 => model1 mejor; >0 => model2 mejor")
+    logger.info("\nNote: ** p<0.05, * p<0.10. DM-stat<0 => model1 better; >0 => model2 better")
 
-    # ── Guardar JSON ──────────────────────────────────────────────
+    # ── Save JSON ──────────────────────────────────────────────
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out_path = RESULTS_DIR / "diebold_mariano_results_final.json"
     with open(out_path, "w") as f:
         json.dump(all_results, f, indent=2)
-    print(f"\nResultados DM: {out_path}")
+    logger.info(f"\nDM results: {out_path}")
 
 
 if __name__ == "__main__":
