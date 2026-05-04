@@ -1,38 +1,46 @@
 """
 tabla_maestra_modelos.py
 ------------------------
-Genera la tabla maestra de todos los modelos del TFG en formato HTML.
+Generates the master table of all TFG models in HTML format.
 
-Estructura:
-  Pais (Global / Espana)
-    Tier (C0 sin senales | C1 con senales)
-      Tipo senal (— / energy / energy_only / macro / institutional / energy+macro)
-        Modelo
+Structure:
+  Country (Global / Spain)
+    Tier (C0 no signals | C1 with signals)
+      Signal type (— / energy / energy_only / macro / institutional / energy+macro)
+        Model
 
-Metricas: MAE h=1,3,6,12 + delta% vs mejor baseline C0 por pais.
-Delta verde = mejora, rojo = empeora.
+Metrics: MAE h=1,3,6,12 + delta% vs best C0 baseline per country.
+Green delta = improvement, red delta = worse.
 
-Uso:
-    python tabla_maestra_modelos.py        # genera HTML y lo abre en el navegador
-    python tabla_maestra_modelos.py --no-open   # solo genera el fichero
+Usage:
+    python tabla_maestra_modelos.py             # generate HTML and open in browser
+    python tabla_maestra_modelos.py --no-open  # generate file only
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 import webbrowser
 from pathlib import Path
 
-ROOT    = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[1]
+MONOREPO = ROOT.parent
+sys.path.insert(0, str(MONOREPO))
+
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
+
 RESULTS = ROOT / "08_results"
 OUT_HTML = RESULTS / "tabla_maestra.html"
-OUT_CSV  = RESULTS / "tabla_maestra.csv"
+OUT_CSV = RESULTS / "tabla_maestra.csv"
 
 HORIZONS = ["h1", "h3", "h6", "h12"]
 
 # ---------------------------------------------------------------------------
-# Modelos: (pais, tier, tipo_senal, nombre_display, fichero, clave_interna)
+# Models: (country, tier, signal_type, display_name, file, internal_key)
 # ---------------------------------------------------------------------------
 
 MODELS = [
@@ -52,34 +60,34 @@ MODELS = [
     ("Global", "C1", "institutional", "TimesFM",         "timesfm_C1_inst_global_metrics.json",  "timesfm_C1_inst_global"),
     ("Global", "C1", "institutional", "TimeGPT",         "timegpt_C1_inst_global_metrics.json",  "timegpt_C1_inst_global"),
 
-    # ===== ESPANA =====
-    ("España", "C0", "—",             "Naive (lag-12)",  "metrics_summary_final.json",           "naive"),
-    ("España", "C0", "—",             "ARIMA",           "metrics_summary_final.json",           "arima"),
-    ("España", "C0", "—",             "SARIMA",          "metrics_summary_final.json",           "sarima"),
-    ("España", "C0", "—",             "SARIMAX C0",      "metrics_summary_final.json",           "sarimax"),
-    ("España", "C0", "—",             "LSTM",            "metrics_summary_final.json",           "lstm"),
-    ("España", "C0", "—",             "N-BEATS",         "metrics_summary_final.json",           "nbeats"),
-    ("España", "C0", "—",             "N-HiTS",          "metrics_summary_final.json",           "nhits"),
-    ("España", "C0", "—",             "Chronos-2",       "metrics_summary_final.json",           "chronos2_C0"),
-    ("España", "C0", "—",             "TimesFM",         "metrics_summary_final.json",           "timesfm_C0"),
-    ("España", "C0", "—",             "TimeGPT",         "metrics_summary_final.json",           "timegpt_C0"),
-    ("España", "C1", "energy",        "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1_energy"),
-    ("España", "C1", "energy",        "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1_energy"),
-    ("España", "C1", "energy only",   "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1_energy_only"),
-    ("España", "C1", "energy only",   "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1_energy_only"),
-    ("España", "C1", "macro",         "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1_macro"),
-    ("España", "C1", "macro",         "TimesFM",         "metrics_summary_final.json",           "timesfm_C1_macro"),
-    ("España", "C1", "macro",         "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1_macro"),
-    ("España", "C1", "institutional", "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1_inst"),
-    ("España", "C1", "institutional", "TimesFM",         "metrics_summary_final.json",           "timesfm_C1_inst"),
-    ("España", "C1", "institutional", "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1_inst"),
-    ("España", "C1", "energy+macro",  "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1"),
-    ("España", "C1", "energy+macro",  "TimesFM",         "metrics_summary_final.json",           "timesfm_C1"),
-    ("España", "C1", "energy+macro",  "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1"),
+    # ===== SPAIN =====
+    ("Spain", "C0", "—",             "Naive (lag-12)",  "metrics_summary_final.json",           "naive"),
+    ("Spain", "C0", "—",             "ARIMA",           "metrics_summary_final.json",           "arima"),
+    ("Spain", "C0", "—",             "SARIMA",          "metrics_summary_final.json",           "sarima"),
+    ("Spain", "C0", "—",             "SARIMAX C0",      "metrics_summary_final.json",           "sarimax"),
+    ("Spain", "C0", "—",             "LSTM",            "metrics_summary_final.json",           "lstm"),
+    ("Spain", "C0", "—",             "N-BEATS",         "metrics_summary_final.json",           "nbeats"),
+    ("Spain", "C0", "—",             "N-HiTS",          "metrics_summary_final.json",           "nhits"),
+    ("Spain", "C0", "—",             "Chronos-2",       "metrics_summary_final.json",           "chronos2_C0"),
+    ("Spain", "C0", "—",             "TimesFM",         "metrics_summary_final.json",           "timesfm_C0"),
+    ("Spain", "C0", "—",             "TimeGPT",         "metrics_summary_final.json",           "timegpt_C0"),
+    ("Spain", "C1", "energy",        "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1_energy"),
+    ("Spain", "C1", "energy",        "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1_energy"),
+    ("Spain", "C1", "energy only",   "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1_energy_only"),
+    ("Spain", "C1", "energy only",   "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1_energy_only"),
+    ("Spain", "C1", "macro",         "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1_macro"),
+    ("Spain", "C1", "macro",         "TimesFM",         "metrics_summary_final.json",           "timesfm_C1_macro"),
+    ("Spain", "C1", "macro",         "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1_macro"),
+    ("Spain", "C1", "institutional", "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1_inst"),
+    ("Spain", "C1", "institutional", "TimesFM",         "metrics_summary_final.json",           "timesfm_C1_inst"),
+    ("Spain", "C1", "institutional", "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1_inst"),
+    ("Spain", "C1", "energy+macro",  "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1"),
+    ("Spain", "C1", "energy+macro",  "TimesFM",         "metrics_summary_final.json",           "timesfm_C1"),
+    ("Spain", "C1", "energy+macro",  "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1"),
 ]
 
 # ---------------------------------------------------------------------------
-# Carga de métricas
+# Metric loading
 # ---------------------------------------------------------------------------
 
 _CACHE: dict[str, dict] = {}
@@ -98,10 +106,10 @@ def _mae(fname: str, key: str, h: str) -> float | None:
     return hd.get("MAE") if isinstance(hd, dict) else None
 
 
-def _best_c0(pais: str) -> dict[str, float]:
+def _best_c0(country: str) -> dict[str, float]:
     best: dict[str, float] = {}
-    for m_pais, tier, _, _, fname, key in MODELS:
-        if m_pais != pais or tier != "C0":
+    for m_country, tier, _, _, fname, key in MODELS:
+        if m_country != country or tier != "C0":
             continue
         for h in HORIZONS:
             v = _mae(fname, key, h)
@@ -112,8 +120,13 @@ def _best_c0(pais: str) -> dict[str, float]:
 
 def build_rows() -> list[dict]:
     rows = []
-    for pais, tier, tipo, modelo, fname, key in MODELS:
-        row: dict = {"Pais": pais, "Tier": tier, "Senales": tipo, "Modelo": modelo}
+    for country, tier, signal_type, model_name, fname, key in MODELS:
+        row: dict = {
+            "Country": country,
+            "Tier": tier,
+            "Signals": signal_type,
+            "Model": model_name,
+        }
         ok = False
         for h in HORIZONS:
             v = _mae(fname, key, h)
@@ -126,9 +139,9 @@ def build_rows() -> list[dict]:
 
 
 def add_deltas(rows: list[dict]) -> list[dict]:
-    refs = {pais: _best_c0(pais) for pais in ("Global", "España")}
+    refs = {country: _best_c0(country) for country in ("Global", "Spain")}
     for row in rows:
-        ref = refs[row["Pais"]]
+        ref = refs[row["Country"]]
         for h in HORIZONS:
             mae = row[f"MAE_{h}"]
             ref_mae = ref.get(h)
@@ -268,25 +281,23 @@ tr.tier-separator td {
 """
 
 TIER_LABELS = {
-    "C0": "C0 — Sin señales exógenas",
-    "C1": "C1 — Con señales exógenas",
+    "C0": "C0 — No exogenous signals",
+    "C1": "C1 — With exogenous signals",
 }
 
 SIGNAL_LABELS = {
     "—": "—",
-    "energy": "Energía (Brent, gas)",
-    "energy only": "Sólo energía",
-    "macro": "Macro (PPI, tasas, USD)",
-    "institutional": "Institucionales (Fed, BCE, commodities)",
-    "energy+macro": "Energía + Macro (completo)",
+    "energy": "Energy (Brent, gas)",
+    "energy only": "Energy only",
+    "macro": "Macro (PPI, rates, USD)",
+    "institutional": "Institutional (Fed, ECB, commodities)",
+    "energy+macro": "Energy + Macro (full)",
 }
 
 
 def _delta_class(v: float | None) -> str:
     if v is None:
         return ""
-    if v <= -5:
-        return "delta-neg"
     if v <= 0:
         return "delta-neg"
     if v <= 10:
@@ -307,11 +318,11 @@ def _fmt_delta(v: float | None) -> str:
     return f"{sign}{v:.1f}%"
 
 
-def _find_best_mae_rows(rows: list[dict], pais: str, h: str) -> set[int]:
+def _find_best_mae_rows(rows: list[dict], country: str, h: str) -> set[int]:
     best_val = None
     best_idxs = set()
     for i, row in enumerate(rows):
-        if row["Pais"] != pais:
+        if row["Country"] != country:
             continue
         v = row.get(f"MAE_{h}")
         if v is not None:
@@ -324,25 +335,28 @@ def _find_best_mae_rows(rows: list[dict], pais: str, h: str) -> set[int]:
 
 
 def build_html(rows: list[dict]) -> str:
-    # Find overall best MAE per pais
+    # Find overall best MAE per country
     best_h12 = {}
-    for pais in ("Global", "España"):
-        pais_rows = [r for r in rows if r["Pais"] == pais]
-        best_val = min((r["MAE_h12"] for r in pais_rows if r["MAE_h12"] is not None), default=None)
-        best_h12[pais] = best_val
+    for country in ("Global", "Spain"):
+        country_rows = [r for r in rows if r["Country"] == country]
+        best_val = min(
+            (r["MAE_h12"] for r in country_rows if r["MAE_h12"] is not None),
+            default=None,
+        )
+        best_h12[country] = best_val
 
     sections_html = ""
 
-    for pais in ("Global", "España"):
-        hdr_class = "global-header" if pais == "Global" else "espana-header"
-        pais_rows = [r for r in rows if r["Pais"] == pais]
+    for country in ("Global", "Spain"):
+        hdr_class = "global-header" if country == "Global" else "espana-header"
+        country_rows = [r for r in rows if r["Country"] == country]
 
-        sections_html += f'<div class="section-header {hdr_class}">{pais}</div>\n'
+        sections_html += f'<div class="section-header {hdr_class}">{country}</div>\n'
         sections_html += "<table>\n"
         sections_html += """<thead><tr>
   <th class="left" style="width:50px">Tier</th>
-  <th class="left" style="width:140px">Señales</th>
-  <th class="left" style="width:150px">Modelo</th>
+  <th class="left" style="width:140px">Signals</th>
+  <th class="left" style="width:150px">Model</th>
   <th>h=1 MAE</th><th>Δ%</th>
   <th>h=3 MAE</th><th>Δ%</th>
   <th>h=6 MAE</th><th>Δ%</th>
@@ -352,12 +366,12 @@ def build_html(rows: list[dict]) -> str:
         prev_tier = ""
         prev_tipo = ""
 
-        for row in pais_rows:
-            tier  = row["Tier"]
-            tipo  = row["Senales"]
-            mod   = row["Modelo"]
+        for row in country_rows:
+            tier = row["Tier"]
+            tipo = row["Signals"]
+            mod = row["Model"]
 
-            is_best = (row["MAE_h12"] is not None and row["MAE_h12"] == best_h12[pais])
+            is_best = (row["MAE_h12"] is not None and row["MAE_h12"] == best_h12[country])
             tr_class = ' class="best-model"' if is_best else ""
 
             # Separator when tier/signal group changes
@@ -380,9 +394,9 @@ def build_html(rows: list[dict]) -> str:
             sections_html += f'  <td class="model">{mod}{"  ★" if is_best else ""}</td>\n'
 
             for h in HORIZONS:
-                mae   = row.get(f"MAE_{h}")
+                mae = row.get(f"MAE_{h}")
                 delta = row.get(f"d%_{h}")
-                dc    = _delta_class(delta)
+                dc = _delta_class(delta)
                 sections_html += f'  <td class="mae">{_fmt_mae(mae)}</td>\n'
                 sections_html += f'  <td class="{dc}">{_fmt_delta(delta)}</td>\n'
 
@@ -391,25 +405,25 @@ def build_html(rows: list[dict]) -> str:
         sections_html += "</tbody></table>\n"
 
     html = f"""<!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Tabla Maestra de Modelos — TFG IPC/MCP</title>
+<title>Master Model Table — TFG IPC/MCP</title>
 <style>{CSS}</style>
 </head>
 <body>
-<h1>Tabla Maestra de Modelos — TFG IPC/MCP</h1>
+<h1>Master Model Table — TFG IPC/MCP</h1>
 <p class="subtitle">
   Backtesting rolling expanding-window (2021-01 → 2024-12) &nbsp;|&nbsp;
-  Métrica: MAE &nbsp;|&nbsp;
-  Δ% = diferencia relativa vs. mejor baseline C0 del mismo país &nbsp;|&nbsp;
-  ★ = mejor modelo overall por país (h=12)
+  Metric: MAE &nbsp;|&nbsp;
+  Δ% = relative difference vs. best C0 baseline for the same country &nbsp;|&nbsp;
+  ★ = best overall model per country (h=12)
 </p>
 <div class="legend">
-  <span><span class="legend-dot" style="background:#eafaf1;border:1px solid #1b7f3a"></span> Δ% negativo = mejora</span>
-  <span><span class="legend-dot" style="background:#fffbeb;border:1px solid #c97a00"></span> Δ% 10–50% peor</span>
-  <span><span class="legend-dot" style="background:#fdf0ef;border:1px solid #c0392b"></span> Δ% &gt;50% peor</span>
-  <span><span class="legend-dot" style="background:#e8fdf0;border:1px solid #1b7f3a"></span> ★ Mejor overall h=12</span>
+  <span><span class="legend-dot" style="background:#eafaf1;border:1px solid #1b7f3a"></span> Δ% negative = improvement</span>
+  <span><span class="legend-dot" style="background:#fffbeb;border:1px solid #c97a00"></span> Δ% 10–50% worse</span>
+  <span><span class="legend-dot" style="background:#fdf0ef;border:1px solid #c0392b"></span> Δ% &gt;50% worse</span>
+  <span><span class="legend-dot" style="background:#e8fdf0;border:1px solid #1b7f3a"></span> ★ Best overall h=12</span>
 </div>
 {sections_html}
 </body>
@@ -423,7 +437,7 @@ def build_html(rows: list[dict]) -> str:
 
 def save_csv(rows: list[dict]) -> None:
     import csv
-    cols = ["Pais", "Tier", "Senales", "Modelo"]
+    cols = ["Country", "Tier", "Signals", "Model"]
     for h in HORIZONS:
         cols += [f"MAE_{h}", f"d%_{h}"]
     with open(OUT_CSV, "w", newline="", encoding="utf-8") as f:
@@ -438,7 +452,8 @@ def save_csv(rows: list[dict]) -> None:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--no-open", action="store_true", help="No abrir en navegador")
+    parser.add_argument("--no-open", action="store_true",
+                        help="Do not open in browser")
     args = parser.parse_args()
 
     rows = build_rows()
@@ -448,8 +463,8 @@ def main():
     OUT_HTML.write_text(html, encoding="utf-8")
     save_csv(rows)
 
-    print(f"HTML guardado: {OUT_HTML}")
-    print(f"CSV  guardado: {OUT_CSV}")
+    logger.info(f"HTML saved: {OUT_HTML}")
+    logger.info(f"CSV  saved: {OUT_CSV}")
 
     if not args.no_open:
         webbrowser.open(OUT_HTML.as_uri())

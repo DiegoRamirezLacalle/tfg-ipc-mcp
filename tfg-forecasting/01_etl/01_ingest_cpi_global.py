@@ -1,26 +1,25 @@
-"""
-01_ingest_cpi_global.py — Descarga e ingestion de inflacion mensual global (World Bank)
+"""Download and ingest monthly global inflation data from the World Bank.
 
-Fuente:
+Source:
   World Bank Global Inflation Dataset
-  Hoja: hcpi_m (Headline CPI Index, mensual, 186 paises)
-  Rango temporal: 2002-01 a 2024-12
+  Sheet: hcpi_m (Headline CPI Index, monthly, 186 countries)
+  Time range: 2002-01 to 2024-12
 
-Nota sobre el formato:
-  La hoja hcpi_m almacena el INDICE de precios al consumo (no la tasa).
-  No existe una fila "World" en esta hoja — solo paises individuales.
-  La tasa mensual global se calcula como:
-    (1) tasa interanual por pais: pct_change(12) sobre el indice
-    (2) mediana transversal de todas las tasas disponibles en cada mes
-  Esto replica la metodologia del World Bank HCPI_GLOBAL_MED (Aggregate sheet, anual).
+Data format note:
+  The hcpi_m sheet stores the consumer price INDEX (not the rate).
+  There is no "World" row — only individual countries.
+  The global monthly rate is computed as:
+    (1) YoY rate per country: pct_change(12) on the index
+    (2) Cross-sectional median across all countries with available data
+  This replicates the World Bank HCPI_GLOBAL_MED methodology.
 
-  cpi_global_rate es la tasa de variacion interanual (YoY, %) en mediana global.
+  cpi_global_rate is the YoY % change (median across countries).
 
-Salidas:
-  data/raw/cpi_global_raw.xlsx                    — Excel original descargado
-  data/processed/cpi_global_monthly.parquet       — Serie limpia (date, cpi_global_rate)
-  data/snapshots/cpi_global_v1_YYYYMM.parquet     — Snapshot versionado
-  data/processed/cpi_global_monthly_check.png     — Plot de verificacion
+Outputs:
+  data/raw/cpi_global_raw.xlsx
+  data/processed/cpi_global_monthly.parquet    (date, cpi_global_rate)
+  data/snapshots/cpi_global_v1_YYYYMM.parquet
+  data/processed/cpi_global_monthly_check.png
 """
 
 from __future__ import annotations
@@ -31,21 +30,27 @@ import warnings
 from datetime import datetime
 from pathlib import Path
 
-# Ensure UTF-8 output on Windows (avoids charmap encode errors in prints)
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT.parent))
+
+# Ensure UTF-8 output on Windows (prevents charmap errors in logger output)
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 import matplotlib
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import requests
 
+from shared.logger import get_logger
+
 warnings.filterwarnings("ignore")
 
-ROOT          = Path(__file__).resolve().parents[1]
+logger = get_logger(__name__)
+
 RAW_DIR       = ROOT / "data" / "raw"
 PROCESSED_DIR = ROOT / "data" / "processed"
 SNAPSHOTS_DIR = ROOT / "data" / "snapshots"
@@ -56,32 +61,28 @@ SOURCE_URL = (
 )
 SHEET      = "hcpi_m"
 DATE_START = "2002-01-01"
-DATE_END   = "2024-12-31"   # inclusive
+DATE_END   = "2024-12-31"
 
-
-# ── Descarga ─────────────────────────────────────────────────────────────────
 
 def download_excel(url: str, dest: Path) -> bytes:
-    print(f"  Descargando {url} ...")
+    logger.info(f"  Downloading {url} ...")
     r = requests.get(url, timeout=120)
     r.raise_for_status()
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(r.content)
-    print(f"  Guardado: {dest}  ({len(r.content)/1024:.0f} KB)")
+    logger.info(f"  Saved: {dest}  ({len(r.content)/1024:.0f} KB)")
     return r.content
 
 
-# ── Parseo ────────────────────────────────────────────────────────────────────
-
 def load_hcpi_m(content: bytes) -> pd.DataFrame:
-    """
-    Carga la hoja hcpi_m y devuelve un DataFrame wide:
-      filas = paises (Country Code como indice)
-      columnas = pd.Timestamp (primer dia del mes)
+    """Load the hcpi_m sheet and return a wide DataFrame.
+
+    Rows = countries (Country Code as index).
+    Columns = pd.Timestamp (first day of month).
     """
     df = pd.read_excel(io.BytesIO(content), sheet_name=SHEET, engine="openpyxl")
 
-    # Columnas de fecha: enteros/floats con formato YYYYMM (e.g. 197001)
+    # Date columns: int/float with YYYYMM format (e.g. 197001)
     date_cols = {}
     for col in df.columns:
         if isinstance(col, (int, float)) and not np.isnan(float(col)):
@@ -90,12 +91,11 @@ def load_hcpi_m(content: bytes) -> pd.DataFrame:
             if 1950 <= year <= 2030 and 1 <= month <= 12:
                 date_cols[col] = pd.Timestamp(year, month, 1)
 
-    # Filtrar solo columnas de fecha
-    meta_cols = ["Country Code", "IMF Country Code", "Country",
-                 "Indicator Type", "Series Name"]
+    # Keep only date columns
+    meta_cols  = ["Country Code", "IMF Country Code", "Country", "Indicator Type", "Series Name"]
     date_orig  = list(date_cols.keys())
 
-    # Excluir ultima fila (nota al pie)
+    # Exclude last row (footnote)
     df = df[df["Country Code"].notna() &
             ~df["Country Code"].astype(str).str.lower().str.startswith("note")]
 
@@ -103,94 +103,90 @@ def load_hcpi_m(content: bytes) -> pd.DataFrame:
     df_wide.columns = [date_cols[c] for c in date_orig]
     df_wide = df_wide.astype(float)
 
-    print(f"  Paises: {len(df_wide)}  |  "
-          f"Fechas: {df_wide.columns.min().date()} a {df_wide.columns.max().date()}")
+    logger.info(f"  Countries: {len(df_wide)}  |  "
+                f"Dates: {df_wide.columns.min().date()} to {df_wide.columns.max().date()}")
     return df_wide
 
 
-def compute_global_rate(df_wide: pd.DataFrame,
-                        date_start: str, date_end: str) -> pd.Series:
-    """
-    Para cada pais: tasa interanual = pct_change(12) sobre el indice mensual.
-    Tasa global = mediana transversal de todos los paises con dato disponible.
-    Filtra al rango [date_start, date_end].
-    """
-    # YoY para cada pais: (index_t / index_t-12 - 1) * 100
-    yoy = df_wide.pct_change(periods=12, axis=1) * 100  # filas=paises, cols=fechas
+def compute_global_rate(df_wide: pd.DataFrame, date_start: str, date_end: str) -> pd.Series:
+    """Compute the cross-sectional median YoY inflation rate.
 
-    # Trasponer a (fecha, pais)
+    Per country: YoY rate = pct_change(12) on the monthly index.
+    Global rate = cross-sectional median across all countries with available data.
+    Filtered to [date_start, date_end].
+    """
+    # YoY per country: (index_t / index_t-12 - 1) * 100
+    yoy = df_wide.pct_change(periods=12, axis=1) * 100   # rows=countries, cols=dates
+
+    # Transpose to (date, country)
     yoy_T = yoy.T
     yoy_T.index = pd.DatetimeIndex(yoy_T.index)
     yoy_T.index.freq = "MS"
 
-    # Mediana transversal
+    # Cross-sectional median
     global_med = yoy_T.median(axis=1, skipna=True)
     global_med.name = "cpi_global_rate"
 
-    # Filtrar rango
-    mask = (global_med.index >= date_start) & (global_med.index <= date_end)
+    # Filter to date range
+    mask   = (global_med.index >= date_start) & (global_med.index <= date_end)
     series = global_med[mask].dropna()
 
-    # Covertura: cuantos paises tienen dato en cada mes
+    # Coverage: number of countries with data per month
     n_countries = yoy_T[mask].notna().sum(axis=1)
-    print(f"  Cobertura media por mes: {n_countries.mean():.0f} paises")
-    print(f"  Cobertura min/max: {n_countries.min()}/{n_countries.max()} paises")
+    logger.info(f"  Mean coverage per month: {n_countries.mean():.0f} countries")
+    logger.info(f"  Coverage min/max: {n_countries.min()}/{n_countries.max()} countries")
 
     return series
 
 
-# ── Estadisticas ──────────────────────────────────────────────────────────────
-
-def print_stats(series: pd.Series) -> None:
-    print("\n" + "─" * 52)
-    print("ESTADISTICAS — cpi_global_rate (YoY mediana, %)")
-    print("─" * 52)
-    print(f"  Rango fechas : {series.index.min().date()} → {series.index.max().date()}")
-    print(f"  Observaciones: {len(series)}")
-    print(f"  NaN count    : {series.isna().sum()}")
-    print(f"  Media        : {series.mean():.4f} %")
-    print(f"  Mediana      : {series.median():.4f} %")
-    print(f"  Min          : {series.min():.4f} %  ({series.idxmin().date()})")
-    print(f"  Max          : {series.max():.4f} %  ({series.idxmax().date()})")
-    print(f"  Std          : {series.std():.4f} %")
-    print("─" * 52)
-    # Gaps
+def log_stats(series: pd.Series) -> None:
+    logger.info("─" * 52)
+    logger.info("STATISTICS — cpi_global_rate (YoY median, %)")
+    logger.info("─" * 52)
+    logger.info(f"  Date range   : {series.index.min().date()} → {series.index.max().date()}")
+    logger.info(f"  Observations : {len(series)}")
+    logger.info(f"  NaN count    : {series.isna().sum()}")
+    logger.info(f"  Mean         : {series.mean():.4f} %")
+    logger.info(f"  Median       : {series.median():.4f} %")
+    logger.info(f"  Min          : {series.min():.4f} %  ({series.idxmin().date()})")
+    logger.info(f"  Max          : {series.max():.4f} %  ({series.idxmax().date()})")
+    logger.info(f"  Std          : {series.std():.4f} %")
+    logger.info("─" * 52)
     expected = pd.date_range(series.index.min(), series.index.max(), freq="MS")
-    missing = expected.difference(series.index)
-    print(f"  Gaps: {'ninguno' if len(missing) == 0 else missing.tolist()}")
+    missing  = expected.difference(series.index)
+    logger.info(f"  Gaps: {'none' if len(missing) == 0 else missing.tolist()}")
 
-
-# ── Plot ──────────────────────────────────────────────────────────────────────
 
 def plot_series(series: pd.Series, out_path: Path) -> None:
     fig, axes = plt.subplots(2, 1, figsize=(13, 7),
                              gridspec_kw={"height_ratios": [3, 1]})
     fig.suptitle(
         "Global Monthly Inflation Rate — World Bank hcpi_m\n"
-        "(mediana interanual de 186 paises, replica HCPI_GLOBAL_MED)",
-        fontsize=12, fontweight="bold", y=0.99)
+        "(cross-country YoY median of 186 countries, replicates HCPI_GLOBAL_MED)",
+        fontsize=12, fontweight="bold", y=0.99,
+    )
 
     SHADING = [
-        ("Crisis financiera", "2008-09-01", "2009-06-30", "#fff3cd", 0.55),
-        ("Covid-19",          "2020-01-01", "2020-12-31", "#e8e8e8", 0.50),
-        ("Shock inflac.",     "2021-01-01", "2022-12-31", "#f8d7d7", 0.55),
-        ("Normalizacion",     "2023-01-01", "2024-12-31", "#d7e8f8", 0.40),
+        ("Financial crisis", "2008-09-01", "2009-06-30", "#fff3cd", 0.55),
+        ("Covid-19",         "2020-01-01", "2020-12-31", "#e8e8e8", 0.50),
+        ("Inflation shock",  "2021-01-01", "2022-12-31", "#f8d7d7", 0.55),
+        ("Normalization",    "2023-01-01", "2024-12-31", "#d7e8f8", 0.40),
     ]
 
-    # ── Panel superior: serie ────────────────────────────────────────────────
+    # Upper panel: series
     ax = axes[0]
     for label, s, e, color, alpha in SHADING:
         ax.axvspan(pd.Timestamp(s), pd.Timestamp(e),
                    color=color, alpha=alpha, zorder=0, label=label)
     ax.axhline(0, color="black", linewidth=0.7, linestyle="--", alpha=0.5)
     ax.plot(series.index, series.values,
-            color="#2166ac", linewidth=1.8, zorder=3, label="Inflacion global (YoY, %)")
+            color="#2166ac", linewidth=1.8, zorder=3, label="Global inflation (YoY, %)")
     ax.scatter(series.idxmax(), series.max(), color="#d62728", s=70, zorder=5,
                label=f"Max: {series.max():.2f}% ({series.idxmax().strftime('%Y-%m')})")
     ax.scatter(series.idxmin(), series.min(), color="#1f77b4", s=70,
                marker="v", zorder=5,
                label=f"Min: {series.min():.2f}% ({series.idxmin().strftime('%Y-%m')})")
-    ax.set_ylabel("Tasa de inflacion YoY (%)", fontsize=10)
+    ax.set_ylabel("YoY inflation rate (%)", fontsize=10)
     ax.xaxis.set_major_locator(mdates.YearLocator(2))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
     ax.tick_params(axis="x", rotation=45)
@@ -198,12 +194,12 @@ def plot_series(series: pd.Series, out_path: Path) -> None:
     ax.set_xlim(series.index.min(), series.index.max())
     ax.grid(axis="y", alpha=0.3)
 
-    # ── Panel inferior: volatilidad rolling ──────────────────────────────────
-    ax2 = axes[1]
+    # Lower panel: rolling volatility
+    ax2      = axes[1]
     roll_std = series.rolling(12, min_periods=6).std()
     ax2.fill_between(roll_std.index, roll_std.values, color="#9ecae1", alpha=0.7)
     ax2.plot(roll_std.index, roll_std.values, color="#2166ac", linewidth=1.0)
-    ax2.set_ylabel("Std rolling 12m", fontsize=9)
+    ax2.set_ylabel("Rolling 12m std", fontsize=9)
     ax2.xaxis.set_major_locator(mdates.YearLocator(2))
     ax2.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
     ax2.tick_params(axis="x", rotation=45)
@@ -214,56 +210,54 @@ def plot_series(series: pd.Series, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=120, bbox_inches="tight")
     plt.close(fig)
-    print(f"\n  Plot guardado: {out_path}")
+    logger.info(f"\n  Plot saved: {out_path}")
 
-
-# ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    print("=" * 60)
-    print("INGESTA CPI GLOBAL — World Bank hcpi_m (186 paises)")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("INGEST CPI GLOBAL — World Bank hcpi_m (186 countries)")
+    logger.info("=" * 60)
 
-    # 1. Descarga
+    # 1. Download
     raw_path = RAW_DIR / "cpi_global_raw.xlsx"
     content  = download_excel(SOURCE_URL, raw_path)
 
-    # 2. Cargar hoja como matriz paises x fechas
-    print("\nCargando hoja hcpi_m...")
+    # 2. Load sheet as country × date matrix
+    logger.info("\nLoading hcpi_m sheet...")
     df_wide = load_hcpi_m(content)
 
-    # 3. Calcular tasa global (mediana YoY)
-    print("\nCalculando tasa interanual global (mediana transversal)...")
+    # 3. Compute global rate (cross-sectional median YoY)
+    logger.info("\nComputing global YoY rate (cross-sectional median)...")
     series = compute_global_rate(df_wide, DATE_START, DATE_END)
 
-    # 4. Estadisticas
-    print_stats(series)
+    # 4. Statistics
+    log_stats(series)
 
-    # 5. DataFrame de salida
+    # 5. Output DataFrame
     df_out = series.rename("cpi_global_rate").to_frame()
     df_out.index.name = "date"
-    print(f"\n  Primeras filas:\n{df_out.head(4).to_string()}")
-    print(f"  ...\n  Ultimas filas:\n{df_out.tail(4).to_string()}")
+    logger.info(f"\n  First rows:\n{df_out.head(4).to_string()}")
+    logger.info(f"  ...\n  Last rows:\n{df_out.tail(4).to_string()}")
 
-    # 6. Guardar processed
+    # 6. Save processed
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     proc_path = PROCESSED_DIR / "cpi_global_monthly.parquet"
     df_out.to_parquet(proc_path)
-    print(f"\n  Guardado processed: {proc_path}")
+    logger.info(f"\n  Saved processed: {proc_path}")
 
-    # 7. Snapshot versionado
+    # 7. Versioned snapshot
     SNAPSHOTS_DIR.mkdir(parents=True, exist_ok=True)
-    version = datetime.now().strftime("%Y%m")
+    version   = datetime.now().strftime("%Y%m")
     snap_path = SNAPSHOTS_DIR / f"cpi_global_v1_{version}.parquet"
     df_out.to_parquet(snap_path)
-    print(f"  Guardado snapshot:  {snap_path}")
+    logger.info(f"  Saved snapshot:  {snap_path}")
 
     # 8. Plot
     plot_series(series, PROCESSED_DIR / "cpi_global_monthly_check.png")
 
-    print("\n" + "=" * 60)
-    print("ETL completado.")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("ETL complete.")
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,22 @@
+{
+  "model": "arimax_C1_inst_global",
+  "order": [
+    3,
+    1,
+    0
+  ],
+  "exog": [
+    "imf_comm_ma3",
+    "brent_log_ma3",
+    "dfr_ma3",
+    "gscpi_ma3",
+    "fedfunds_ma3",
+    "usg10y_ma3"
+  ],
+  "n_train": 228,
+  "metrics_val": {
+    "MAE": 0.8623,
+    "RMSE": 1.1188,
+    "MASE": 0.7357
+  }
+}

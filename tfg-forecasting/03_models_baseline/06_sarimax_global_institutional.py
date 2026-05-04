@@ -1,10 +1,9 @@
-"""
-06_sarimax_global_institutional.py — ARIMAX C1_institutional CPI Global
+"""ARIMAX C1_institutional — Global CPI with institutional signals.
 
-ARIMA(3,1,0) con las señales institucionales globales seleccionadas por
-correlación ≥ 0.2 con cpi_global_rate(t+1).
+ARIMA(3,1,0) with global institutional signals selected by
+correlation >= 0.2 with cpi_global_rate(t+1).
 
-Top señales (por corr. completo):
+Top signals (full-sample correlation):
   imf_comm_ma3  (0.586) — IMF All Commodity Index
   brent_log_ma3 (0.456) — Brent crude
   dfr_ma3       (0.376) — ECB DFR
@@ -12,8 +11,9 @@ Top señales (por corr. completo):
   fedfunds_ma3  (0.279) — Fed Funds
   usg10y_ma3    (0.250) — 10Y UST
 
-Protocolo rolling expanding-window idéntico al script 04 del baseline.
-Salida:
+Rolling expanding-window protocol identical to baseline script 04.
+
+Output:
   08_results/arimax_C1_inst_global_metrics.json
   08_results/rolling_predictions_C1_inst_global.parquet
   08_results/rolling_metrics_C1_inst_global.json
@@ -36,16 +36,19 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_VAL_END, DATE_TEST_END
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = ROOT / "08_results"
 
-ARIMA_ORDER = (3, 1, 0)
-HORIZONS    = [1, 3, 6, 12]
+ARIMA_ORDER   = (3, 1, 0)
+HORIZONS      = [1, 3, 6, 12]
 ORIGINS_START = "2021-01-01"
 ORIGINS_END   = DATE_TEST_END
 TEST_END_TS   = pd.Timestamp(DATE_TEST_END)
 
-# Señales seleccionadas (disponibles desde 2002, sin NaN tras bfill)
+# Selected signals (available from 2002, no NaN after bfill)
 EXOG_COLS = [
     "imf_comm_ma3",
     "brent_log_ma3",
@@ -64,7 +67,7 @@ def load_data():
     y = feat["cpi_global_rate"]
     X = feat[EXOG_COLS].copy()
 
-    # Rellenar NaN residuales (DXY no está en EXOG_COLS, pero por si acaso)
+    # Fill residual NaNs
     X = X.ffill().bfill()
 
     return y, X
@@ -76,7 +79,7 @@ def fit_arimax(y_train, x_train):
 
 
 def run_static_val(y, X):
-    """Evaluación estática train 2002-2020 / val 2021-01 a 2022-06."""
+    """Static evaluation: train 2002-2020 / val 2021-01 to 2022-06."""
     train_mask = y.index <= DATE_TRAIN_END
     val_mask   = (y.index > DATE_TRAIN_END) & (y.index <= DATE_VAL_END)
 
@@ -109,7 +112,7 @@ def run_rolling(y, X):
     origins    = pd.date_range(start=ORIGINS_START, end=ORIGINS_END, freq="MS")
     y_train_init = y.loc[:DATE_TRAIN_END]
     mase_scale = float(np.mean(np.abs(y_train_init.values[12:] - y_train_init.values[:-12])))
-    print(f"  MASE scale: {mase_scale:.4f} pp")
+    logger.info(f"  MASE scale: {mase_scale:.4f} pp")
 
     records = []
     for origin in tqdm(origins, desc="ARIMAX C1_inst global"):
@@ -119,7 +122,7 @@ def run_rolling(y, X):
         try:
             res = fit_arimax(y_train, x_train)
         except Exception as e:
-            print(f"\n[!] {origin.date()}: {e}")
+            logger.warning(f"\n[!] {origin.date()}: {e}")
             continue
 
         for h in HORIZONS:
@@ -174,74 +177,70 @@ def compute_metrics(df_preds, mase_scale):
 
 
 def main():
-    print("=" * 60)
-    print("ARIMAX C1_institutional — CPI Global")
-    print(f"  Orden: {ARIMA_ORDER}  Exógenas: {len(EXOG_COLS)}")
-    print(f"  {EXOG_COLS}")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("ARIMAX C1_institutional — CPI Global")
+    logger.info(f"  Order: {ARIMA_ORDER}  Exogenous: {len(EXOG_COLS)}")
+    logger.info(f"  {EXOG_COLS}")
+    logger.info("=" * 60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     y, X = load_data()
-    print(f"\nCPI Global: {len(y)} obs  ({y.index.min().date()} - {y.index.max().date()})")
-    print(f"Exógenas:   {X.shape[1]} cols, NaN={X.isna().sum().sum()}\n")
+    logger.info(f"\nCPI Global: {len(y)} obs  ({y.index.min().date()} - {y.index.max().date()})")
+    logger.info(f"Exogenous:   {X.shape[1]} cols, NaN={X.isna().sum().sum()}\n")
 
-    # Evaluación estática
-    print("1. Evaluación estática...")
+    logger.info("1. Static evaluation...")
     static = run_static_val(y, X)
     mv = static["metrics_val"]
-    print(f"   MAE={mv['MAE']}  RMSE={mv['RMSE']}  MASE={mv['MASE']}")
+    logger.info(f"   MAE={mv['MAE']}  RMSE={mv['RMSE']}  MASE={mv['MASE']}")
 
     with open(RESULTS_DIR / "arimax_C1_inst_global_metrics.json", "w") as f:
         json.dump(static, f, indent=2)
 
-    # Rolling
-    print("\n2. Rolling expanding-window...")
+    logger.info("\n2. Rolling expanding-window...")
     df_preds, mase_scale = run_rolling(y, X)
     metrics = compute_metrics(df_preds, mase_scale)
 
-    print("\n" + "=" * 60)
-    print("RESULTADOS ROLLING C1_institutional")
-    print("=" * 60)
-    print(f"\n  {'h':>4} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'N':>5}")
-    print(f"  {'-'*38}")
+    logger.info("\n" + "=" * 60)
+    logger.info("ROLLING RESULTS C1_institutional")
+    logger.info("=" * 60)
+    logger.info(f"\n  {'h':>4} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'N':>5}")
+    logger.info(f"  {'-'*38}")
     for h in HORIZONS:
         key = f"h{h}"
         if key in metrics["arimax_C1_inst"]:
             m = metrics["arimax_C1_inst"][key]
-            print(f"  {h:>4} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} {m['MASE']:>8.4f} {m['n_evals']:>5d}")
+            logger.info(f"  {h:>4} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} {m['MASE']:>8.4f} {m['n_evals']:>5d}")
 
-    # Comparativa vs C0 baseline
     try:
         with open(RESULTS_DIR / "rolling_metrics_global.json") as f:
             c0 = json.load(f)
-        print("\n  Delta MAE vs ARIMAX C0 (positivo = mejora C1):")
-        print(f"  {'h':>4} {'C0 ARIMAX':>12} {'C1 inst':>12} {'Delta%':>10}")
-        print(f"  {'-'*42}")
+        logger.info("\n  Delta MAE vs ARIMAX C0 (positive = C1 improvement):")
+        logger.info(f"  {'h':>4} {'C0 ARIMAX':>12} {'C1 inst':>12} {'Delta%':>10}")
+        logger.info(f"  {'-'*42}")
         for h in HORIZONS:
             key = f"h{h}"
             if key in metrics["arimax_C1_inst"] and key in c0.get("arimax", {}):
                 c0_mae = c0["arimax"][key]["MAE"]
                 c1_mae = metrics["arimax_C1_inst"][key]["MAE"]
                 pct    = (c0_mae - c1_mae) / c0_mae * 100
-                mark   = " <-- mejora" if pct > 0 else ""
-                print(f"  {h:>4} {c0_mae:>12.4f} {c1_mae:>12.4f} {pct:>+9.1f}%{mark}")
+                mark   = " <-- improvement" if pct > 0 else ""
+                logger.info(f"  {h:>4} {c0_mae:>12.4f} {c1_mae:>12.4f} {pct:>+9.1f}%{mark}")
     except FileNotFoundError:
         pass
 
-    # Guardar
     preds_path = RESULTS_DIR / "rolling_predictions_C1_inst_global.parquet"
     df_preds.to_parquet(preds_path, index=False)
-    print(f"\nPredicciones: {preds_path}")
+    logger.info(f"\nPredictions: {preds_path}")
 
     metrics_path = RESULTS_DIR / "rolling_metrics_C1_inst_global.json"
     with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=2)
-    print(f"Métricas:     {metrics_path}")
+    logger.info(f"Metrics:     {metrics_path}")
 
-    print("\n" + "=" * 60)
-    print("ARIMAX C1_inst COMPLETADO")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("ARIMAX C1_inst COMPLETE")
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":

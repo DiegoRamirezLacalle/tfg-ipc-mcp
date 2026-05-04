@@ -1,0 +1,26 @@
+{
+  "h1": {
+    "model": "nhits_global_h1",
+    "MAE": 0.1793,
+    "RMSE": 0.1793,
+    "MASE": 0.1529
+  },
+  "h3": {
+    "model": "nhits_global_h3",
+    "MAE": 0.2622,
+    "RMSE": 0.2817,
+    "MASE": 0.2237
+  },
+  "h6": {
+    "model": "nhits_global_h6",
+    "MAE": 0.6804,
+    "RMSE": 0.8139,
+    "MASE": 0.5805
+  },
+  "h12": {
+    "model": "nhits_global_h12",
+    "MAE": 1.6649,
+    "RMSE": 2.0338,
+    "MASE": 1.4205
+  }
+}

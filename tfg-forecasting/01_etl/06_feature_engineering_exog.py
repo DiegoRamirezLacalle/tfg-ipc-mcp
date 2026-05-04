@@ -1,62 +1,61 @@
-"""
-06_feature_engineering_exog.py — Construccion del dataset exogeno
+"""Build the exogenous feature dataset for SARIMAX.
 
-Une el IPC del INE con los tipos de interes BCE y genera features derivadas.
-El resultado es un DataFrame alineado mensualmente listo para SARIMAX.
+Joins Spain IPC (INE) with ECB rates and generates lag/diff features.
 
-Features generadas:
-  dfr          — Deposit Facility Rate nivel (variable principal)
-  mrr          — Main Refinancing Rate nivel (variable secundaria)
-  dfr_diff     — Cambio mensual del DFR (accion de politica monetaria)
-  dfr_lag3     — DFR con retardo 3 meses
-  dfr_lag6     — DFR con retardo 6 meses (transmision tipica: 6-18m)
-  dfr_lag12    — DFR con retardo 12 meses
+Features produced:
+  dfr       — Deposit Facility Rate level (main policy variable)
+  mrr       — Main Refinancing Rate level
+  dfr_diff  — Monthly DFR change (policy action)
+  dfr_lag3  — DFR lagged 3 months
+  dfr_lag6  — DFR lagged 6 months (typical transmission: 6-18m)
+  dfr_lag12 — DFR lagged 12 months
 
-Entrada:  data/processed/ipc_spain_index.parquet
-          data/processed/ecb_rates_monthly.parquet
-Salida:   data/processed/features_exog.parquet
+Input:  data/processed/ipc_spain_index.parquet
+        data/processed/ecb_rates_monthly.parquet
+Output: data/processed/features_exog.parquet
 """
 
+import sys
 from pathlib import Path
 
 import pandas as pd
 
-ROOT          = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT.parent))
+
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
+
 PROCESSED_DIR = ROOT / "data" / "processed"
 
 
 def main() -> None:
-    # ── Cargar fuentes ────────────────────────────────────────────
-    ipc = pd.read_parquet(PROCESSED_DIR / "ipc_spain_index.parquet")[["indice_general"]]
+    ipc   = pd.read_parquet(PROCESSED_DIR / "ipc_spain_index.parquet")[["indice_general"]]
     rates = pd.read_parquet(PROCESSED_DIR / "ecb_rates_monthly.parquet")
 
-    # ── Alinear al rango comun ────────────────────────────────────
     df = ipc.join(rates, how="inner")
     df.index.freq = "MS"
 
-    # ── Features derivadas ────────────────────────────────────────
     df["dfr_diff"]  = df["dfr"].diff()
     df["dfr_lag3"]  = df["dfr"].shift(3)
     df["dfr_lag6"]  = df["dfr"].shift(6)
     df["dfr_lag12"] = df["dfr"].shift(12)
 
-    # Los lags introducen NaN al inicio — los documentamos pero no los eliminamos
-    # para no perder observaciones del train set; cada modelo recorta lo que necesite
+    # Lags introduce NaN at the start — kept intentionally; each model trims as needed
     nan_counts = df.isna().sum()
     if nan_counts.any():
-        print("NaN por columna (esperados en lags iniciales):")
-        print(nan_counts[nan_counts > 0].to_string())
+        logger.info(f"NaN per column (expected in initial lags):\n{nan_counts[nan_counts > 0].to_string()}")
 
-    print(f"\nRango: {df.index.min().date()} - {df.index.max().date()}")
-    print(f"Observaciones: {len(df)}")
-    print(f"Columnas: {list(df.columns)}")
-    print(f"\nPrimeras filas:\n{df.head()}")
-    print(f"\nCorrelaciones con indice_general:")
-    print(df.corr()["indice_general"].drop("indice_general").round(3).to_string())
+    logger.info(f"Range: {df.index.min().date()} - {df.index.max().date()}")
+    logger.info(f"Observations: {len(df)}")
+    logger.info(f"Columns: {list(df.columns)}")
+    logger.info(f"First rows:\n{df.head()}")
+    logger.info(f"Correlations with indice_general:\n{df.corr()['indice_general'].drop('indice_general').round(3).to_string()}")
 
     out = PROCESSED_DIR / "features_exog.parquet"
     df.to_parquet(out)
-    print(f"\nExportado: {out}")
+    logger.info(f"Saved: {out}")
 
 
 if __name__ == "__main__":

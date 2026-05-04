@@ -1,0 +1,34 @@
+{
+  "model": "arima111_global",
+  "order": [
+    1,
+    1,
+    1
+  ],
+  "aic": 72.3836,
+  "bic": 82.6585,
+  "n_train": 228,
+  "residuals": {
+    "mean": 0.011418,
+    "std": 0.3572,
+    "ljung_box": {
+      "lag_6": {
+        "stat": 2.5648,
+        "pvalue": 0.8612
+      },
+      "lag_12": {
+        "stat": 13.8077,
+        "pvalue": 0.3132
+      },
+      "lag_24": {
+        "stat": 22.5111,
+        "pvalue": 0.5488
+      }
+    }
+  },
+  "metrics_val": {
+    "MAE": 2.9275,
+    "RMSE": 3.5629,
+    "MASE": 2.4978
+  }
+}

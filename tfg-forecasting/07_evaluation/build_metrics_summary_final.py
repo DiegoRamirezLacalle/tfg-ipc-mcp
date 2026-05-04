@@ -1,14 +1,14 @@
 """
-build_metrics_summary_final.py — Tabla comparativa completa de todos los modelos
+build_metrics_summary_final.py — Full comparison table for all models
 
-Modelos incluidos:
-  Baseline: naive, arima, sarima, sarimax
-  Deep:     lstm, nbeats, nhits
+Models included:
+  Baseline:    naive, arima, sarima, sarimax
+  Deep:        lstm, nbeats, nhits
   Foundation C0: timesfm_C0, chronos2_C0, timegpt_C0
   Foundation C1: timesfm_C1, chronos2_C1, timegpt_C1
 
-Metricas: MAE, RMSE, MASE por horizonte h=1,3,6,12
-Salida: 08_results/metrics_summary_final.json
+Metrics: MAE, RMSE, MASE per horizon h=1,3,6,12
+Output: 08_results/metrics_summary_final.json
 """
 
 from __future__ import annotations
@@ -25,6 +25,9 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = ROOT / "08_results"
 HORIZONS = [1, 3, 6, 12]
@@ -63,7 +66,7 @@ def metrics_from_parquet(path: Path, model_name: str, mase_scale: float) -> dict
 
 def main():
     mase_scale = compute_mase_scale()
-    print(f"MASE scale (naive seasonal lag-12, train 2002-2020): {mase_scale:.4f}")
+    logger.info(f"MASE scale (naive seasonal lag-12, train 2002-2020): {mase_scale:.4f}")
 
     all_metrics = {}
 
@@ -72,14 +75,14 @@ def main():
     if baseline_path.exists():
         for model in ["naive", "arima", "sarima", "sarimax"]:
             all_metrics[model] = metrics_from_parquet(baseline_path, model, mase_scale)
-            print(f"  {model}: OK")
+            logger.info(f"  {model}: OK")
 
     # ── Deep models ──
     deep_path = ROOT / "04_models_deep" / "results" / "deep_rolling_predictions.parquet"
     if deep_path.exists():
         for model in ["lstm", "nbeats", "nhits"]:
             all_metrics[model] = metrics_from_parquet(deep_path, model, mase_scale)
-            print(f"  {model}: OK")
+            logger.info(f"  {model}: OK")
 
     # ── Foundation models ──
     foundation_models = [
@@ -96,20 +99,20 @@ def main():
         path = RESULTS_DIR / f"{model}_predictions.parquet"
         if path.exists():
             all_metrics[model] = metrics_from_parquet(path, model, mase_scale)
-            print(f"  {model}: OK")
+            logger.info(f"  {model}: OK")
         else:
-            print(f"  [!] {model}: not found")
+            logger.warning(f"  [!] {model}: not found")
 
     # ── Print comparison table ──
-    print("\n" + "=" * 90)
-    print("TABLA COMPARATIVA FINAL — MAE por horizonte")
-    print("=" * 90)
+    logger.info("\n" + "=" * 90)
+    logger.info("FINAL COMPARISON TABLE — MAE by horizon")
+    logger.info("=" * 90)
 
-    header = f"{'Modelo':<18}"
+    header = f"{'Model':<18}"
     for h in HORIZONS:
         header += f" {'h='+str(h):>8}"
-    print(header)
-    print("-" * 55)
+    logger.info(header)
+    logger.info("-" * 55)
 
     # Sort by h=1 MAE
     sorted_models = sorted(
@@ -126,10 +129,10 @@ def main():
                 row += f" {mae:8.4f}"
             else:
                 row += f" {'N/A':>8}"
-        print(row)
+        logger.info(row)
 
     # ── Best model per horizon ──
-    print("\n--- Mejor modelo por horizonte (MAE) ---")
+    logger.info("\n--- Best model per horizon (MAE) ---")
     for h in HORIZONS:
         key = f"h{h}"
         best_model = None
@@ -140,23 +143,25 @@ def main():
                 best_mae = mae
                 best_model = model
         if best_model:
-            print(f"  h={h}: {best_model} (MAE={best_mae:.4f})")
+            logger.info(f"  h={h}: {best_model} (MAE={best_mae:.4f})")
 
     # ── C0 vs C1 delta table ──
-    print("\n--- C0 vs C1 delta (MAE) ---")
-    families = [("timesfm", "timesfm_C0", "timesfm_C1"),
-                ("chronos2", "chronos2_C0", "chronos2_C1"),
-                ("timegpt", "timegpt_C0", "timegpt_C1"),
-                ("chronos2_e", "chronos2_C0", "chronos2_C1_energy"),
-                ("timegpt_e", "timegpt_C0", "timegpt_C1_energy"),
-                ("chronos2_eo", "chronos2_C0", "chronos2_C1_energy_only"),
-                ("timegpt_eo", "timegpt_C0", "timegpt_C1_energy_only"),
-                ("chronos2_inst", "chronos2_C0", "chronos2_C1_inst"),
-                ("chronos2_macro", "chronos2_C0", "chronos2_C1_macro"),
-                ("timesfm_inst", "timesfm_C0", "timesfm_C1_inst"),
-                ("timesfm_macro", "timesfm_C0", "timesfm_C1_macro"),
-                ("timegpt_inst", "timegpt_C0", "timegpt_C1_inst"),
-                ("timegpt_macro", "timegpt_C0", "timegpt_C1_macro")]
+    logger.info("\n--- C0 vs C1 delta (MAE) ---")
+    families = [
+        ("timesfm",      "timesfm_C0",  "timesfm_C1"),
+        ("chronos2",     "chronos2_C0", "chronos2_C1"),
+        ("timegpt",      "timegpt_C0",  "timegpt_C1"),
+        ("chronos2_e",   "chronos2_C0", "chronos2_C1_energy"),
+        ("timegpt_e",    "timegpt_C0",  "timegpt_C1_energy"),
+        ("chronos2_eo",  "chronos2_C0", "chronos2_C1_energy_only"),
+        ("timegpt_eo",   "timegpt_C0",  "timegpt_C1_energy_only"),
+        ("chronos2_inst","chronos2_C0", "chronos2_C1_inst"),
+        ("chronos2_macro","chronos2_C0","chronos2_C1_macro"),
+        ("timesfm_inst", "timesfm_C0",  "timesfm_C1_inst"),
+        ("timesfm_macro","timesfm_C0",  "timesfm_C1_macro"),
+        ("timegpt_inst", "timegpt_C0",  "timegpt_C1_inst"),
+        ("timegpt_macro","timegpt_C0",  "timegpt_C1_macro"),
+    ]
 
     for family, c0, c1 in families:
         if c0 in all_metrics and c1 in all_metrics:
@@ -168,14 +173,14 @@ def main():
                 if m0 and m1:
                     delta_pct = (m1 - m0) / m0 * 100
                     row += f"  h{h}:{delta_pct:+.1f}%"
-            print(row)
+            logger.info(row)
 
     # ── Save JSON ──
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out_path = RESULTS_DIR / "metrics_summary_final.json"
     with open(out_path, "w") as f:
         json.dump(all_metrics, f, indent=2)
-    print(f"\nGuardado: {out_path}")
+    logger.info(f"\nSaved: {out_path}")
 
 
 if __name__ == "__main__":

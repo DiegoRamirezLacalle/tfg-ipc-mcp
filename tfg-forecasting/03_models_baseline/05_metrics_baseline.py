@@ -1,18 +1,17 @@
-"""
-05_metrics_baseline.py — Consolidacion y reporte final de modelos baseline
+"""Consolidated report and final evaluation for Spain baseline models (C0).
 
-Integra los resultados de los cuatro scripts anteriores en:
-  1. Tabla de especificaciones de modelos
-  2. Evaluacion estatica (train 2002-2020 / val 2021-2022)
-  3. Evaluacion rolling por horizonte (h=1,3,6,12)
-  4. Desglose por periodo economico:
-       A) Pre-crisis:   2021-01 a 2022-06  (inflacion baja, DFR=-0.50%)
-       B) Crisis:       2022-07 a 2023-06  (pico inflacion, BCE sube tipos)
-       C) Post-crisis:  2023-07 a 2024-12  (desinflacion)
-  5. Ranking de modelos por horizonte
-  6. Graficos de errores y comparativa
+Integrates results from the four preceding scripts into:
+  1. Model specification table
+  2. Static evaluation (train 2002-2020 / val 2021-2022)
+  3. Rolling evaluation by horizon (h=1,3,6,12)
+  4. Breakdown by economic period:
+       A) Pre-crisis:   2021-01 to 2022-06  (low inflation, DFR=-0.50%)
+       B) Crisis:       2022-07 to 2023-06  (inflation peak, ECB hikes)
+       C) Post-crisis:  2023-07 to 2024-12  (disinflation)
+  5. Model ranking by horizon
+  6. Error plots and comparison charts
 
-Salida:
+Output:
   results/baseline_report.txt
   results/baseline_summary.json
   results/plots/rolling_mae_by_horizon.png
@@ -34,6 +33,10 @@ import pandas as pd
 ROOT     = Path(__file__).resolve().parents[1]
 MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
+
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 PLOTS_DIR   = RESULTS_DIR / "plots"
@@ -59,8 +62,6 @@ MODEL_COLORS = {
 }
 
 
-# ── Carga ──────────────────────────────────────────────────────────────────
-
 def load_all():
     static = {}
     for m in ["arima", "sarima", "sarimax"]:
@@ -76,8 +77,6 @@ def load_all():
 
     return static, rolling, preds
 
-
-# ── Analisis por periodo ────────────────────────────────────────────────────
 
 def metrics_by_period(preds: pd.DataFrame) -> dict:
     results = {}
@@ -99,8 +98,6 @@ def metrics_by_period(preds: pd.DataFrame) -> dict:
     return results
 
 
-# ── Ranking ────────────────────────────────────────────────────────────────
-
 def build_ranking(rolling: dict) -> dict:
     ranking = {}
     for h in HORIZONS:
@@ -118,8 +115,6 @@ def build_ranking(rolling: dict) -> dict:
         }
     return ranking
 
-
-# ── Reporte texto ──────────────────────────────────────────────────────────
 
 def write_report(static, rolling, period_metrics, ranking):
     sep  = "=" * 70
@@ -224,11 +219,9 @@ def write_report(static, rolling, period_metrics, ranking):
     path = RESULTS_DIR / "baseline_report.txt"
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
-    print(f"Reporte guardado: {path}")
+    logger.info(f"Report saved: {path}")
     return text
 
-
-# ── Graficos ───────────────────────────────────────────────────────────────
 
 def plot_mae_by_horizon(rolling: dict) -> None:
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -244,8 +237,8 @@ def plot_mae_by_horizon(rolling: dict) -> None:
 
     ax.set_xticks(x)
     ax.set_xticklabels([f"h={h}" for h in HORIZONS])
-    ax.set_ylabel("MAE (puntos de indice IPC)")
-    ax.set_title("MAE Rolling por horizonte -- Baseline C0")
+    ax.set_ylabel("MAE (IPC index points)")
+    ax.set_title("MAE rolling by horizon — Baseline C0")
     ax.legend(loc="upper left")
     ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
     ax.grid(axis="y", alpha=0.3)
@@ -253,7 +246,7 @@ def plot_mae_by_horizon(rolling: dict) -> None:
     path = PLOTS_DIR / "rolling_mae_by_horizon.png"
     fig.savefig(path, dpi=150)
     plt.close(fig)
-    print(f"Grafico: {path}")
+    logger.info(f"Plot saved: {path}")
 
 
 def plot_error_by_period(period_metrics: dict) -> None:
@@ -285,17 +278,17 @@ def plot_error_by_period(period_metrics: dict) -> None:
         ax.set_xticks(x)
         ax.set_xticklabels(["Pre-crisis\n2021-06/22", "Crisis\n07/22-06/23",
                              "Post-crisis\n07/23-12/24"], fontsize=8)
-        ax.set_ylabel("MAE (puntos de indice IPC)")
-        ax.set_title(f"MAE por periodo -- h={h} mes{'es' if h > 1 else ''}")
+        ax.set_ylabel("MAE (IPC index points)")
+        ax.set_title(f"MAE by period — h={h} month{'s' if h > 1 else ''}")
         ax.legend(fontsize=8)
         ax.grid(axis="y", alpha=0.3)
 
-    fig.suptitle("Comportamiento por periodo economico -- Baseline C0", fontsize=11)
+    fig.suptitle("Performance by economic period — Baseline C0", fontsize=11)
     fig.tight_layout()
     path = PLOTS_DIR / "error_by_period.png"
     fig.savefig(path, dpi=150)
     plt.close(fig)
-    print(f"Grafico: {path}")
+    logger.info(f"Plot saved: {path}")
 
 
 def plot_rolling_errors_over_time(preds: pd.DataFrame) -> None:
@@ -317,25 +310,23 @@ def plot_rolling_errors_over_time(preds: pd.DataFrame) -> None:
 
         ax.axvspan(pd.Timestamp("2022-07-01"), pd.Timestamp("2023-06-01"),
                    alpha=0.08, color="red", label="_Crisis BCE")
-        ax.set_ylabel("Error absoluto")
-        ax.set_title(f"Error absoluto rolling -- h={h} mes{'es' if h > 1 else ''}")
+        ax.set_ylabel("Absolute error")
+        ax.set_title(f"Rolling absolute error — h={h} month{'s' if h > 1 else ''}")
         ax.legend(ncol=5, fontsize=8)
         ax.grid(alpha=0.3)
 
-    fig.suptitle("Evolucion del error rolling en el tiempo -- Baseline C0", fontsize=11)
+    fig.suptitle("Rolling error over time — Baseline C0", fontsize=11)
     fig.tight_layout()
     path = PLOTS_DIR / "rolling_errors_h1_h12.png"
     fig.savefig(path, dpi=150)
     plt.close(fig)
-    print(f"Grafico: {path}")
+    logger.info(f"Plot saved: {path}")
 
-
-# ── Main ───────────────────────────────────────────────────────────────────
 
 def main():
-    print("=" * 60)
-    print("CONSOLIDACION BASELINE")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("BASELINE CONSOLIDATION")
+    logger.info("=" * 60)
 
     PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -344,8 +335,7 @@ def main():
     ranking        = build_ranking(rolling)
 
     report = write_report(static, rolling, period_metrics, ranking)
-    print()
-    print(report)
+    logger.info("\n" + report)
 
     summary = {
         "static_val":     {m: static[m]["metrics_val"] for m in ["arima", "sarima", "sarimax"]},
@@ -356,17 +346,17 @@ def main():
     summary_path = RESULTS_DIR / "baseline_summary.json"
     with open(summary_path, "w") as f:
         json.dump(summary, f, indent=2)
-    print(f"Summary JSON: {summary_path}")
+    logger.info(f"Summary JSON: {summary_path}")
 
-    print("\nGenerando graficos...")
+    logger.info("Generating plots...")
     plot_mae_by_horizon(rolling)
     plot_error_by_period(period_metrics)
     plot_rolling_errors_over_time(preds)
 
-    print("\nArchivos generados en results/:")
+    logger.info("Files generated in results/:")
     for p in sorted(RESULTS_DIR.rglob("*")):
         if p.is_file():
-            print(f"  {p.relative_to(RESULTS_DIR)}")
+            logger.info(f"  {p.relative_to(RESULTS_DIR)}")
 
 
 if __name__ == "__main__":

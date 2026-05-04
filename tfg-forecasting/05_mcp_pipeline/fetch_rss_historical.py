@@ -1,26 +1,23 @@
-"""
-fetch_rss_historical.py
------------------------
-Descarga historico de comunicados oficiales (2015-2024) para tres fuentes:
+"""Download historical official press releases (2015-2024) from three sources:
 
-  BCE  — Decisiones de politica monetaria del BCE desde press releases.
-  INE  — Notas de prensa mensuales del IPC via URL predecible.
-  BdE  — Notas de prensa del Banco de Espana via RSS.
+  BCE — ECB monetary policy decisions from press releases.
+  INE — Monthly CPI press releases via predictable URL.
+  BdE — Banco de Espana press releases via RSS.
 
-Cada comunicado se guarda como JSON normalizado en:
+Each release is saved as normalized JSON in:
   data/raw/rss_raw/{source}/YYYY-MM.json
 
-Es resumible: si YYYY-MM.json ya existe, se salta.
-Rate limiting: 1 segundo entre peticiones HTTP.
+Resumable: skips months where YYYY-MM.json already exists.
+Rate limiting: 1 second between HTTP requests.
 
-Uso:
-  python fetch_rss_historical.py                     # todas las fuentes
-  python fetch_rss_historical.py --source bce        # solo BCE
-  python fetch_rss_historical.py --source ine        # solo INE
-  python fetch_rss_historical.py --source bde        # solo BdE
-  python fetch_rss_historical.py --mongo             # ademas inserta en MongoDB
+Usage:
+  python fetch_rss_historical.py                     # all sources
+  python fetch_rss_historical.py --source bce        # BCE only
+  python fetch_rss_historical.py --source ine        # INE only
+  python fetch_rss_historical.py --source bde        # BdE only
+  python fetch_rss_historical.py --mongo             # also insert into MongoDB
 
-Requiere:
+Requirements:
   pip install httpx beautifulsoup4 feedparser pymongo
 """
 
@@ -29,6 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 import time
 import unicodedata
 from datetime import datetime, timezone
@@ -39,7 +37,13 @@ import httpx
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 
-# ── Configuracion ──────────────────────────────────────────────
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT.parent))
+
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RAW_BASE = PROJECT_ROOT / "data" / "raw" / "rss_raw"
 
@@ -50,9 +54,9 @@ MONGO_COLLECTION = "news_raw"
 START_YEAR = 2015
 END_YEAR = 2024
 
-RATE_LIMIT = 1.0  # segundos entre peticiones
+RATE_LIMIT = 1.0  # seconds between requests
 
-# Headers para evitar bloqueos
+# headers to avoid server blocks
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (compatible; TFG-IPC-MCP-Research/1.0; "
@@ -63,14 +67,13 @@ HEADERS = {
 }
 
 
-# ── Utilidades ────────────────────────────────────────────────
 def _rate_limit():
-    """Espera entre peticiones para no saturar servidores."""
+    """Sleep between requests to avoid overloading servers."""
     time.sleep(RATE_LIMIT)
 
 
 def _save_json(source: str, year_month: str, docs: list[dict]):
-    """Guarda lista de documentos como JSON en data/raw/rss_raw/{source}/YYYY-MM.json."""
+    """Save document list as JSON to data/raw/rss_raw/{source}/YYYY-MM.json."""
     out_dir = RAW_BASE / source
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{year_month}.json"
@@ -80,19 +83,13 @@ def _save_json(source: str, year_month: str, docs: list[dict]):
 
 
 def _already_fetched(source: str, year_month: str) -> bool:
-    """Comprueba si ya existe el JSON para un mes dado."""
+    """Return True if JSON for the given month already exists."""
     path = RAW_BASE / source / f"{year_month}.json"
     return path.exists()
 
 
-def _make_doc(
-    date: str,
-    title: str,
-    body: str,
-    source: str,
-    url: str,
-) -> dict:
-    """Crea documento normalizado."""
+def _make_doc(date: str, title: str, body: str, source: str, url: str) -> dict:
+    """Create a normalized document dict."""
     return {
         "date": date,
         "title": title.strip(),
@@ -106,7 +103,7 @@ def _make_doc(
 
 
 def _insert_mongo(docs: list[dict]) -> int:
-    """Inserta documentos en MongoDB, evitando duplicados por URL."""
+    """Insert documents into MongoDB, skipping duplicates by URL."""
     if not docs:
         return 0
     client = MongoClient(MONGO_URI)
@@ -119,17 +116,15 @@ def _insert_mongo(docs: list[dict]) -> int:
             col.insert_one(doc)
             inserted += 1
         except Exception:
-            pass  # duplicado
+            pass  # duplicate
     return inserted
 
 
-# ═══════════════════════════════════════════════════════════════
-# FUENTE 1: BCE — Decisiones de politica monetaria
-# ═══════════════════════════════════════════════════════════════
+# BCE: ECB monetary policy decisions
 
-# Fechas de reuniones de politica monetaria del Governing Council (2015-2024).
-# Fuente: calendarios oficiales del BCE publicados anualmente.
-# Solo se incluyen reuniones con decision de tipos (no reuniones "non-monetary").
+# ECB Governing Council monetary policy meeting dates (2015-2024).
+# Source: official ECB calendars published annually.
+# Includes only meetings with rate decisions (not "non-monetary" meetings).
 BCE_MEETING_DATES = [
     # 2015
     "2015-01-22", "2015-03-05", "2015-04-15", "2015-06-03",
@@ -163,14 +158,13 @@ BCE_MEETING_DATES = [
     "2024-07-18", "2024-09-12", "2024-10-17", "2024-12-12",
 ]
 
-# URL base del BCE para press releases
 BCE_BASE_URL = "https://www.ecb.europa.eu"
 BCE_PR_INDEX = BCE_BASE_URL + "/press/pr/date/{year}/html/index.en.html"
 BCE_RSS_URL = "https://www.ecb.europa.eu/rss/press.html"
 
 
 def _fetch_bce_from_rss() -> list[dict]:
-    """Obtiene comunicados recientes del BCE via RSS."""
+    """Fetch recent ECB press releases via RSS."""
     feed = feedparser.parse(BCE_RSS_URL)
     docs = []
     for entry in feed.entries:
@@ -184,7 +178,6 @@ def _fetch_bce_from_rss() -> list[dict]:
             except Exception:
                 pass
 
-        # Filtrar solo monetary policy
         is_mopo = any(kw in title.lower() for kw in [
             "monetary policy", "interest rate", "key ecb interest",
             "governing council", "types", "tipos",
@@ -203,15 +196,12 @@ def _fetch_bce_from_rss() -> list[dict]:
 
 
 def _fetch_bce_press_release(url: str, client: httpx.Client) -> str:
-    """Extrae el texto completo de una pagina de press release del BCE."""
+    """Extract full text from an ECB press release page."""
     try:
         resp = client.get(url)
         if resp.status_code != 200:
             return ""
         soup = BeautifulSoup(resp.text, "html.parser")
-
-        # El contenido principal suele estar en <div class="section">
-        # o en el <main> o en <article>
         content = (
             soup.find("main")
             or soup.find("article")
@@ -226,10 +216,7 @@ def _fetch_bce_press_release(url: str, client: httpx.Client) -> str:
 
 
 def _discover_bce_mopo_links(year: int, client: httpx.Client) -> list[dict]:
-    """
-    Intenta descubrir links de decisiones de politica monetaria del BCE
-    para un ano dado, buscando en el indice de press releases.
-    """
+    """Discover monetary policy decision links from the ECB annual press release index."""
     url = BCE_PR_INDEX.format(year=year)
     try:
         resp = client.get(url)
@@ -241,7 +228,6 @@ def _discover_bce_mopo_links(year: int, client: httpx.Client) -> list[dict]:
         for a in soup.find_all("a", href=True):
             href = a["href"]
             text = a.get_text(strip=True)
-            # Buscar links de monetary policy decisions (mp en el filename)
             if "ecb.mp" in href or "monetary policy" in text.lower():
                 full_url = href if href.startswith("http") else BCE_BASE_URL + href
                 links.append({"url": full_url, "title": text})
@@ -256,36 +242,31 @@ def fetch_bce(
     start_year: int = START_YEAR,
     end_year: int = END_YEAR,
 ):
-    """
-    Descarga historico de decisiones de politica monetaria del BCE.
+    """Download historical ECB monetary policy decisions.
 
-    Estrategia:
-    1. Intenta descubrir links desde el indice anual de press releases.
-    2. Si no encuentra nada (pagina JS-rendered), usa las fechas conocidas
-       de reuniones del Governing Council + RSS feed como complemento.
+    Strategy:
+    1. Attempt to discover links from the annual press release index.
+    2. If unavailable (JS-rendered), fall back to known Governing Council
+       meeting dates + RSS feed.
     """
-    print(f"\n{'='*60}")
-    print(f"BCE — Decisiones de politica monetaria ({start_year}-{end_year})")
-    print(f"{'='*60}")
+    logger.info(f"BCE: downloading monetary policy decisions ({start_year}-{end_year})")
 
     all_docs: list[dict] = []
     total_new = 0
     client = httpx.Client(headers=HEADERS, timeout=30.0, follow_redirects=True)
 
-    # Estrategia 1: Intentar descubrir links por ano
-    print("\n[1/2] Buscando links en indice anual de press releases...")
+    logger.info("[1/2] Searching annual press release index...")
     discovered_links = []
     for year in range(start_year, end_year + 1):
         links = _discover_bce_mopo_links(year, client)
         if links:
-            print(f"  {year}: {len(links)} links de monetary policy")
+            logger.info(f"  {year}: {len(links)} monetary policy links")
             discovered_links.extend([(year, l) for l in links])
         else:
-            print(f"  {year}: indice no disponible (JS-rendered)")
+            logger.info(f"  {year}: index not available (JS-rendered)")
         _rate_limit()
 
-    # Estrategia 2: Usar fechas conocidas del Governing Council
-    print("\n[2/2] Procesando fechas conocidas del Governing Council...")
+    logger.info("[2/2] Processing known Governing Council dates...")
     filtered_dates = [
         d for d in BCE_MEETING_DATES
         if start_year <= int(d[:4]) <= end_year
@@ -297,11 +278,9 @@ def fetch_bce(
         if _already_fetched("bce", ym):
             continue
 
-        # Buscar entre los links descubiertos para este mes
         month_docs = []
         for year, link_info in discovered_links:
             if str(year) == str(dt.year):
-                # Intentar descargar el press release
                 body = _fetch_bce_press_release(link_info["url"], client)
                 if body:
                     month_docs.append(_make_doc(
@@ -313,7 +292,6 @@ def fetch_bce(
                     ))
                     _rate_limit()
 
-        # Si no encontramos nada via scraping, crear entrada con info conocida
         if not month_docs:
             month_docs.append(_make_doc(
                 date=date_str,
@@ -327,10 +305,10 @@ def fetch_bce(
         _save_json("bce", ym, month_docs)
         all_docs.extend(month_docs)
         total_new += 1
-        print(f"  {ym}: {len(month_docs)} docs ({'scraped' if month_docs[0]['body'] and 'not available' not in month_docs[0]['body'] else 'placeholder'})")
+        scraped = month_docs[0]["body"] and "not available" not in month_docs[0]["body"]
+        logger.info(f"  {ym}: {len(month_docs)} docs ({'scraped' if scraped else 'placeholder'})")
 
-    # Complementar con RSS para comunicados recientes
-    print("\n  Complementando con RSS reciente...")
+    logger.info("  Complementing with recent RSS...")
     rss_docs = _fetch_bce_from_rss()
     for doc in rss_docs:
         if doc["date"]:
@@ -339,28 +317,26 @@ def fetch_bce(
                 _save_json("bce", ym, [doc])
                 all_docs.append(doc)
                 total_new += 1
-                print(f"  {ym}: RSS - {doc['title'][:50]}...")
+                logger.info(f"  {ym}: RSS - {doc['title'][:50]}...")
 
     client.close()
 
     if use_mongo:
         n = _insert_mongo(all_docs)
-        print(f"\n  MongoDB: {n} docs insertados")
+        logger.info(f"  MongoDB: {n} docs inserted")
 
-    print(f"\n  BCE total: {total_new} meses nuevos")
+    logger.info(f"  BCE total: {total_new} new months")
     return all_docs
 
 
-# ═══════════════════════════════════════════════════════════════
-# FUENTE 2: INE — Notas de prensa del IPC
-# ═══════════════════════════════════════════════════════════════
+# INE: CPI press releases
 
-# URL predecible: https://www.ine.es/dyngs/Prensa/IPCMMYY.htm
+# Predictable URL: https://www.ine.es/dyngs/Prensa/IPCMMYY.htm
 INE_BASE_URL = "https://www.ine.es/dyngs/Prensa/IPC{mm}{yy}.htm"
 
 
 def _fetch_ine_month(year: int, month: int, client: httpx.Client) -> dict | None:
-    """Descarga y parsea una nota de prensa del IPC del INE."""
+    """Download and parse one INE CPI press release."""
     yy = f"{year % 100:02d}"
     mm = f"{month:02d}"
     url = INE_BASE_URL.format(mm=mm, yy=yy)
@@ -371,12 +347,9 @@ def _fetch_ine_month(year: int, month: int, client: httpx.Client) -> dict | None
             return None
         soup = BeautifulSoup(resp.text, "html.parser")
 
-        # Extraer titulo
         title_tag = soup.find("h1") or soup.find("title")
         title = title_tag.get_text(strip=True) if title_tag else f"IPC {month:02d}/{year}"
 
-        # Extraer cuerpo principal
-        # El INE usa varias clases: contenido, cuerpo, main-content
         content = (
             soup.find("div", class_="contenido")
             or soup.find("div", {"id": "contenido"})
@@ -386,24 +359,15 @@ def _fetch_ine_month(year: int, month: int, client: httpx.Client) -> dict | None
         if content:
             body = content.get_text(separator="\n", strip=True)
         else:
-            # Fallback: todo el texto eliminando navegacion
             for nav in soup.find_all(["nav", "header", "footer", "script", "style"]):
                 nav.decompose()
             body = soup.get_text(separator="\n", strip=True)
 
-        # Limitar tamano
         body = body[:5000]
-
-        date_str = f"{year}-{month:02d}-01"  # Primer dia del mes como referencia
-        return _make_doc(
-            date=date_str,
-            title=title,
-            body=body,
-            source="ine",
-            url=url,
-        )
+        date_str = f"{year}-{month:02d}-01"
+        return _make_doc(date=date_str, title=title, body=body, source="ine", url=url)
     except Exception as e:
-        print(f"    [ERROR] {url}: {e}")
+        logger.warning(f"{url}: {e}")
         return None
 
 
@@ -412,13 +376,11 @@ def fetch_ine(
     start_year: int = START_YEAR,
     end_year: int = END_YEAR,
 ):
+    """Download historical INE CPI press releases.
+
+    URL pattern: https://www.ine.es/dyngs/Prensa/IPCMMYY.htm
     """
-    Descarga historico de notas de prensa del IPC del INE.
-    URL predecible: https://www.ine.es/dyngs/Prensa/IPCMMYY.htm
-    """
-    print(f"\n{'='*60}")
-    print(f"INE — Notas de prensa del IPC ({start_year}-{end_year})")
-    print(f"{'='*60}")
+    logger.info(f"INE: downloading CPI press releases ({start_year}-{end_year})")
 
     all_docs: list[dict] = []
     total_new = 0
@@ -442,38 +404,36 @@ def fetch_ine(
                 all_docs.append(doc)
                 total_new += 1
                 body_preview = doc["body"][:60].replace("\n", " ")
-                print(f"  {ym}: OK - {body_preview}...")
+                logger.info(f"  {ym}: OK - {body_preview}...")
             else:
                 total_errors += 1
-                print(f"  {ym}: no disponible")
+                logger.info(f"  {ym}: not available")
 
     client.close()
 
     if use_mongo:
         n = _insert_mongo(all_docs)
-        print(f"\n  MongoDB: {n} docs insertados")
+        logger.info(f"  MongoDB: {n} docs inserted")
 
-    print(f"\n  INE total: {total_new} nuevos, {total_skipped} existentes, {total_errors} errores")
+    logger.info(f"  INE total: {total_new} new, {total_skipped} existing, {total_errors} errors")
     return all_docs
 
 
-# ═══════════════════════════════════════════════════════════════
-# FUENTE 2b: INE PDFs — Notas de prensa IPC desde PDFs (2015-2024)
-# ═══════════════════════════════════════════════════════════════
+# INE PDFs: CPI press releases from PDFs (2015-2024)
 
-# URL confirmada: https://www.ine.es/daco/daco42/daco421/ipc{MM}{YY}.pdf
-# Ejemplos: ipc0115.pdf (ene-2015), ipc1224.pdf (dic-2024)
+# Confirmed URL: https://www.ine.es/daco/daco42/daco421/ipc{MM}{YY}.pdf
+# Examples: ipc0115.pdf (Jan-2015), ipc1224.pdf (Dec-2024)
 INE_PDF_BASE = "https://www.ine.es/daco/daco42/daco421/ipc{mm}{yy}.pdf"
 
 
 def _extract_ine_pdf_text(pdf_bytes: bytes) -> str:
-    """Extrae texto de los PDFs de notas de prensa del IPC del INE."""
-    import pdfplumber
+    """Extract text from INE CPI press release PDFs."""
     import io
+    import pdfplumber
 
     text_parts = []
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
-        for page in pdf.pages[:3]:  # Primeras 3 paginas suficientes
+        for page in pdf.pages[:3]:  # first 3 pages are sufficient
             text = page.extract_text()
             if text:
                 text_parts.append(text)
@@ -481,52 +441,43 @@ def _extract_ine_pdf_text(pdf_bytes: bytes) -> str:
 
 
 def _normalize_ine_pdf_text(text: str) -> str:
-    """
-    Normaliza texto extraido de PDF para mejorar el parseo numerico.
-
-    Corrige mojibake frecuente (UTF-8 mal decodificado), unifica signos menos
-    Unicode y espacios no estandar, y deja el decimal con punto.
-    """
+    """Normalize PDF text: fix mojibake, unify Unicode minus signs, standardize decimal separator."""
     repaired = text
 
-    # Corregir mojibake comun en PDFs (ej. "variaciÃ³n", "â€“0,4").
+    # Fix common mojibake in PDFs (e.g. "variaciÃ³n", "â€"0,4").
     if ("Ã" in repaired) or ("â" in repaired):
         try:
             candidate = repaired.encode("latin1", errors="ignore").decode(
                 "utf-8", errors="ignore"
             )
-            if candidate and candidate.count("\ufffd") <= repaired.count("\ufffd"):
+            if candidate and candidate.count("�") <= repaired.count("�"):
                 repaired = candidate
         except Exception:
             pass
 
     repaired = unicodedata.normalize("NFKC", repaired)
 
-    # Unificar signos menos/dash a '-' ASCII para que regex capture negativos.
+    # Unify minus/dash to ASCII '-' so regex captures negatives.
     for ch in ["−", "–", "—", "‑", "‒", "―", "﹣"]:
         repaired = repaired.replace(ch, "-")
-    for bad in ["â€“", "â€”", "âˆ’"]:
+    for bad in ["â€"", "â€"", "âˆ'"]:
         repaired = repaired.replace(bad, "-")
 
-    # Espacios no separables y tabuladores.
-    repaired = repaired.replace("\u00a0", " ").replace("\u202f", " ").replace("\t", " ")
+    # Non-breaking spaces and tabs.
+    repaired = repaired.replace(" ", " ").replace(" ", " ").replace("\t", " ")
 
-    # Normalizar separador decimal espanol.
+    # Normalize Spanish decimal separator.
     repaired = repaired.replace(",", ".")
 
     return repaired
 
 
 def _parse_ine_pdf_signals(text: str) -> dict:
-    """
-    Extrae senales IPC del texto del PDF.
-    Los PDFs del INE contienen tasas de variacion anual y mensual
-    como datos numericos directos, no necesitan LLM.
-    """
+    """Extract CPI signals from PDF text using regex (no LLM — data is numeric)."""
     text_norm = _normalize_ine_pdf_text(text)
     number = r"([+\-]?\s*\d+(?:\.\d+)?)"
 
-    # Tasa de variacion anual (IPC general)
+    # Annual rate (CPI general)
     annual_rate = None
     for pattern in [
         rf"(?:variaci\w*|tasa)\s+anual[^\d+\-]{{0,120}}{number}\s*(?:por\s*ciento|%)",
@@ -537,13 +488,13 @@ def _parse_ine_pdf_signals(text: str) -> dict:
         if m:
             try:
                 val = float(m.group(1).replace(" ", ""))
-                if -5.0 <= val <= 15.0:  # rango razonable para IPC espanol
+                if -5.0 <= val <= 15.0:  # reasonable range for Spanish CPI
                     annual_rate = val
                     break
             except ValueError:
                 continue
 
-    # Tasa de variacion mensual
+    # Monthly rate
     monthly_rate = None
     for pattern in [
         rf"(?:variaci\w*|tasa)\s+mensual[^\d+\-]{{0,120}}{number}\s*(?:por\s*ciento|%)",
@@ -554,15 +505,15 @@ def _parse_ine_pdf_signals(text: str) -> dict:
         if m:
             try:
                 val = float(m.group(1).replace(" ", ""))
-                if -3.0 <= val <= 3.0:  # rango razonable mensual
+                if -3.0 <= val <= 3.0:  # reasonable monthly range
                     monthly_rate = val
                     break
             except ValueError:
                 continue
 
-    # Construir senales
+    # Build signals
     if annual_rate is None and monthly_rate is None:
-        # No se pudieron extraer tasas — devolver defaults neutros
+        # Could not extract rates — return neutral defaults
         return {
             "decision": "dato",
             "magnitude": None,
@@ -574,7 +525,7 @@ def _parse_ine_pdf_signals(text: str) -> dict:
             "ipc_monthly": None,
         }
 
-    # Decision basada en cambio mensual
+    # Decision based on monthly change
     if monthly_rate is not None:
         if monthly_rate > 0.3:
             decision = "subida"
@@ -589,7 +540,7 @@ def _parse_ine_pdf_signals(text: str) -> dict:
         shock = 0.0
         magnitude = None
 
-    # Tono basado en nivel de inflacion anual
+    # Tone based on annual inflation level
     if annual_rate is not None:
         if annual_rate > 3.5:
             tone = "negativo"
@@ -605,7 +556,7 @@ def _parse_ine_pdf_signals(text: str) -> dict:
         "magnitude": round(magnitude, 2) if magnitude is not None else None,
         "tone": tone,
         "shock_score": shock,
-        "uncertainty_index": 0.3,  # datos IPC son objetivos, baja incertidumbre
+        "uncertainty_index": 0.3,  # CPI data is objective, low uncertainty
         "topic": "inflacion",
         "ipc_general": annual_rate,
         "ipc_monthly": monthly_rate,
@@ -617,20 +568,15 @@ def fetch_ine_pdfs(
     start_year: int = START_YEAR,
     end_year: int = END_YEAR,
 ):
-    """
-    Descarga 120 PDFs de notas de prensa del IPC del INE (2015-2024).
+    """Download 120 INE CPI press release PDFs (2015-2024) and extract rates with regex.
 
     URL: https://www.ine.es/daco/daco42/daco421/ipc{MM}{YY}.pdf
-    Extrae tasas de variacion con regex (sin LLM).
-    Guarda en MongoDB con source=ine, raw_source=pdf_historical, processed=True.
-    Resumible: salta meses ya existentes en MongoDB.
+    Resumable: skips months already in MongoDB.
     """
     import pdfplumber as _pdf_check  # verify availability at startup
     del _pdf_check
 
-    print(f"\n{'='*60}")
-    print(f"INE PDFs — Notas de prensa IPC ({start_year}-{end_year})")
-    print(f"{'='*60}")
+    logger.info(f"INE PDFs: downloading CPI press releases ({start_year}-{end_year})")
 
     client_http = httpx.Client(headers=HEADERS, timeout=60.0, follow_redirects=True)
     mongo_client = MongoClient(MONGO_URI)
@@ -648,7 +594,6 @@ def fetch_ine_pdfs(
             mm = f"{month:02d}"
             url = INE_PDF_BASE.format(mm=mm, yy=yy)
 
-            # Resumible: saltar si ya existe en MongoDB
             if col.count_documents({"url": url}) > 0:
                 total_skipped += 1
                 continue
@@ -658,28 +603,27 @@ def fetch_ine_pdfs(
                 _rate_limit()
 
                 if resp.status_code != 200:
-                    print(f"  {ym}: HTTP {resp.status_code} — no disponible")
+                    logger.info(f"  {ym}: HTTP {resp.status_code} — not available")
                     total_errors += 1
                     continue
 
                 if len(resp.content) < 1000:
-                    print(f"  {ym}: respuesta demasiado pequena ({len(resp.content)}b)")
+                    logger.info(f"  {ym}: response too small ({len(resp.content)}b)")
                     total_errors += 1
                     continue
 
-                # Extraer texto del PDF
                 text = _extract_ine_pdf_text(resp.content)
                 if not text or len(text) < 50:
-                    print(f"  {ym}: PDF sin texto extraible")
+                    logger.info(f"  {ym}: PDF has no extractable text")
                     total_errors += 1
                     continue
 
-                # Parsear senales directamente (datos numericos, sin LLM)
                 signals = _parse_ine_pdf_signals(text)
-
-                ipc_str = (f"IPC anual={signals['ipc_general']}%"
-                           if signals['ipc_general'] is not None
-                           else "tasa no parseada")
+                ipc_str = (
+                    f"CPI annual={signals['ipc_general']}%"
+                    if signals["ipc_general"] is not None
+                    else "rate not parsed"
+                )
 
                 doc = {
                     "date": f"{year}-{month:02d}-01",
@@ -697,34 +641,33 @@ def fetch_ine_pdfs(
                     try:
                         col.insert_one(doc)
                     except Exception:
-                        pass  # duplicado
+                        pass  # duplicate
 
-                # Guardar en JSON local (excluir _id que MongoDB añade al dict)
                 doc_json = {k: v for k, v in doc.items() if k != "_id"}
                 _save_json("ine_pdf", ym, [doc_json])
 
                 total_new += 1
-                print(f"  {ym}: OK — {ipc_str} | {signals['tone']} | shock={signals['shock_score']}")
+                logger.info(
+                    f"  {ym}: OK — {ipc_str} | {signals['tone']} | shock={signals['shock_score']}"
+                )
 
             except Exception as e:
-                print(f"  {ym}: ERROR — {e}")
+                logger.warning(f"  {ym}: ERROR — {e}")
                 total_errors += 1
-                _rate_limit()  # esperar aunque haya error
+                _rate_limit()
 
     client_http.close()
     mongo_client.close()
 
-    print(f"\n  INE PDFs: {total_new} nuevos, {total_skipped} existentes, {total_errors} errores")
+    logger.info(f"  INE PDFs: {total_new} new, {total_skipped} existing, {total_errors} errors")
     return total_new
 
 
-# ═══════════════════════════════════════════════════════════════
-# FUENTE 3: BdE — Banco de Espana (notas de prensa)
-# ═══════════════════════════════════════════════════════════════
+# BdE: Banco de Espana press releases
 
 BDE_RSS_URL = "https://www.bde.es/rss/es/"
 
-# Palabras clave para filtrar notas relevantes sobre tipos e inflacion
+# Keywords to filter relevant notes (Spanish text matching — must stay in Spanish)
 BDE_KEYWORDS = [
     "tipo", "interes", "inflacion", "ipc", "precio",
     "politica monetaria", "euribor", "credito", "hipoteca",
@@ -733,21 +676,15 @@ BDE_KEYWORDS = [
 
 
 def fetch_bde(use_mongo: bool = False):
-    """
-    Descarga notas de prensa del Banco de Espana via RSS.
+    """Download Banco de Espana press releases via RSS.
 
-    Limitacion conocida: el RSS del BdE solo retiene los ultimos ~20-50
-    articulos. Para historico completo seria necesario scraping con
-    Selenium/Playwright (la web del BdE usa JS rendering pesado).
-    Esto se documenta como limitacion del TFG.
+    Known limitation: BdE RSS only retains ~20-50 articles. Full history
+    would require Selenium/Playwright (BdE site uses heavy JS rendering).
     """
-    print(f"\n{'='*60}")
-    print("BdE — Notas de prensa del Banco de Espana (RSS)")
-    print(f"{'='*60}")
+    logger.info("BdE: downloading Banco de Espana press releases (RSS)")
 
     all_docs: list[dict] = []
 
-    # Intentar multiples URLs del RSS del BdE
     rss_urls = [
         BDE_RSS_URL,
         "https://www.bde.es/rss/es/notas-prensa.xml",
@@ -760,24 +697,24 @@ def fetch_bde(use_mongo: bool = False):
             feed = feedparser.parse(rss_url)
             if feed.entries:
                 entries.extend(feed.entries)
-                print(f"  RSS {rss_url}: {len(feed.entries)} entries")
+                logger.info(f"  RSS {rss_url}: {len(feed.entries)} entries")
         except Exception as e:
-            print(f"  RSS {rss_url}: error - {e}")
+            logger.warning(f"  RSS {rss_url}: error - {e}")
 
     if not entries:
-        print("  WARN: No se obtuvieron entradas del BdE RSS.")
-        print("  Limitacion conocida: el sitio del BdE usa JS rendering.")
-        print("  Para historico completo se requiere Selenium/Playwright.")
+        logger.warning("No BdE RSS entries obtained.")
+        logger.warning(
+            "Known limitation: BdE site uses JS rendering. "
+            "Full history requires Selenium/Playwright."
+        )
         return all_docs
 
-    # Procesar entradas
     seen_months: set[str] = set()
     for entry in entries:
         title = getattr(entry, "title", "")
         link = getattr(entry, "link", "")
         summary = getattr(entry, "summary", "") or getattr(entry, "description", "")
 
-        # Filtrar por relevancia
         text_lower = (title + " " + summary).lower()
         is_relevant = any(kw in text_lower for kw in BDE_KEYWORDS)
         if not is_relevant:
@@ -794,7 +731,6 @@ def fetch_bde(use_mongo: bool = False):
             continue
 
         ym = pub_date.strftime("%Y-%m")
-
         doc = _make_doc(
             date=pub_date.strftime("%Y-%m-%d"),
             title=title,
@@ -803,52 +739,49 @@ def fetch_bde(use_mongo: bool = False):
             url=link,
         )
 
-        # Agrupar por mes
         if ym not in seen_months:
             seen_months.add(ym)
             if not _already_fetched("bde", ym):
                 _save_json("bde", ym, [doc])
                 all_docs.append(doc)
-                print(f"  {ym}: {title[:60]}...")
+                logger.info(f"  {ym}: {title[:60]}...")
 
     if use_mongo:
         n = _insert_mongo(all_docs)
-        print(f"\n  MongoDB: {n} docs insertados")
+        logger.info(f"  MongoDB: {n} docs inserted")
 
-    print(f"\n  BdE total: {len(all_docs)} meses nuevos (limitado por RSS)")
+    logger.info(f"  BdE total: {len(all_docs)} new months (limited by RSS)")
     return all_docs
 
 
-# ═══════════════════════════════════════════════════════════════
 # CLI
-# ═══════════════════════════════════════════════════════════════
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Descarga historico de comunicados oficiales (2015-2024)"
+        description="Download historical official press releases (2015-2024)"
     )
     parser.add_argument(
         "--source",
         choices=["bce", "ine", "ine-pdf", "bde"],
         default=None,
-        help="Solo descargar una fuente (default: todas). 'ine-pdf' descarga PDFs historicos 2015-2024.",
+        help="Download one source only (default: all). 'ine-pdf' downloads historical PDFs.",
     )
     parser.add_argument(
         "--mongo",
         action="store_true",
-        help="Insertar documentos en MongoDB ademas de guardar JSON",
+        help="Also insert documents into MongoDB",
     )
     parser.add_argument(
         "--start-year",
         type=int,
         default=START_YEAR,
-        help=f"Ano inicio (default: {START_YEAR})",
+        help=f"Start year (default: {START_YEAR})",
     )
     parser.add_argument(
         "--end-year",
         type=int,
         default=END_YEAR,
-        help=f"Ano fin (default: {END_YEAR})",
+        help=f"End year (default: {END_YEAR})",
     )
 
     args = parser.parse_args()
@@ -857,11 +790,9 @@ def main():
     end_y = args.end_year
     sources = [args.source] if args.source else ["bce", "ine-pdf", "bde"]
 
-    print(f"Descarga historica de comunicados oficiales")
-    print(f"Rango: {start_y}-{end_y}")
-    print(f"Fuentes: {', '.join(sources)}")
-    print(f"Rate limit: {RATE_LIMIT}s entre peticiones")
-    print(f"Output: {RAW_BASE}/")
+    logger.info(f"Historical press release download: {start_y}-{end_y}")
+    logger.info(f"Sources: {', '.join(sources)}, rate limit: {RATE_LIMIT}s")
+    logger.info(f"Output: {RAW_BASE}/")
 
     if "bce" in sources:
         fetch_bce(use_mongo=args.mongo, start_year=start_y, end_year=end_y)
@@ -875,12 +806,9 @@ def main():
     if "bde" in sources:
         fetch_bde(use_mongo=args.mongo)
 
-    print(f"\n{'='*60}")
-    print("Descarga completada.")
-    print(f"Archivos en: {RAW_BASE}")
+    logger.info(f"Download complete. Files in: {RAW_BASE}")
     if args.mongo:
-        print(f"Documentos insertados en MongoDB: {MONGO_DB}.{MONGO_COLLECTION}")
-    print(f"{'='*60}")
+        logger.info(f"Documents inserted in MongoDB: {MONGO_DB}.{MONGO_COLLECTION}")
 
 
 if __name__ == "__main__":

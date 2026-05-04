@@ -1,26 +1,25 @@
+"""ARIMA non-seasonal baseline via auto_arima (pmdarima) — Global CPI.
+
+Target series: cpi_global_rate (YoY % rate, median of 186 countries)
+
+Parameters fixed by EDA (notebooks 02-04 _global):
+  d = 1   (ADF p=0.010 marginal, PP p=0.145 does not reject, KPSS rejects level stationarity)
+  D = 0   (Fs = -0.079: no seasonality, global median cancels national patterns)
+  p in [0..4], q in [0..4]  (PACF cuts at lag 3, ACF tails to lag 4 on diff(1))
+
+Key difference vs Spain:
+  - Spain:   level index -> SARIMA with D=1
+  - Global:  YoY rate already computed -> ARIMA without seasonal component (D=0)
+
+Final selection by AIC.
+
+Input:  data/processed/cpi_global_monthly.parquet
+Output: 08_results/arima_global_summary.txt
+        08_results/arima_global_metrics.json
 """
-01_arima_auto_global.py -- ARIMA no estacional via auto_arima (pmdarima) — CPI Global
 
-Serie objetivo: cpi_global_rate (tasa interanual YoY %, mediana de 186 paises)
-
-Parametros fijados por el EDA (notebooks 02-04 _global):
-  d = 1   (ADF p=0.010 marginal, PP p=0.145 no rechaza, KPSS rechaza estac. en nivel)
-  D = 0   (Fs = -0.079: sin estacionalidad, mediana global cancela patrones nacionales)
-  p in [0..4], q in [0..4]  (PACF corta en lag 3, ACF cola hasta lag 4 sobre diff(1))
-
-Diferencia clave con Espana:
-  - Espana:  indice en nivel -> SARIMA con D=1
-  - Global:  tasa YoY ya calculada -> ARIMA sin componente estacional (D=0)
-
-Seleccion final por AIC.
-
-Entrada:  data/processed/cpi_global_monthly.parquet
-Salida:   08_results/arima_global_summary.txt
-          08_results/arima_global_metrics.json
-"""
-
-import sys
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -28,17 +27,18 @@ import pandas as pd
 import pmdarima as pm
 from statsmodels.stats.diagnostic import acorr_ljungbox
 
-ROOT     = Path(__file__).resolve().parents[1]   # tfg-forecasting/
-MONOREPO = ROOT.parent                            # tfg-ipc-mcp/
+ROOT     = Path(__file__).resolve().parents[1]
+MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_VAL_END
+from shared.logger import get_logger
 from shared.metrics import mae, rmse, mase
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = ROOT / "08_results"
 
-
-# ── Carga ──────────────────────────────────────────────────────────────────
 
 def load_data():
     df = pd.read_parquet(ROOT / "data" / "processed" / "cpi_global_monthly.parquet")
@@ -52,13 +52,8 @@ def load_data():
     return y, train, val, test
 
 
-# ── Ajuste ─────────────────────────────────────────────────────────────────
-
 def fit_arima(train: pd.Series):
-    """
-    auto_arima con d=1, D=0, seasonal=False.
-    Rangos p, q hasta 4 segun ACF/PACF sobre diff(1).
-    """
+    """auto_arima with d=1, D=0, seasonal=False. p/q up to 4 from ACF/PACF on diff(1)."""
     model = pm.auto_arima(
         train,
         start_p=0, max_p=4,
@@ -73,25 +68,21 @@ def fit_arima(train: pd.Series):
     return model
 
 
-# ── Diagnostico de residuos ────────────────────────────────────────────────
-
 def diagnose_residuals(model, name="arima_global"):
     resid = model.resid()
     lb = acorr_ljungbox(resid, lags=[6, 12, 24], return_df=True)
 
-    print(f"\n--- Diagnostico de residuos ({name}) ---")
-    print(f"  Media:    {resid.mean():.6f}")
-    print(f"  Std:      {resid.std():.4f}")
-    print(f"  Min:      {resid.min():.4f}   Max: {resid.max():.4f}")
-    print(f"  Ljung-Box (H0: sin autocorrelacion):")
+    logger.info(f"\n--- Residual diagnostics ({name}) ---")
+    logger.info(f"  Mean:  {resid.mean():.6f}")
+    logger.info(f"  Std:   {resid.std():.4f}")
+    logger.info(f"  Min:   {resid.min():.4f}   Max: {resid.max():.4f}")
+    logger.info(f"  Ljung-Box (H0: no autocorrelation):")
     for lag, row in lb.iterrows():
-        status = "OK" if row["lb_pvalue"] > 0.05 else "AUTOCORRELACION RESIDUAL"
-        print(f"    Lag {lag:2d}: stat={row['lb_stat']:7.3f}  p={row['lb_pvalue']:.4f}  [{status}]")
+        status = "OK" if row["lb_pvalue"] > 0.05 else "RESIDUAL AUTOCORRELATION"
+        logger.info(f"    Lag {lag:2d}: stat={row['lb_stat']:7.3f}  p={row['lb_pvalue']:.4f}  [{status}]")
 
     return resid, lb
 
-
-# ── Prediccion sobre validacion ────────────────────────────────────────────
 
 def forecast_and_evaluate(model, train: pd.Series, val: pd.Series):
     n_val = len(val)
@@ -107,18 +98,14 @@ def forecast_and_evaluate(model, train: pd.Series, val: pd.Series):
     return fc_series, ci, metrics
 
 
-# ── Guardar resultados ─────────────────────────────────────────────────────
-
 def save_results(model, metrics: dict, resid: pd.Series, lb: pd.DataFrame):
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Summary textual
     summary_path = RESULTS_DIR / "arima_global_summary.txt"
     with open(summary_path, "w", encoding="utf-8") as f:
         f.write(str(model.summary()))
-    print(f"\nSummary guardado: {summary_path}")
+    logger.info(f"\nSummary saved: {summary_path}")
 
-    # Metricas JSON
     lb_dict = {
         f"lag_{lag}": {"stat": round(row["lb_stat"], 4), "pvalue": round(row["lb_pvalue"], 4)}
         for lag, row in lb.iterrows()
@@ -139,65 +126,59 @@ def save_results(model, metrics: dict, resid: pd.Series, lb: pd.DataFrame):
     metrics_path = RESULTS_DIR / "arima_global_metrics.json"
     with open(metrics_path, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
-    print(f"Metricas guardadas: {metrics_path}")
+    logger.info(f"Metrics saved: {metrics_path}")
 
     return out
 
 
-# ── Main ───────────────────────────────────────────────────────────────────
-
 def main():
-    print("=" * 60)
-    print("ARIMA AUTO GLOBAL — Baseline CPI Global (d=1, D=0)")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("ARIMA AUTO GLOBAL — Baseline CPI Global (d=1, D=0)")
+    logger.info("=" * 60)
 
     y, train, val, test = load_data()
-    print(f"Train: {train.index.min().date()} -> {train.index.max().date()} ({len(train)} obs)")
-    print(f"Val:   {val.index.min().date()} -> {val.index.max().date()} ({len(val)} obs)")
-    print(f"Test:  {test.index.min().date()} -> {test.index.max().date()} ({len(test)} obs)")
-    print(f"\nEstadisticas train:  media={train.mean():.4f}  std={train.std():.4f}  "
-          f"min={train.min():.4f}  max={train.max():.4f}")
+    logger.info(f"Train: {train.index.min().date()} -> {train.index.max().date()} ({len(train)} obs)")
+    logger.info(f"Val:   {val.index.min().date()} -> {val.index.max().date()} ({len(val)} obs)")
+    logger.info(f"Test:  {test.index.min().date()} -> {test.index.max().date()} ({len(test)} obs)")
+    logger.info(f"\nTrain stats:  mean={train.mean():.4f}  std={train.std():.4f}  "
+                f"min={train.min():.4f}  max={train.max():.4f}")
 
-    # Ajuste
-    print("\n--- Busqueda auto_arima (d=1, D=0, seasonal=False, p/q max=4) ---")
+    logger.info("\n--- auto_arima search (d=1, D=0, seasonal=False, p/q max=4) ---")
     model = fit_arima(train)
 
     order = model.order
-    print(f"\nModelo seleccionado: ARIMA{order}")
-    print(f"AIC: {model.aic():.4f}  |  BIC: {model.bic():.4f}")
-    print(f"Parametros:\n{model.summary()}")
+    logger.info(f"\nSelected model: ARIMA{order}")
+    logger.info(f"AIC: {model.aic():.4f}  |  BIC: {model.bic():.4f}")
+    logger.info(f"Parameters:\n{model.summary()}")
 
-    # Diagnostico residuos
     resid, lb = diagnose_residuals(model, f"ARIMA{order}")
 
-    # Prediccion sobre validacion
-    print(f"\n--- Prediccion sobre validacion ({len(val)} meses) ---")
+    logger.info(f"\n--- Forecast on validation ({len(val)} months) ---")
     fc, ci, metrics = forecast_and_evaluate(model, train, val)
 
-    print(f"\nMetricas sobre validacion (2021-01 a 2022-06):")
+    logger.info(f"\nValidation metrics (2021-01 to 2022-06):")
     for k, v in metrics.items():
-        print(f"  {k}: {v}")
+        logger.info(f"  {k}: {v}")
 
-    print(f"\n{'Fecha':>12} {'Real':>10} {'Pred':>10} {'Error':>10} {'CI_low':>8} {'CI_hi':>8}")
-    print("-" * 65)
+    logger.info(f"\n{'Date':>12} {'Actual':>10} {'Pred':>10} {'Error':>10} {'CI_low':>8} {'CI_hi':>8}")
+    logger.info("-" * 65)
     for date, real, pred, lo, hi in zip(val.index, val.values, fc.values, ci[:, 0], ci[:, 1]):
         err = real - pred
         flag = " <--" if abs(err) > 1.5 else ""
-        print(f"{str(date.date()):>12} {real:10.4f} {pred:10.4f} {err:10.4f} "
-              f"{lo:8.4f} {hi:8.4f}{flag}")
+        logger.info(f"{str(date.date()):>12} {real:10.4f} {pred:10.4f} {err:10.4f} "
+                    f"{lo:8.4f} {hi:8.4f}{flag}")
 
-    # Guardar
     result = save_results(model, metrics, resid, lb)
 
-    print(f"\n{'=' * 60}")
-    print(f"RESUMEN ARIMA GLOBAL")
-    print(f"  Modelo:  ARIMA{order}")
-    print(f"  AIC:     {result['aic']}")
-    print(f"  BIC:     {result['bic']}")
-    print(f"  MAE val: {metrics['MAE']}")
-    print(f"  RMSE val:{metrics['RMSE']}")
-    print(f"  MASE val:{metrics['MASE']}")
-    print(f"{'=' * 60}")
+    logger.info(f"\n{'=' * 60}")
+    logger.info("ARIMA GLOBAL SUMMARY")
+    logger.info(f"  Model:    ARIMA{order}")
+    logger.info(f"  AIC:      {result['aic']}")
+    logger.info(f"  BIC:      {result['bic']}")
+    logger.info(f"  MAE val:  {metrics['MAE']}")
+    logger.info(f"  RMSE val: {metrics['RMSE']}")
+    logger.info(f"  MASE val: {metrics['MASE']}")
+    logger.info(f"{'=' * 60}")
 
 
 if __name__ == "__main__":

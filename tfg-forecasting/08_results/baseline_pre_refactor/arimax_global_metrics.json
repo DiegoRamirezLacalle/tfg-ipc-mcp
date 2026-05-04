@@ -1,0 +1,35 @@
+{
+  "model": "arimax_global",
+  "exog": "fedfunds",
+  "order": [
+    3,
+    1,
+    0
+  ],
+  "aic": 69.3653,
+  "bic": 83.0651,
+  "n_train": 228,
+  "residuals": {
+    "mean": 0.011451,
+    "std": 0.3548,
+    "ljung_box": {
+      "lag_6": {
+        "stat": 1.5945,
+        "pvalue": 0.953
+      },
+      "lag_12": {
+        "stat": 11.8829,
+        "pvalue": 0.4551
+      },
+      "lag_24": {
+        "stat": 19.5101,
+        "pvalue": 0.7243
+      }
+    }
+  },
+  "metrics_val": {
+    "MAE": 2.921,
+    "RMSE": 3.5566,
+    "MASE": 2.4923
+  }
+}

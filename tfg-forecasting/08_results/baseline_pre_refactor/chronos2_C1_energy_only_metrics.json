@@ -1,0 +1,32 @@
+{
+  "chronos2_C1_energy_only": {
+    "h1": {
+      "MAE": 0.6007,
+      "RMSE": 0.754,
+      "MASE": 0.4275,
+      "coverage_80": 0.7021,
+      "n_evals": 47
+    },
+    "h3": {
+      "MAE": 0.8659,
+      "RMSE": 1.1048,
+      "MASE": 0.6162,
+      "coverage_80": 0.5778,
+      "n_evals": 45
+    },
+    "h6": {
+      "MAE": 1.2148,
+      "RMSE": 1.6072,
+      "MASE": 0.8645,
+      "coverage_80": 0.5794,
+      "n_evals": 42
+    },
+    "h12": {
+      "MAE": 1.9233,
+      "RMSE": 2.6352,
+      "MASE": 1.3688,
+      "coverage_80": 0.5509,
+      "n_evals": 36
+    }
+  }
+}

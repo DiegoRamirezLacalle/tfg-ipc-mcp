@@ -1,15 +1,15 @@
 """
-04_chronos2_C1.py — Chronos-2 condicion C1 (historico + senales MCP)
+04_chronos2_C1.py — Chronos-2 condition C1 (historical + MCP signals)
 
-Rolling-origin backtesting con covariables del pipeline MCP.
+Rolling-origin backtesting with MCP pipeline covariates.
 
-Chronos-2 soporta covariables nativamente via dict inputs:
-  - past_covariates: valores historicos de todas las covariables
-  - future_covariates: valores futuros de covariables conocidas (DFR/MRR)
-  Para senales MCP (no conocidas a futuro): solo past_covariates
+Chronos-2 natively supports covariates via dict inputs:
+  - past_covariates: historical values of all covariates
+  - future_covariates: future values of known covariates (DFR/MRR)
+  For MCP signals (not known in the future): only past_covariates
 
-Modelo: amazon/chronos-2
-Senales MCP ya con shift +1 aplicado (sin leakage temporal).
+Model: amazon/chronos-2
+MCP signals already have shift +1 applied (no temporal leakage).
 """
 
 from __future__ import annotations
@@ -31,6 +31,9 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = ROOT / "08_results"
 HORIZONS = [1, 3, 6, 12]
@@ -40,35 +43,34 @@ ORIGINS_END = DATE_TEST_END
 MODEL_NAME = "chronos2_C1"
 CHRONOS_MODEL_ID = "amazon/chronos-2"
 TEST_END_TS = pd.Timestamp(DATE_TEST_END)
-SIGNAL_START = "2015-01-01"   # Fix diagnostico: evitar regimen de ceros pre-2015
+SIGNAL_START = "2015-01-01"
 
-# Fix 3: subperiodos para analisis granular de C0 vs C1
-# A = año tranquilo, B = shock BCE (crisis inflacion), C = normalizacion post-shock
+# Subperiods for granular analysis
+# A = quiet year, B = BCE shock (inflation crisis), C = post-shock normalisation
 SUBPERIODS = {
     "A_2021": ("2021-01-01", "2021-12-01"),
     "B_2022_shock": ("2022-01-01", "2022-12-01"),
     "C_2023_2024": ("2023-01-01", "2024-12-01"),
 }
 
-# Cuantiles: 21 levels [0.01..0.99]
+# Quantiles: 21 levels [0.01..0.99]
 Q_IDX = {"p10": 2, "p50": 10, "p90": 18}
 
-# Covariables numericas — separadas en "conocidas a futuro" y "solo pasado"
-# DFR/MRR son publicas en tiempo real (BCE decisions), se pueden pasar como future
+# Numeric covariates — split into "known in the future" and "past only"
+# DFR/MRR are public in real time (ECB decisions), can be passed as future
 KNOWN_FUTURE_COVS = ["dfr", "mrr"]
 PAST_ONLY_COVS = [
     "dfr_diff", "dfr_lag3", "dfr_lag6", "dfr_lag12",
     "gdelt_avg_tone", "gdelt_goldstein", "gdelt_n_articles",
     "bce_shock_score", "bce_uncertainty", "ine_surprise_score",
-    # señales derivadas
     "signal_available", "bce_tone_numeric", "bce_cumstance",
     "gdelt_tone_ma3", "gdelt_tone_ma6", "ine_inflacion",
 ]
-# Categoricas como covariables — Chronos-2 soporta categoricas en numpy
+# Categorical covariates — Chronos-2 supports categoricals in numpy
 CAT_COVS = ["bce_tone", "dominant_topic"]
 
 
-# ── Datos ────────────────────────────────────────────────────────
+# Data
 
 def load_data() -> pd.DataFrame:
     df = pd.read_parquet(ROOT / "data" / "processed" / "features_c1.parquet")
@@ -85,21 +87,21 @@ def load_data() -> pd.DataFrame:
     return df
 
 
-# ── Modelo ───────────────────────────────────────────────────────
+# Model
 
 def load_model():
     from chronos import Chronos2Pipeline
 
-    print(f"[chronos2] Cargando {CHRONOS_MODEL_ID} ...")
+    logger.info(f"[chronos2] Loading {CHRONOS_MODEL_ID} ...")
     pipeline = Chronos2Pipeline.from_pretrained(
         CHRONOS_MODEL_ID,
         device_map="cpu",
     )
-    print("[chronos2] Modelo cargado (21 cuantiles, covariables nativas)")
+    logger.info("[chronos2] Model loaded (21 quantiles, native covariates)")
     return pipeline
 
 
-# ── Preparar inputs con covariables ─────────────────────────────
+# Prepare inputs with covariates
 
 def prepare_input(
     df: pd.DataFrame,
@@ -107,18 +109,16 @@ def prepare_input(
     h: int,
 ) -> dict:
     """
-    Prepara un dict input para Chronos-2 con covariables.
+    Build a dict input for Chronos-2 with covariates.
 
-    Estructura:
-      - target: 1D array de IPC historico
-      - past_covariates: dict de arrays (len = context)
-      - future_covariates: dict de arrays (len = h), solo para DFR/MRR
+    Structure:
+      - target: 1D array of historical IPC
+      - past_covariates: dict of arrays (len = context)
+      - future_covariates: dict of arrays (len = h), only for DFR/MRR
     """
-    # Fix diagnostico: recortar a 2015+ para evitar regimen de ceros pre-2015
     context_df = df.loc[SIGNAL_START:origin]
     target = context_df["indice_general"].values.astype(np.float64)
 
-    # Past covariates: todas (numericas + categoricas)
     past_covs = {}
     for col in KNOWN_FUTURE_COVS + PAST_ONLY_COVS:
         if col in context_df.columns:
@@ -127,7 +127,6 @@ def prepare_input(
         if col in context_df.columns:
             past_covs[col] = context_df[col].values.astype(str)
 
-    # Future covariates: solo DFR/MRR (conocidas, publicas en tiempo real)
     fc_dates = pd.date_range(
         start=origin + pd.DateOffset(months=1), periods=h, freq="MS"
     )
@@ -135,7 +134,6 @@ def prepare_input(
     for col in KNOWN_FUTURE_COVS:
         if col in df.columns:
             future_vals = df[col].reindex(fc_dates)
-            # Si no hay valores futuros reales, forward-fill
             if future_vals.isna().any():
                 last_val = float(context_df[col].iloc[-1])
                 future_vals = future_vals.fillna(last_val)
@@ -148,7 +146,7 @@ def prepare_input(
     }
 
 
-# ── Rolling backtesting ─────────────────────────────────────────
+# Rolling backtesting
 
 def run_rolling(df: pd.DataFrame, model) -> tuple[pd.DataFrame, float]:
     y = df["indice_general"]
@@ -162,10 +160,8 @@ def run_rolling(df: pd.DataFrame, model) -> tuple[pd.DataFrame, float]:
     records = []
 
     for origin in tqdm(origins, desc="Chronos2 C1 rolling"):
-        # Preparar input con covariables para h=12
         inp = prepare_input(df, origin, MAX_H)
 
-        # Filtrar future_covariates None
         input_dict = {"target": inp["target"], "past_covariates": inp["past_covariates"]}
         if inp["future_covariates"]:
             input_dict["future_covariates"] = inp["future_covariates"]
@@ -176,7 +172,7 @@ def run_rolling(df: pd.DataFrame, model) -> tuple[pd.DataFrame, float]:
             quantiles = preds[0].numpy()
             q = quantiles[0]  # (21, 12)
         except Exception as e:
-            print(f"\n[!] Error en {origin.date()}: {e}")
+            logger.warning(f"\n[!] Error at {origin.date()}: {e}")
             continue
 
         p50 = q[Q_IDX["p50"]]
@@ -215,7 +211,7 @@ def run_rolling(df: pd.DataFrame, model) -> tuple[pd.DataFrame, float]:
     return pd.DataFrame(records), mase_scale
 
 
-# ── Metricas ─────────────────────────────────────────────────────
+# Metrics
 
 def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
     results = {}
@@ -242,7 +238,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 def compute_subperiod_metrics(
     df_preds: pd.DataFrame, mase_scale: float
 ) -> dict:
-    """Metricas por subperiodo de origenes (Fix 3)."""
+    """Metrics by origin subperiod."""
     results = {}
     for period_name, (start, end) in SUBPERIODS.items():
         mask = (
@@ -272,73 +268,72 @@ def compute_subperiod_metrics(
     return results
 
 
-def print_table(metrics: dict) -> None:
-    print(f"\n{'Horizonte':<12} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'Cov80':>6} {'N':>5}")
-    print("-" * 52)
+def log_table(metrics: dict) -> None:
+    logger.info(f"\n{'Horizon':<12} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'Cov80':>6} {'N':>5}")
+    logger.info("-" * 52)
     for h in HORIZONS:
         key = f"h{h}"
         if key in metrics:
             m = metrics[key]
-            print(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
-                  f"{m['MASE']:8.4f} {m['coverage_80']:6.2%} {m['n_evals']:5d}")
+            logger.info(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
+                        f"{m['MASE']:8.4f} {m['coverage_80']:6.2%} {m['n_evals']:5d}")
 
 
-def print_subperiod_table(sub_metrics: dict) -> None:
-    print(f"\n{'Periodo':<18} {'h':>3} {'MAE':>8} {'MASE':>8} {'Cov80':>6} {'N':>4}")
-    print("-" * 52)
+def log_subperiod_table(sub_metrics: dict) -> None:
+    logger.info(f"\n{'Period':<18} {'h':>3} {'MAE':>8} {'MASE':>8} {'Cov80':>6} {'N':>4}")
+    logger.info("-" * 52)
     for period_name, hdict in sub_metrics.items():
         for h in HORIZONS:
             key = f"h{h}"
             if key in hdict:
                 m = hdict[key]
-                print(f"{period_name:<18} {h:>3} {m['MAE']:8.4f} {m['MASE']:8.4f} "
-                      f"{m['coverage_80']:6.2%} {m['n_origins']:4d}")
+                logger.info(f"{period_name:<18} {h:>3} {m['MAE']:8.4f} {m['MASE']:8.4f} "
+                            f"{m['coverage_80']:6.2%} {m['n_origins']:4d}")
 
 
-# ── Main ─────────────────────────────────────────────────────────
+# Main
 
 def main():
-    print("=" * 60)
-    print(f"BACKTESTING ROLLING — {MODEL_NAME}")
-    print(f"Modelo: {CHRONOS_MODEL_ID}")
-    print(f"Origenes: {ORIGINS_START} - {ORIGINS_END}")
-    print(f"Horizontes: {HORIZONS}")
-    print(f"Covariables (known future): {KNOWN_FUTURE_COVS}")
-    print(f"Covariables (past only): {PAST_ONLY_COVS}")
-    print(f"Covariables (categoricas): {CAT_COVS}")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"Model: {CHRONOS_MODEL_ID}")
+    logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END}")
+    logger.info(f"Horizons: {HORIZONS}")
+    logger.info(f"Covariates (known future): {KNOWN_FUTURE_COVS}")
+    logger.info(f"Covariates (past only): {PAST_ONLY_COVS}")
+    logger.info(f"Covariates (categorical): {CAT_COVS}")
+    logger.info("=" * 60)
 
     df = load_data()
-    print(f"Datos: {df.index.min().date()} - {df.index.max().date()} ({len(df)} obs)")
+    logger.info(f"Data: {df.index.min().date()} - {df.index.max().date()} ({len(df)} obs)")
 
     model = load_model()
 
     df_preds, mase_scale = run_rolling(df, model)
-    print(f"\nPredicciones generadas: {len(df_preds)}")
+    logger.info(f"\nPredictions generated: {len(df_preds)}")
 
     if df_preds.empty:
-        print("[!] No se generaron predicciones. Revisar errores arriba.")
+        logger.warning("[!] No predictions generated. Check errors above.")
         return
 
     metrics = compute_metrics(df_preds, mase_scale)
     sub_metrics = compute_subperiod_metrics(df_preds, mase_scale)
 
-    print("\n" + "=" * 60)
-    print(f"RESULTADOS GLOBALES — {MODEL_NAME}")
-    print("=" * 60)
-    print_table(metrics)
+    logger.info("\n" + "=" * 60)
+    logger.info(f"GLOBAL RESULTS — {MODEL_NAME}")
+    logger.info("=" * 60)
+    log_table(metrics)
 
-    print("\n" + "=" * 60)
-    print(f"RESULTADOS POR SUBPERIODO — {MODEL_NAME}")
-    print("=" * 60)
-    print_subperiod_table(sub_metrics)
+    logger.info("\n" + "=" * 60)
+    logger.info(f"RESULTS BY SUBPERIOD — {MODEL_NAME}")
+    logger.info("=" * 60)
+    log_subperiod_table(sub_metrics)
 
-    # Comparativa C0 vs C1 global
     c0_path = RESULTS_DIR / "chronos2_C0_metrics.json"
     if c0_path.exists():
         with open(c0_path) as f:
             c0_metrics = json.load(f).get("chronos2_C0", {})
-        print("\n--- C0 vs C1 (MAE global) ---")
+        logger.info("\n--- C0 vs C1 (MAE global) ---")
         for h in HORIZONS:
             key = f"h{h}"
             c0_mae = c0_metrics.get(key, {}).get("MAE", "N/A")
@@ -346,25 +341,24 @@ def main():
             if isinstance(c0_mae, float) and isinstance(c1_mae, float):
                 delta = c1_mae - c0_mae
                 pct = (delta / c0_mae) * 100
-                print(f"  h={h}: C0={c0_mae:.4f}  C1={c1_mae:.4f}  "
-                      f"delta={delta:+.4f} ({pct:+.1f}%)")
+                logger.info(f"  h={h}: C0={c0_mae:.4f}  C1={c1_mae:.4f}  "
+                            f"delta={delta:+.4f} ({pct:+.1f}%)")
 
-    # Guardar
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     preds_path = RESULTS_DIR / f"{MODEL_NAME}_predictions.parquet"
     df_preds.to_parquet(preds_path, index=False)
-    print(f"\nPredicciones: {preds_path}")
+    logger.info(f"\nPredictions: {preds_path}")
 
     metrics_path = RESULTS_DIR / f"{MODEL_NAME}_metrics.json"
     with open(metrics_path, "w") as f:
         json.dump({MODEL_NAME: metrics}, f, indent=2)
-    print(f"Metricas:     {metrics_path}")
+    logger.info(f"Metrics:     {metrics_path}")
 
     sub_path = RESULTS_DIR / f"{MODEL_NAME}_subperiod_metrics.json"
     with open(sub_path, "w") as f:
         json.dump({MODEL_NAME: sub_metrics}, f, indent=2)
-    print(f"Subperiodos:  {sub_path}")
+    logger.info(f"Subperiods:  {sub_path}")
 
 
 if __name__ == "__main__":

@@ -1,12 +1,11 @@
-"""
-05_clean_and_align.py — Limpieza del IPC (INE)
+"""Clean and align Spain IPC data from INE Excel.
 
-Lee el Excel crudo del INE, extrae solo la sección de índice en nivel,
-parsea fechas, verifica gaps, y exporta a parquet versionado.
+Extracts the price index section, parses dates, checks for gaps,
+and exports to a versioned parquet.
 
-Entrada:  data/raw/IPC.xlsx
-Salida:   data/processed/ipc_spain_index.parquet
-          data/snapshots/<tag>.parquet (snapshot versionado)
+Input:  data/raw/IPC.xlsx
+Output: data/processed/ipc_spain_index.parquet
+        data/snapshots/<tag>.parquet
 """
 
 import sys
@@ -15,18 +14,24 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# ── Paths ────────────────────────────────────────────────────
-ROOT = Path(__file__).resolve().parents[1]          # tfg-forecasting/
-RAW_FILE = ROOT / "data" / "raw" / "IPC.xlsx"
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT.parent))
+
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
+
+# Paths
+RAW_FILE      = ROOT / "data" / "raw" / "IPC.xlsx"
 PROCESSED_DIR = ROOT / "data" / "processed"
 SNAPSHOTS_DIR = ROOT / "data" / "snapshots"
 
-# ── Constantes del formato INE ───────────────────────────────
-ROW_DATES = 7           # fila con fechas (0-indexed)
-ROW_DATA_START = 8      # fila del índice general
-ROW_DATA_END = 22       # fila después del último grupo ECOICOP
-COL_INDEX_START = 1     # primera col de la sección "Índice"
-COL_INDEX_END = 291     # col después de la última (exclusivo)
+# INE Excel format constants
+ROW_DATES      = 7     # row with date headers (0-indexed)
+ROW_DATA_START = 8     # row of the general index
+ROW_DATA_END   = 22    # row after the last ECOICOP group
+COL_INDEX_START = 1    # first column of the "Index" section
+COL_INDEX_END   = 291  # exclusive upper bound
 
 ECOICOP_NAMES = {
     8:  "indice_general",
@@ -47,17 +52,16 @@ ECOICOP_NAMES = {
 
 
 def parse_ine_date(date_str: str) -> pd.Timestamp:
-    """Convierte '2024M05' → Timestamp('2024-05-01')."""
+    """Convert '2024M05' to Timestamp('2024-05-01')."""
     year, month = date_str.split("M")
     return pd.Timestamp(year=int(year), month=int(month), day=1)
 
 
 def load_and_clean(path: Path = RAW_FILE) -> pd.DataFrame:
-    """Lee el Excel del INE y devuelve un DataFrame limpio con DatetimeIndex."""
-
+    """Read the INE Excel and return a clean DataFrame with DatetimeIndex."""
     raw = pd.read_excel(path, sheet_name=0, header=None)
 
-    # 1. Extraer fechas de la sección de índice
+    # Extract dates from the index section
     date_cells = raw.iloc[ROW_DATES, COL_INDEX_START:COL_INDEX_END]
     dates = []
     for d in date_cells:
@@ -66,7 +70,7 @@ def load_and_clean(path: Path = RAW_FILE) -> pd.DataFrame:
         else:
             dates.append(pd.NaT)
 
-    # 2. Extraer valores numéricos de cada grupo ECOICOP
+    # Extract numeric values for each ECOICOP group
     records = {}
     for row_idx, col_name in ECOICOP_NAMES.items():
         values = raw.iloc[row_idx, COL_INDEX_START:COL_INDEX_END]
@@ -75,77 +79,66 @@ def load_and_clean(path: Path = RAW_FILE) -> pd.DataFrame:
     df = pd.DataFrame(records, index=dates)
     df.index.name = "date"
 
-    # 3. Eliminar filas sin fecha válida o sin dato en índice general
+    # Drop rows without a valid date or general index
     df = df[df.index.notna()]
     df = df.dropna(subset=["indice_general"])
 
-    # 4. Ordenar cronológicamente (el Excel viene descendente)
+    # Sort ascending (INE Excel is in descending order)
     df = df.sort_index()
-
     return df
 
 
 def validate_monthly_continuity(df: pd.DataFrame) -> list[str]:
-    """Verifica que no hay gaps en la serie mensual. Devuelve lista de problemas."""
+    """Check for gaps in the monthly series. Returns a list of issues."""
     issues = []
     expected = pd.date_range(start=df.index.min(), end=df.index.max(), freq="MS")
     missing = expected.difference(df.index)
     if len(missing) > 0:
-        issues.append(f"Faltan {len(missing)} meses: {missing.tolist()}")
-
-    # Duplicados
+        issues.append(f"Missing {len(missing)} months: {missing.tolist()}")
     dupes = df.index[df.index.duplicated()]
     if len(dupes) > 0:
-        issues.append(f"Fechas duplicadas: {dupes.tolist()}")
-
+        issues.append(f"Duplicate dates: {dupes.tolist()}")
     return issues
 
 
 def export(df: pd.DataFrame, tag: str | None = None) -> None:
-    """Exporta a processed/ y opcionalmente a snapshots/."""
+    """Export to processed/ and optionally to snapshots/."""
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-
     out_path = PROCESSED_DIR / "ipc_spain_index.parquet"
     df.to_parquet(out_path)
-    print(f"Exportado: {out_path}  ({len(df)} filas, {df.columns.size} cols)")
+    logger.info(f"Saved: {out_path}  ({len(df)} rows, {df.columns.size} cols)")
 
     if tag:
         SNAPSHOTS_DIR.mkdir(parents=True, exist_ok=True)
         snap_path = SNAPSHOTS_DIR / f"ipc_spain_index_{tag}.parquet"
         df.to_parquet(snap_path)
-        print(f"Snapshot:  {snap_path}")
+        logger.info(f"Snapshot: {snap_path}")
 
 
 def main() -> None:
-    print(f"Leyendo {RAW_FILE} ...")
+    logger.info(f"Reading {RAW_FILE} ...")
     df = load_and_clean()
 
-    print(f"\nSerie limpia: {df.index.min().date()} -> {df.index.max().date()}")
-    print(f"Filas: {len(df)}, Columnas: {list(df.columns)}")
-    print(f"\nPrimeras filas:\n{df.head()}")
-    print(f"\nUltimas filas:\n{df.tail()}")
+    logger.info(f"Clean series: {df.index.min().date()} -> {df.index.max().date()}")
+    logger.info(f"Rows: {len(df)}, Columns: {list(df.columns)}")
+    logger.info(f"First rows:\n{df.head()}")
+    logger.info(f"Last rows:\n{df.tail()}")
+    logger.info(f"Statistics -- indice_general:\n{df['indice_general'].describe().to_string()}")
 
-    # Estadisticas basicas del indice general
-    print(f"\nEstadisticas -- indice general:")
-    print(df["indice_general"].describe().to_string())
-
-    # Validacion de continuidad
     issues = validate_monthly_continuity(df)
     if issues:
-        print("\n[!] Problemas de continuidad:")
+        logger.warning("Continuity issues detected:")
         for iss in issues:
-            print(f"  - {iss}")
+            logger.warning(f"  - {iss}")
     else:
-        print("\nContinuidad mensual OK -- sin gaps ni duplicados")
+        logger.info("Monthly continuity OK — no gaps or duplicates")
 
-    # NaN check por columna
     nan_counts = df.isna().sum()
     if nan_counts.any():
-        print(f"\nNaN por columna:\n{nan_counts[nan_counts > 0]}")
+        logger.warning(f"NaN per column:\n{nan_counts[nan_counts > 0]}")
     else:
-        print("Sin NaN en ninguna columna")
+        logger.info("No NaN in any column")
 
-    # Exportar
     tag = f"v1_{df.index.max().strftime('%Y%m')}"
     export(df, tag=tag)
 

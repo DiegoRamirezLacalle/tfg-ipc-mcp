@@ -1,0 +1,26 @@
+{
+  "h1": {
+    "model": "lstm_global_h1",
+    "MAE": 0.0923,
+    "RMSE": 0.0923,
+    "MASE": 0.0788
+  },
+  "h3": {
+    "model": "lstm_global_h3",
+    "MAE": 0.1711,
+    "RMSE": 0.18,
+    "MASE": 0.146
+  },
+  "h6": {
+    "model": "lstm_global_h6",
+    "MAE": 0.5808,
+    "RMSE": 0.6934,
+    "MASE": 0.4955
+  },
+  "h12": {
+    "model": "lstm_global_h12",
+    "MAE": 1.6465,
+    "RMSE": 2.0309,
+    "MASE": 1.4049
+  }
+}

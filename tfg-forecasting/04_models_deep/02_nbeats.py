@@ -1,28 +1,26 @@
-"""
-02_nbeats.py -- N-BEATS como baseline deep principal
+"""N-BEATS as main deep baseline.
 
-N-BEATS (Oreshkin et al., 2020): arquitectura puramente feedforward con
-bloques residuales. Mas estable y reproducible que LSTM, rendimiento
-competitivo sin necesidad de tuning extensivo.
+N-BEATS (Oreshkin et al., 2020): purely feedforward architecture with
+residual blocks. More stable and reproducible than LSTM, competitive
+performance without extensive tuning.
 
-Se usa la variante 'generic' (sin interpretabilidad), que es la que
-mejor funciona para forecasting puro.
+Uses the generic variant (no interpretability), which performs best for
+pure forecasting.
 
-Configuracion:
-  - input_size = 24 (2 anos de contexto)
-  - n_blocks = [1, 1]  (stacks trend + seasonality)
+Configuration:
+  - input_size = 24 (2 years of context)
+  - n_blocks = [1, 1]  (trend + seasonality stacks)
   - mlp_units = [[256, 256], [256, 256]]
   - max_steps = 500
 
-Entrada:  data/processed/ipc_spain_index.parquet
-Salida:   04_models_deep/results/nbeats_metrics.json
+Input:  data/processed/ipc_spain_index.parquet
+Output: 04_models_deep/results/nbeats_metrics.json
 """
 
 import json
 import warnings
 from pathlib import Path
 
-import pandas as pd
 from neuralforecast import NeuralForecast
 from neuralforecast.models import NBEATS
 
@@ -31,6 +29,9 @@ warnings.filterwarnings("ignore")
 from _helpers import (
     RESULTS_DIR, load_nf_format, evaluate_forecast, print_comparison
 )
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 HORIZONS = [1, 3, 6, 12]
 
@@ -38,8 +39,7 @@ HORIZONS = [1, 3, 6, 12]
 def train_and_evaluate(horizon):
     df_train, df_val, _, y_train_vals = load_nf_format()
 
-    # Para h < 4 los stacks trend/seasonality no son compatibles (requieren
-    # h >= 2*n_harmonics), asi que usamos stacks genericos (identity).
+    # trend/seasonality stacks require h >= 2*n_harmonics; use identity for short horizons
     if horizon < 4:
         stacks = ["identity", "identity", "identity"]
     else:
@@ -71,34 +71,34 @@ def train_and_evaluate(horizon):
 
 
 def main():
-    print("=" * 60)
-    print("N-BEATS -- Baseline deep principal")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("N-BEATS — Main deep baseline")
+    logger.info("=" * 60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     all_metrics = {}
 
     for h in HORIZONS:
-        print(f"\n--- Horizonte h={h} ---")
+        logger.info(f"\n--- Horizon h={h} ---")
         metrics, dates, y_true, y_pred = train_and_evaluate(h)
         all_metrics[f"h{h}"] = metrics
 
-        print(f"  MAE={metrics['MAE']}  RMSE={metrics['RMSE']}  MASE={metrics['MASE']}")
+        logger.info(f"  MAE={metrics['MAE']}  RMSE={metrics['RMSE']}  MASE={metrics['MASE']}")
         print_comparison(dates, y_true, y_pred)
 
     out_path = RESULTS_DIR / "nbeats_metrics.json"
     with open(out_path, "w") as f:
         json.dump(all_metrics, f, indent=2)
-    print(f"\nMetricas guardadas: {out_path}")
+    logger.info(f"\nMetrics saved: {out_path}")
 
-    print(f"\n{'=' * 60}")
-    print("RESUMEN N-BEATS")
-    print(f"{'h':>4} {'MAE':>8} {'RMSE':>8} {'MASE':>8}")
-    print("-" * 30)
+    logger.info(f"\n{'=' * 60}")
+    logger.info("N-BEATS SUMMARY")
+    logger.info(f"{'h':>4} {'MAE':>8} {'RMSE':>8} {'MASE':>8}")
+    logger.info("-" * 30)
     for h in HORIZONS:
         m = all_metrics[f"h{h}"]
-        print(f"{h:>4} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} {m['MASE']:>8.4f}")
-    print("=" * 60)
+        logger.info(f"{h:>4} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} {m['MASE']:>8.4f}")
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":

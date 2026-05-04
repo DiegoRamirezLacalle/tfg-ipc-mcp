@@ -1,10 +1,9 @@
-"""
-02_sarima_europe.py — SARIMA canonico para HICP Eurozona
+"""SARIMA canonical model for HICP Eurozone.
 
-Modelo de referencia: SARIMA(0,1,1)(0,1,1)12
-Mismo que el canonico de Espana (airline model).
+Reference model: SARIMA(0,1,1)(0,1,1)12
+Same as the canonical Spain model (airline model).
 
-Salida:
+Output:
   08_results/sarima_europe_summary.txt
   08_results/sarima_europe_metrics.json
 """
@@ -16,8 +15,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.stats.diagnostic import acorr_ljungbox
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 warnings.filterwarnings("ignore")
 
@@ -26,9 +25,12 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_VAL_END
+from shared.logger import get_logger
 from shared.metrics import mae, rmse, mase
 
-RESULTS_DIR = ROOT / "08_results"
+logger = get_logger(__name__)
+
+RESULTS_DIR    = ROOT / "08_results"
 ORDER          = (0, 1, 1)
 SEASONAL_ORDER = (0, 1, 1, 12)
 
@@ -43,21 +45,20 @@ def load_data():
 
 
 def main():
-    print("=" * 60)
-    print(f"SARIMA{ORDER}x{SEASONAL_ORDER} — HICP Eurozona")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info(f"SARIMA{ORDER}x{SEASONAL_ORDER} — HICP Eurozone")
+    logger.info("=" * 60)
 
     train, val = load_data()
-    print(f"Train: {train.index.min().date()} -> {train.index.max().date()} ({len(train)} obs)")
+    logger.info(f"Train: {train.index.min().date()} -> {train.index.max().date()} ({len(train)} obs)")
 
     mod = SARIMAX(train, order=ORDER, seasonal_order=SEASONAL_ORDER, trend="n")
     res = mod.fit(disp=False)
-    print(res.summary())
+    logger.info(res.summary())
 
-    # Ljung-Box
     lb = acorr_ljungbox(res.resid, lags=[6, 12, 24], return_df=True)
-    print("\nLjung-Box:")
-    print(lb[["lb_stat", "lb_pvalue"]].round(4))
+    logger.info("\nLjung-Box:")
+    logger.info(str(lb[["lb_stat", "lb_pvalue"]].round(4)))
 
     fc = res.get_forecast(steps=len(val)).predicted_mean
     m_val = {
@@ -65,7 +66,7 @@ def main():
         "RMSE": round(rmse(val.values, fc.values), 4),
         "MASE": round(mase(val.values, fc.values, train.values), 4),
     }
-    print(f"\nMetricas validacion: {m_val}")
+    logger.info(f"\nValidation metrics: {m_val}")
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     (RESULTS_DIR / "sarima_europe_summary.txt").write_text(
@@ -77,7 +78,7 @@ def main():
         json.dump({"order": list(ORDER), "seasonal_order": list(SEASONAL_ORDER),
                    "aic": round(res.aic, 2), "metrics_val": m_val}, f, indent=2)
 
-    print(f"\nGuardado en {RESULTS_DIR}")
+    logger.info(f"\nSaved to {RESULTS_DIR}")
 
 
 if __name__ == "__main__":
