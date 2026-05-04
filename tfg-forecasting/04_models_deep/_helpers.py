@@ -1,9 +1,8 @@
-"""
-Utilidades compartidas para los modelos deep del bloque 04.
+"""Shared utilities for Block 04 deep models.
 
-NeuralForecast espera formato long (unique_id, ds, y).
-Aqui centralizamos la conversion y la evaluacion para no duplicar
-codigo entre LSTM, N-BEATS y N-HiTS.
+NeuralForecast expects long format (unique_id, ds, y).
+Centralises conversion and evaluation to avoid duplication
+across LSTM, N-BEATS, and N-HiTS scripts.
 """
 
 import sys
@@ -17,19 +16,22 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_VAL_END
+from shared.logger import get_logger
 from shared.metrics import mae, rmse, mase
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 
 
 def load_nf_format():
-    """Carga IPC y devuelve DataFrames en formato NeuralForecast (long).
+    """Load IPC Spain and return DataFrames in NeuralForecast long format.
 
     Returns:
-        df_train: long format hasta DATE_TRAIN_END
-        df_val:   long format DATE_TRAIN_END+1 a DATE_VAL_END
-        df_full:  long format completo (para rolling)
-        y_train_values: array 1D del train set (para MASE scale)
+        df_train:       long format up to DATE_TRAIN_END
+        df_val:         long format DATE_TRAIN_END+1 to DATE_VAL_END
+        df_full:        full long format (for rolling)
+        y_train_values: 1D array of train set (for MASE scale)
     """
     df = pd.read_parquet(ROOT / "data" / "processed" / "ipc_spain_index.parquet")
     y = df[["indice_general"]].copy()
@@ -48,7 +50,7 @@ def load_nf_format():
 
 
 def evaluate_forecast(y_true, y_pred, y_train_values, model_name):
-    """Calcula MAE, RMSE, MASE y devuelve dict formateado."""
+    """Compute MAE, RMSE, MASE and return formatted dict."""
     return {
         "model": model_name,
         "MAE":   round(float(mae(y_true, y_pred)), 4),
@@ -58,9 +60,9 @@ def evaluate_forecast(y_true, y_pred, y_train_values, model_name):
 
 
 def print_comparison(dates, y_true, y_pred):
-    """Imprime tabla punto a punto."""
-    print(f"\n{'Fecha':>12} {'Real':>10} {'Pred':>10} {'Error':>10}")
-    print("-" * 45)
+    """Log point-by-point comparison table."""
+    logger.info(f"\n{'Date':>12} {'Actual':>10} {'Pred':>10} {'Error':>10}")
+    logger.info("-" * 45)
     for d, real, pred in zip(dates, y_true, y_pred):
         date_str = str(d.date()) if hasattr(d, "date") else str(d)[:10]
-        print(f"{date_str:>12} {real:10.3f} {pred:10.3f} {real - pred:10.3f}")
+        logger.info(f"{date_str:>12} {real:10.3f} {pred:10.3f} {real - pred:10.3f}")

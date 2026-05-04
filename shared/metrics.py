@@ -1,7 +1,4 @@
-"""
-Métricas de evaluación compartidas.
-MAE, RMSE, MASE y test de Diebold-Mariano.
-"""
+"""Shared evaluation metrics: MAE, RMSE, MASE, and Diebold-Mariano test."""
 
 import numpy as np
 from scipy import stats
@@ -16,42 +13,35 @@ def rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 
 
 def mase(y_true: np.ndarray, y_pred: np.ndarray, y_train: np.ndarray, m: int = 12) -> float:
-    """Mean Absolute Scaled Error (Hyndman & Koehler, 2006). m=12 para estacionalidad mensual.
+    """Mean Absolute Scaled Error (Hyndman & Koehler, 2006).
 
-    La escala es el MAE del naive estacional sobre el train set:
-    scale = mean(|y_t - y_{t-m}|) para t = m, ..., T
+    Scale = MAE of the seasonal naive forecast on the training set (lag m).
+    m=12 for monthly seasonality.
     """
-    naive_errors = np.abs(y_train[m:] - y_train[:-m])
-    scale = np.mean(naive_errors)
+    scale = np.mean(np.abs(y_train[m:] - y_train[:-m]))
     if scale == 0:
-        raise ValueError("Escala naive es 0; revisa la serie de entrenamiento.")
+        raise ValueError("Naive scale is 0; check the training series.")
     return float(np.mean(np.abs(y_true - y_pred)) / scale)
 
 
-def diebold_mariano(
-    e1: np.ndarray,
-    e2: np.ndarray,
-    h: int = 1,
-    power: int = 2,
-) -> dict:
-    """
-    Test Diebold-Mariano (Harvey et al., 1997).
+def diebold_mariano(e1: np.ndarray, e2: np.ndarray, h: int = 1, power: int = 2) -> dict:
+    """Diebold-Mariano test with Harvey-Leybourne-Newbold correction.
 
-    Parámetros
+    Parameters
     ----------
-    e1, e2 : errores de predicción de los dos modelos
-    h      : horizonte de predicción (pasos)
-    power  : 1 → errores absolutos, 2 → errores cuadráticos
+    e1, e2 : forecast errors for the two models
+    h      : forecast horizon (steps)
+    power  : 1 → absolute errors, 2 → squared errors
 
-    Devuelve
-    --------
-    dict con 'dm_stat', 'p_value' y 'better' ('model1' | 'model2' | 'tie')
+    Returns
+    -------
+    dict with 'dm_stat', 'p_value', and 'better' ('model1' | 'model2' | 'tie')
     """
     d = np.abs(e1) ** power - np.abs(e2) ** power
     n = len(d)
     d_bar = np.mean(d)
 
-    # varianza con corrección de autocovarianza hasta lag h-1
+    # variance with autocovariance correction up to lag h-1
     gamma = [np.mean((d - d_bar) * np.roll(d - d_bar, lag)) for lag in range(h)]
     var_d = (gamma[0] + 2 * sum(gamma[1:])) / n
     if var_d <= 0:

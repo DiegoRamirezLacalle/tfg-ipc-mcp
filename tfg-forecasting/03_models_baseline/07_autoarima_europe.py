@@ -1,18 +1,17 @@
-"""
-07_autoarima_europe.py — AutoSARIMA rolling backtesting (HICP Eurozona)
+"""AutoSARIMA rolling backtesting — HICP Eurozone.
 
-Diferencia clave frente a SARIMA fijo (04_backtesting_rolling_europe.py):
-  - En cada origen rolling, pmdarima.auto_arima re-selecciona los ordenes
-    (p,d,q)(P,D,Q) optimos via criterio AIC + stepwise.
+Key difference vs fixed SARIMA (04_backtesting_rolling_europe.py):
+  - At each rolling origin, pmdarima.auto_arima re-selects the optimal
+    (p,d,q)(P,D,Q) orders via AIC + stepwise.
 
-Diseno:
-  - Ventana expandiente: en cada origen t se entrena con todos los datos hasta t
-  - auto_arima estacional (m=12) re-ajustado en cada origen
-  - Horizontes: h = 1, 3, 6, 12 meses
-  - Origenes: 2021-01 hasta 2024-12 (48 puntos)
-  - Sin exogena (comparable al SARIMA baseline)
+Design:
+  - Expanding window: at each origin t, train on all data up to t
+  - Seasonal auto_arima (m=12) re-fitted at each origin
+  - Horizons: h = 1, 3, 6, 12 months
+  - Origins: 2021-01 to 2024-12 (48 points)
+  - No exogenous (comparable to SARIMA baseline)
 
-Salida:
+Output:
   08_results/autoarima_europe_predictions.parquet
   08_results/autoarima_europe_metrics.json
   08_results/autoarima_europe_orders.json
@@ -30,11 +29,14 @@ from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT     = Path(__file__).resolve().parents[1]
 MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 RESULTS_DIR   = ROOT / "08_results"
 HORIZONS      = [1, 3, 6, 12]
@@ -66,12 +68,12 @@ def run_rolling(y: pd.Series):
     mase_scale = float(np.mean(np.abs(
         y_train_init.values[12:] - y_train_init.values[:-12]
     )))
-    print(f"  MASE scale: {mase_scale:.4f}")
+    logger.info(f"  MASE scale: {mase_scale:.4f}")
 
     records = []
     orders_log = []
 
-    for origin in tqdm(origins, desc="Origenes AutoARIMA Europe"):
+    for origin in tqdm(origins, desc="AutoARIMA Europe"):
         y_train = y.loc[:origin]
 
         try:
@@ -94,7 +96,7 @@ def run_rolling(y: pd.Series):
                 "seasonal_order": list(model.seasonal_order),
             })
         except Exception as e:
-            print(f"\n[!] Error auto_arima en {origin.date()}: {e}")
+            logger.warning(f"\n[!] auto_arima error at {origin.date()}: {e}")
             continue
 
         for h in HORIZONS:
@@ -158,27 +160,27 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 
 def main():
-    print("=" * 60)
-    print("AutoARIMA ROLLING — HICP Eurozona")
-    print(f"  Origenes: {ORIGINS_START} - {ORIGINS_END}")
-    print(f"  Horizontes: {HORIZONS}")
-    print(f"  Metodo: pmdarima.auto_arima re-ajustado en cada origen")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("AutoARIMA ROLLING — HICP Eurozone")
+    logger.info(f"  Origins:  {ORIGINS_START} - {ORIGINS_END}")
+    logger.info(f"  Horizons: {HORIZONS}")
+    logger.info(f"  Method:   pmdarima.auto_arima re-fitted at each origin")
+    logger.info("=" * 60)
 
     y = load_data()
-    print(f"\nHICP Europe: {y.index.min().date()} - {y.index.max().date()} ({len(y)} obs)\n")
+    logger.info(f"\nHICP Europe: {y.index.min().date()} - {y.index.max().date()} ({len(y)} obs)\n")
 
     df_preds, mase_scale, orders_log = run_rolling(y)
-    print(f"\nTotal registros: {len(df_preds)}")
+    logger.info(f"\nTotal records: {len(df_preds)}")
 
     metrics = compute_metrics(df_preds, mase_scale)
 
-    print("\n" + "=" * 60)
-    print("RESULTADOS AutoARIMA Europe")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("AutoARIMA Europe RESULTS")
+    logger.info("=" * 60)
     ref = metrics.get("naive", {})
-    print(f"\n  {'h':>4}  {'MAE':>8}  {'RMSE':>8}  {'MASE':>8}  {'vs naive':>9}")
-    print(f"  {'-'*48}")
+    logger.info(f"\n  {'h':>4}  {'MAE':>8}  {'RMSE':>8}  {'MASE':>8}  {'vs naive':>9}")
+    logger.info(f"  {'-'*48}")
     for h in HORIZONS:
         key = f"h{h}"
         if key in metrics.get("auto_arima", {}):
@@ -186,14 +188,14 @@ def main():
             n_mae = ref.get(key, {}).get("MAE", float("nan"))
             ratio = m["MAE"] / n_mae if n_mae else float("nan")
             mark = " *" if ratio < 1.0 else ""
-            print(f"  {h:>4}  {m['MAE']:>8.4f}  {m['RMSE']:>8.4f}  "
-                  f"{m['MASE']:>8.4f}  {ratio:>8.3f}x{mark}")
+            logger.info(f"  {h:>4}  {m['MAE']:>8.4f}  {m['RMSE']:>8.4f}  "
+                        f"{m['MASE']:>8.4f}  {ratio:>8.3f}x{mark}")
 
-    print("\n  (* = bate al naive estacional lag-12)")
+    logger.info("\n  (* = beats seasonal lag-12 naive)")
 
-    print("\n  Muestra de ordenes auto_arima (cada 12 origenes):")
+    logger.info("\n  Sample of auto_arima orders (every 12 origins):")
     for entry in orders_log[::12]:
-        print(f"    {entry['origin']}: SARIMA{tuple(entry['order'])}x{tuple(entry['seasonal_order'])}")
+        logger.info(f"    {entry['origin']}: SARIMA{tuple(entry['order'])}x{tuple(entry['seasonal_order'])}")
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     df_preds.to_parquet(RESULTS_DIR / "autoarima_europe_predictions.parquet", index=False)
@@ -202,10 +204,10 @@ def main():
     with open(RESULTS_DIR / "autoarima_europe_orders.json", "w") as f:
         json.dump(orders_log, f, indent=2)
 
-    print(f"\nGuardado en {RESULTS_DIR}")
-    print("=" * 60)
-    print("COMPLETADO")
-    print("=" * 60)
+    logger.info(f"\nSaved to {RESULTS_DIR}")
+    logger.info("=" * 60)
+    logger.info("COMPLETE")
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":

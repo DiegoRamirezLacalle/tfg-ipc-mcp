@@ -1,13 +1,13 @@
-"""
-05_metrics_deep_global.py — Consolidacion deep + comparativa baseline CPI Global
+"""Deep models consolidation + baseline comparison — CPI Global.
 
-Carga metricas rolling de baseline (08_results/rolling_metrics_global.json)
-y deep (08_results/deep_rolling_metrics_global.json) y genera reporte unificado:
-  1. Tabla comparativa deep vs baseline por horizonte
-  2. Ranking global de todos los modelos
-  3. Grafico comparativo MAE
+Loads rolling metrics from baseline (08_results/rolling_metrics_global.json)
+and deep (08_results/deep_rolling_metrics_global.json) and generates a
+unified report:
+  1. Comparative deep vs baseline table by horizon
+  2. Global ranking of all models
+  3. Comparative MAE plot
 
-Salida:
+Output:
   08_results/deep_global_report.txt
   08_results/deep_global_summary.json
   08_results/figures/all_models_mae_by_horizon_global.png
@@ -24,6 +24,13 @@ import matplotlib.ticker as mticker
 import numpy as np
 
 ROOT        = Path(__file__).resolve().parents[1]
+MONOREPO    = ROOT.parent
+sys.path.insert(0, str(MONOREPO))
+
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
+
 RESULTS_DIR = ROOT / "08_results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 
@@ -126,7 +133,7 @@ def write_report(metrics, ranking):
     path = RESULTS_DIR / "deep_global_report.txt"
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
-    print(f"Reporte: {path}")
+    logger.info(f"Report: {path}")
     return text
 
 
@@ -147,7 +154,7 @@ def plot_comparison(metrics):
 
     ax.set_xticks(x)
     ax.set_xticklabels([f"h={h}" for h in HORIZONS])
-    ax.set_ylabel("MAE (pp tasa YoY)")
+    ax.set_ylabel("MAE (pp YoY rate)")
     ax.set_title("Rolling MAE — Baseline vs Deep C0 Global")
     ax.legend(ncol=4, fontsize=8, loc="upper left")
     ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
@@ -158,20 +165,19 @@ def plot_comparison(metrics):
     path = FIGURES_DIR / "all_models_mae_by_horizon_global.png"
     fig.savefig(path, dpi=150)
     plt.close(fig)
-    print(f"Grafico: {path}")
+    logger.info(f"Plot: {path}")
 
 
 def main():
-    print("=" * 60)
-    print("CONSOLIDACION DEEP + BASELINE — CPI Global")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("DEEP + BASELINE CONSOLIDATION — CPI Global")
+    logger.info("=" * 60)
 
     metrics = load_metrics()
     ranking = build_ranking(metrics)
 
     report = write_report(metrics, ranking)
-    print()
-    print(report)
+    logger.info("\n" + report)
 
     summary = {
         "metrics": metrics,
@@ -180,7 +186,7 @@ def main():
     summary_path = RESULTS_DIR / "deep_global_summary.json"
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
-    print(f"Summary JSON: {summary_path}")
+    logger.info(f"Summary JSON: {summary_path}")
 
     plot_comparison(metrics)
 

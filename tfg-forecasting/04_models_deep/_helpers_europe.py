@@ -1,4 +1,4 @@
-"""Utilidades compartidas para modelos deep — HICP Eurozona."""
+"""Shared utilities for deep models — HICP Eurozone."""
 
 import sys
 from pathlib import Path
@@ -11,14 +11,17 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_VAL_END
+from shared.logger import get_logger
 from shared.metrics import mae, rmse, mase
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = ROOT / "08_results"
 UNIQUE_ID   = "HICP_EUROPE"
 
 
 def load_nf_format_europe():
-    """Carga HICP Eurozona en formato long NeuralForecast.
+    """Load HICP Eurozone in NeuralForecast long format.
 
     Returns:
         train, val, df_full, y_train_values

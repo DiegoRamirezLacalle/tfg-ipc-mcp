@@ -1,15 +1,15 @@
 """
-19_timesfm_C0_europe.py — TimesFM 2.5 condicion C0 (solo historico) HICP Eurozona
+19_timesfm_C0_europe.py — TimesFM 2.5 condition C0 (historical only) HICP Eurozone
 
 Rolling-origin backtesting:
-  - 48 origenes: 2021-01 a 2024-12
-  - Horizontes: h=1, 3, 6, 12
-  - Metricas: MAE, RMSE, MASE (naive estacional lag-12)
+  - 48 origins: 2021-01 to 2024-12
+  - Horizons: h=1, 3, 6, 12
+  - Metrics: MAE, RMSE, MASE (seasonal naive lag-12)
 
-Modelo: google/timesfm-2.5-200m-pytorch
-Serie: hicp_europe_index.parquet (indice en nivel, base 2015=100)
+Model: google/timesfm-2.5-200m-pytorch
+Series: hicp_europe_index.parquet (level index, base 2015=100)
 
-Salida:
+Output:
   08_results/timesfm_C0_europe_predictions.parquet
   08_results/timesfm_C0_europe_metrics.json
 """
@@ -32,6 +32,9 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = ROOT / "08_results"
 HORIZONS = [1, 3, 6, 12]
@@ -42,7 +45,7 @@ MODEL_NAME = "timesfm_C0_europe"
 TEST_END_TS = pd.Timestamp(DATE_TEST_END)
 
 
-# -- Datos -----------------------------------------------------------
+# Data
 
 def load_data() -> pd.Series:
     df = pd.read_parquet(ROOT / "data" / "processed" / "hicp_europe_index.parquet")
@@ -52,12 +55,12 @@ def load_data() -> pd.Series:
     return df["hicp_index"]
 
 
-# -- Modelo ----------------------------------------------------------
+# Model
 
 def load_model():
     import timesfm
 
-    print("[timesfm] Cargando modelo google/timesfm-2.5-200m-pytorch ...")
+    logger.info("[timesfm] Loading model google/timesfm-2.5-200m-pytorch ...")
     tfm = timesfm.TimesFM_2p5_200M_torch.from_pretrained(
         "google/timesfm-2.5-200m-pytorch",
     )
@@ -68,11 +71,11 @@ def load_model():
             per_core_batch_size=1,
         )
     )
-    print("[timesfm] Modelo cargado y compilado (max_horizon=12)")
+    logger.info("[timesfm] Model loaded and compiled (max_horizon=12)")
     return tfm
 
 
-# -- Rolling backtesting ---------------------------------------------
+# Rolling backtesting
 
 def run_rolling(y: pd.Series, model) -> tuple[pd.DataFrame, float]:
     origins = pd.date_range(start=ORIGINS_START, end=ORIGINS_END, freq="MS")
@@ -81,7 +84,7 @@ def run_rolling(y: pd.Series, model) -> tuple[pd.DataFrame, float]:
     mase_scale = float(np.mean(np.abs(
         y_train_init.values[12:] - y_train_init.values[:-12]
     )))
-    print(f"  MASE scale: {mase_scale:.4f}")
+    logger.info(f"  MASE scale: {mase_scale:.4f}")
 
     records = []
 
@@ -124,7 +127,7 @@ def run_rolling(y: pd.Series, model) -> tuple[pd.DataFrame, float]:
     return pd.DataFrame(records), mase_scale
 
 
-# -- Metricas --------------------------------------------------------
+# Metrics
 
 def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
     results = {}
@@ -143,78 +146,78 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
     return results
 
 
-def print_table(metrics: dict) -> None:
-    print(f"\n{'Horizonte':<12} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'N':>5}")
-    print("-" * 45)
+def log_table(metrics: dict) -> None:
+    logger.info(f"\n{'Horizon':<12} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'N':>5}")
+    logger.info("-" * 45)
     for h in HORIZONS:
         key = f"h{h}"
         if key in metrics:
             m = metrics[key]
-            print(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
-                  f"{m['MASE']:8.4f} {m['n_evals']:5d}")
+            logger.info(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
+                        f"{m['MASE']:8.4f} {m['n_evals']:5d}")
 
 
-# -- Main ------------------------------------------------------------
+# Main
 
 def main():
-    print("=" * 60)
-    print(f"BACKTESTING ROLLING — {MODEL_NAME}")
-    print(f"Origenes: {ORIGINS_START} - {ORIGINS_END}")
-    print(f"Horizontes: {HORIZONS}")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END}")
+    logger.info(f"Horizons: {HORIZONS}")
+    logger.info("=" * 60)
 
     y = load_data()
-    print(f"HICP Europa: {y.index.min().date()} - {y.index.max().date()} ({len(y)} obs)")
+    logger.info(f"HICP Europe: {y.index.min().date()} - {y.index.max().date()} ({len(y)} obs)")
 
     model = load_model()
 
     df_preds, mase_scale = run_rolling(y, model)
-    print(f"\nPredicciones generadas: {len(df_preds)}")
+    logger.info(f"\nPredictions generated: {len(df_preds)}")
 
     metrics = compute_metrics(df_preds, mase_scale)
 
-    print("\n" + "=" * 60)
-    print(f"RESULTADOS {MODEL_NAME}")
-    print("=" * 60)
-    print_table(metrics)
+    logger.info("\n" + "=" * 60)
+    logger.info(f"RESULTS {MODEL_NAME}")
+    logger.info("=" * 60)
+    log_table(metrics)
 
-    # Comparativa vs baseline sarima y chronos2
+    # Comparison vs SARIMA baseline and Chronos2
     baseline_path = RESULTS_DIR / "rolling_metrics_europe.json"
     if baseline_path.exists():
         baselines = json.loads(baseline_path.read_text())
-        print("\n--- vs SARIMA (MAE) ---")
+        logger.info("\n--- vs SARIMA (MAE) ---")
         for h in HORIZONS:
             key = f"h{h}"
             tfm = metrics.get(key, {}).get("MAE")
             sar = baselines.get("sarima", {}).get(key, {}).get("MAE")
             if tfm and sar:
                 delta = tfm - sar
-                print(f"  h={h}: TimesFM={tfm:.4f}  SARIMA={sar:.4f}  "
-                      f"delta={delta:+.4f} ({delta/sar*100:+.1f}%)")
+                logger.info(f"  h={h}: TimesFM={tfm:.4f}  SARIMA={sar:.4f}  "
+                            f"delta={delta:+.4f} ({delta/sar*100:+.1f}%)")
 
     c2_path = RESULTS_DIR / "chronos2_C0_europe_metrics.json"
     if c2_path.exists():
         c2 = json.loads(c2_path.read_text()).get("chronos2_C0_europe", {})
-        print("\n--- vs Chronos2 C0 europe (MAE) ---")
+        logger.info("\n--- vs Chronos2 C0 europe (MAE) ---")
         for h in HORIZONS:
             key = f"h{h}"
             tfm = metrics.get(key, {}).get("MAE")
             c2m = c2.get(key, {}).get("MAE")
             if tfm and c2m:
                 delta = tfm - c2m
-                print(f"  h={h}: TimesFM={tfm:.4f}  Chronos2={c2m:.4f}  "
-                      f"delta={delta:+.4f} ({delta/c2m*100:+.1f}%)")
+                logger.info(f"  h={h}: TimesFM={tfm:.4f}  Chronos2={c2m:.4f}  "
+                            f"delta={delta:+.4f} ({delta/c2m*100:+.1f}%)")
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     preds_path = RESULTS_DIR / f"{MODEL_NAME}_predictions.parquet"
     df_preds.to_parquet(preds_path, index=False)
-    print(f"\nPredicciones: {preds_path}")
+    logger.info(f"\nPredictions: {preds_path}")
 
     metrics_path = RESULTS_DIR / f"{MODEL_NAME}_metrics.json"
     with open(metrics_path, "w") as f:
         json.dump({MODEL_NAME: metrics}, f, indent=2)
-    print(f"Metricas:     {metrics_path}")
+    logger.info(f"Metrics:     {metrics_path}")
 
 
 if __name__ == "__main__":

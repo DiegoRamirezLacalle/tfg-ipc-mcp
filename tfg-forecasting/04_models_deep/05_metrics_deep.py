@@ -1,13 +1,12 @@
-"""
-05_metrics_deep.py — Consolidacion deep + comparativa con baseline
+"""Deep models consolidation + baseline comparison.
 
-Carga las metricas rolling de ambos bloques (03_models_baseline y
-04_models_deep) y genera un reporte unificado con:
-  1. Tabla comparativa deep vs baseline por horizonte
-  2. Ranking global de todos los modelos
-  3. Graficos comparativos
+Loads rolling metrics from both blocks (03_models_baseline and
+04_models_deep) and generates a unified report with:
+  1. Comparative table deep vs baseline by horizon
+  2. Global ranking of all models
+  3. Comparative plots
 
-Salida:
+Output:
   results/deep_report.txt
   results/deep_summary.json
   results/plots/all_models_mae_by_horizon.png
@@ -26,6 +25,10 @@ import numpy as np
 ROOT     = Path(__file__).resolve().parents[1]
 MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
+
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 RESULTS_DIR    = Path(__file__).resolve().parent / "results"
 BASELINE_DIR   = ROOT / "03_models_baseline" / "results"
@@ -80,7 +83,6 @@ def write_report(metrics, ranking):
         sep, "",
     ]
 
-    # Tabla por horizonte
     for h in HORIZONS:
         key = f"h{h}"
         lines += [
@@ -101,14 +103,12 @@ def write_report(metrics, ranking):
             )
         lines.append("")
 
-    # Ranking
     lines += [sep, "RANKING GLOBAL POR HORIZONTE", sep2,
               f"{'h':>4} {'Mejor':>10} {'Tipo':>10} {'MAE':>8}", sep2]
     for h, info in ranking.items():
         tipo = "baseline" if info["best"] in BASELINE_MODELS else "deep"
         lines.append(f"{h:>4} {info['best']:>10} {tipo:>10} {info['MAE']:>8.4f}")
 
-    # Conclusiones
     lines += [
         "", sep, "CONCLUSIONES", sep2,
         "  - El LSTM es competitivo en h=1 pero pierde ventaja en h=12",
@@ -131,7 +131,7 @@ def write_report(metrics, ranking):
     path = RESULTS_DIR / "deep_report.txt"
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
-    print(f"Reporte: {path}")
+    logger.info(f"Report: {path}")
     return text
 
 
@@ -156,8 +156,8 @@ def plot_comparison(metrics):
 
     ax.set_xticks(x)
     ax.set_xticklabels([f"h={h}" for h in HORIZONS])
-    ax.set_ylabel("MAE (puntos de indice IPC)")
-    ax.set_title("Comparativa Rolling MAE — Baseline vs Deep (C0)")
+    ax.set_ylabel("MAE (IPC index points)")
+    ax.set_title("Rolling MAE comparison — Baseline vs Deep (C0)")
     ax.legend(ncol=4, fontsize=8, loc="upper left")
     ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
     ax.grid(axis="y", alpha=0.3)
@@ -167,33 +167,32 @@ def plot_comparison(metrics):
     path = PLOTS_DIR / "all_models_mae_by_horizon.png"
     fig.savefig(path, dpi=150)
     plt.close(fig)
-    print(f"Grafico: {path}")
+    logger.info(f"Plot: {path}")
 
 
 def main():
-    print("=" * 60)
-    print("CONSOLIDACION DEEP + BASELINE")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("DEEP + BASELINE CONSOLIDATION")
+    logger.info("=" * 60)
 
     metrics = load_metrics()
     ranking = build_ranking(metrics)
 
     report = write_report(metrics, ranking)
-    print()
-    print(report)
+    logger.info("\n" + report)
 
     summary = {"metrics": metrics, "ranking": {str(h): v for h, v in ranking.items()}}
     summary_path = RESULTS_DIR / "deep_summary.json"
     with open(summary_path, "w") as f:
         json.dump(summary, f, indent=2)
-    print(f"Summary JSON: {summary_path}")
+    logger.info(f"Summary JSON: {summary_path}")
 
     plot_comparison(metrics)
 
-    print("\nArchivos generados:")
+    logger.info("\nFiles generated:")
     for p in sorted(RESULTS_DIR.rglob("*")):
         if p.is_file():
-            print(f"  {p.relative_to(RESULTS_DIR)}")
+            logger.info(f"  {p.relative_to(RESULTS_DIR)}")
 
 
 if __name__ == "__main__":

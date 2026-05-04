@@ -1,13 +1,10 @@
-"""
-agent_extractor.py
-------------------
-Procesa textos RSS de comunicados oficiales (BCE, INE, BdE) con Ollama
-(qwen3:4b) y devuelve senales estructuradas via Pydantic + structured output.
+"""Process RSS texts from official sources (ECB, INE, BdE) with Ollama
+(qwen3:4b) and return structured signals via Pydantic + structured output.
 
-GDELT NO pasa por aqui — sus senales son puramente cuantitativas.
+GDELT is NOT processed here — its signals are purely quantitative.
 
-Requiere:
-    1. Ollama instalado y corriendo
+Requirements:
+    1. Ollama installed and running
     2. pip install ollama pydantic
     3. ollama pull qwen3:4b
 """
@@ -16,6 +13,7 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from enum import Enum
 from pathlib import Path
 from typing import Any, Optional
@@ -23,50 +21,53 @@ from typing import Any, Optional
 import ollama
 from pydantic import BaseModel, Field
 
-# ── Configuracion ──────────────────────────────────────────────
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT.parent))
+
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
+
+# Configuration
 MODEL = "qwen3:4b"
 PROMPT_PATH = Path(__file__).parent / "prompts" / "extraction_v1.txt"
 
 _THINK_RE = re.compile(r"<think>.*?</think>", re.DOTALL)
 
 
-# ── Esquema Pydantic para salida estructurada ──────────────────
+# Pydantic schema for structured LLM output
 class Decision(str, Enum):
-    subida = "subida"
-    bajada = "bajada"
+    subida     = "subida"
+    bajada     = "bajada"
     sin_cambio = "sin_cambio"
-    dato = "dato"
+    dato       = "dato"
 
 
 class Tone(str, Enum):
-    hawkish = "hawkish"
-    neutral = "neutral"
-    dovish = "dovish"
+    hawkish  = "hawkish"
+    neutral  = "neutral"
+    dovish   = "dovish"
     positivo = "positivo"
     negativo = "negativo"
 
 
 class Topic(str, Enum):
     tipos_interes = "tipos_interes"
-    inflacion = "inflacion"
-    empleo = "empleo"
-    pib = "pib"
-    otro = "otro"
+    inflacion     = "inflacion"
+    empleo        = "empleo"
+    pib           = "pib"
+    otro          = "otro"
 
 
 class RSSSignals(BaseModel):
-    """Senales extraidas de un comunicado oficial."""
+    """Signals extracted from an official press release."""
 
-    decision: Decision = Field(
-        description="subida|bajada|sin_cambio|dato",
-    )
+    decision: Decision = Field(description="subida|bajada|sin_cambio|dato")
     magnitude: Optional[float] = Field(
         default=None,
         description="Numeric change (e.g. 0.50 for 50bps). null if not applicable.",
     )
-    tone: Tone = Field(
-        description="hawkish|neutral|dovish|positivo|negativo",
-    )
+    tone: Tone = Field(description="hawkish|neutral|dovish|positivo|negativo")
     shock_score: float = Field(
         ge=0.0, le=1.0,
         description="0=expected, 1=completely unexpected",
@@ -75,12 +76,10 @@ class RSSSignals(BaseModel):
         ge=0.0, le=1.0,
         description="0=clear outlook, 1=maximum ambiguity",
     )
-    topic: Topic = Field(
-        description="tipos_interes|inflacion|empleo|pib|otro",
-    )
+    topic: Topic = Field(description="tipos_interes|inflacion|empleo|pib|otro")
 
 
-# Valores por defecto para texto irrelevante o error
+# Default values for irrelevant text or parse error
 DEFAULT_SIGNALS = RSSSignals(
     decision=Decision.dato,
     magnitude=None,
@@ -96,7 +95,7 @@ def _load_system_prompt() -> str:
 
 
 def _strip_thinking(text: str) -> str:
-    """Elimina bloques <think>...</think> de Qwen3."""
+    """Remove <think>...</think> blocks from Qwen3 output."""
     return _THINK_RE.sub("", text).strip()
 
 
@@ -105,19 +104,18 @@ def _clamp(value: float, lo: float, hi: float) -> float:
 
 
 def extract_signals(text: str, source: str = "") -> dict[str, Any]:
-    """
-    Extrae senales de un comunicado oficial.
+    """Extract signals from an official press release.
 
     Parameters
     ----------
     text : str
-        Titulo + cuerpo del comunicado RSS.
+        Title + body of the RSS entry.
     source : str
-        Fuente: "bce", "ine", "bde" (para contexto).
+        Source identifier: "bce", "ine", or "bde" (used as context).
 
     Returns
     -------
-    dict con decision, magnitude, tone, shock_score, uncertainty_index, topic.
+    dict with decision, magnitude, tone, shock_score, uncertainty_index, topic.
     """
     if not text or not text.strip():
         return DEFAULT_SIGNALS.model_dump()
@@ -132,7 +130,7 @@ def extract_signals(text: str, source: str = "") -> dict[str, Any]:
                 {"role": "user", "content": user_content},
             ],
             format=RSSSignals.model_json_schema(),
-            think=False,  # desactiva thinking mode de Qwen3 (evita <think> largos)
+            think=False,  # disable Qwen3 thinking mode (avoids long <think> blocks)
             options={"temperature": 0},
         )
         raw_text = _strip_thinking(response["message"]["content"])
@@ -140,7 +138,7 @@ def extract_signals(text: str, source: str = "") -> dict[str, Any]:
         err_msg = str(e).lower()
         if "not found" in err_msg or "pull" in err_msg:
             raise RuntimeError(
-                f"Modelo '{MODEL}' no descargado. Ejecuta:\n  ollama pull {MODEL}"
+                f"Model '{MODEL}' not downloaded. Run:\n  ollama pull {MODEL}"
             ) from e
         raise
 
@@ -156,12 +154,12 @@ def extract_signals(text: str, source: str = "") -> dict[str, Any]:
         )
         return signals.model_dump()
     except (json.JSONDecodeError, KeyError, ValueError, TypeError) as exc:
-        print(f"[WARN] Extraccion fallida: {exc}")
-        print(f"       Respuesta LLM: {raw_text[:300]}")
+        logger.warning(f"Extraction failed: {exc}")
+        logger.warning(f"LLM response: {raw_text[:300]}")
         return DEFAULT_SIGNALS.model_dump()
 
 
-# ── CLI para test manual ──────────────────────────────────────
+# CLI for manual testing
 if __name__ == "__main__":
     test_text = (
         "BCE sube tipos 50 puntos basicos. "
@@ -171,8 +169,8 @@ if __name__ == "__main__":
         "que se mantenga por encima del objetivo durante un periodo "
         "prolongado."
     )
-    print(f"Modelo: {MODEL}")
-    print(f"Schema: {json.dumps(RSSSignals.model_json_schema(), indent=2)}")
-    print("\nExtrayendo senales...")
+    logger.info(f"Model: {MODEL}")
+    logger.info(f"Schema: {json.dumps(RSSSignals.model_json_schema(), indent=2)}")
+    logger.info("Extracting signals...")
     result = extract_signals(test_text, source="bce")
-    print(json.dumps(result, indent=2))
+    logger.info(json.dumps(result, indent=2))

@@ -1,14 +1,13 @@
-"""
-01_arima_auto_europe.py — auto_arima SARIMA para HICP Eurozona
+"""auto_arima SARIMA for HICP Eurozone.
 
-Serie: hicp_europe_index.parquet (indice en nivel, base 2015=100)
+Series: hicp_europe_index.parquet (level index, base 2015=100)
 
-Parametros fijados por EDA (notebooks 02-04 _europe):
-  d=1, D=1, m=12  (igual que Espana)
-  p in {0,1,2,3}, q in {0,1,2}  (PACF/ACF sobre diff(1,12))
+Parameters fixed by EDA (notebooks 02-04 _europe):
+  d=1, D=1, m=12  (same as Spain)
+  p in {0,1,2,3}, q in {0,1,2}  (PACF/ACF on diff(1,12))
   P in {1,2},     Q in {1}
 
-Salida:
+Output:
   08_results/arima_europe_summary.txt
   08_results/arima_europe_metrics.json
 """
@@ -30,7 +29,10 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_VAL_END
+from shared.logger import get_logger
 from shared.metrics import mae, rmse, mase
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = ROOT / "08_results"
 
@@ -66,40 +68,37 @@ def fit_sarima(train: pd.Series):
 def diagnose(model):
     resid = model.resid()
     lb = acorr_ljungbox(resid, lags=[6, 12, 24], return_df=True)
-    print("\nLjung-Box:")
-    print(lb[["lb_stat", "lb_pvalue"]].round(4))
+    logger.info("\nLjung-Box:")
+    logger.info(str(lb[["lb_stat", "lb_pvalue"]].round(4)))
     return resid
 
 
 def main():
-    print("=" * 60)
-    print("auto_arima SARIMA — HICP Eurozona")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("auto_arima SARIMA — HICP Eurozone")
+    logger.info("=" * 60)
 
     y, train, val = load_data()
-    print(f"Train: {train.index.min().date()} -> {train.index.max().date()} ({len(train)} obs)")
-    print(f"Val:   {val.index.min().date()} -> {val.index.max().date()} ({len(val)} obs)\n")
+    logger.info(f"Train: {train.index.min().date()} -> {train.index.max().date()} ({len(train)} obs)")
+    logger.info(f"Val:   {val.index.min().date()} -> {val.index.max().date()} ({len(val)} obs)\n")
 
-    print("Buscando mejor SARIMA(p,1,q)(P,1,Q)12 por AIC...")
+    logger.info("Searching best SARIMA(p,1,q)(P,1,Q)12 by AIC...")
     model = fit_sarima(train)
 
-    print(f"\nModelo seleccionado: {model.order} x {model.seasonal_order}")
-    print(f"AIC: {model.aic():.2f}  |  BIC: {model.bic():.2f}")
-    print(f"\nParametros:\n{model.summary()}")
+    logger.info(f"\nSelected model: {model.order} x {model.seasonal_order}")
+    logger.info(f"AIC: {model.aic():.2f}  |  BIC: {model.bic():.2f}")
+    logger.info(f"\nParameters:\n{model.summary()}")
 
     diagnose(model)
 
-    # Evaluacion en validacion
     fc = model.predict(n_periods=len(val))
-    y_train_arr = train.values
     m_val = {
         "MAE":  round(mae(val.values, fc), 4),
         "RMSE": round(rmse(val.values, fc), 4),
-        "MASE": round(mase(val.values, fc, y_train_arr), 4),
+        "MASE": round(mase(val.values, fc, train.values), 4),
     }
-    print(f"\nMetricas validacion: {m_val}")
+    logger.info(f"\nValidation metrics: {m_val}")
 
-    # Guardar resumen
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     order_str = f"SARIMA{model.order}x{model.seasonal_order}"
     summary_txt = (
@@ -119,7 +118,7 @@ def main():
     with open(RESULTS_DIR / "arima_europe_metrics.json", "w") as f:
         json.dump(result, f, indent=2)
 
-    print(f"\nResultados guardados en {RESULTS_DIR}")
+    logger.info(f"\nResults saved to {RESULTS_DIR}")
     return model.order, model.seasonal_order
 
 

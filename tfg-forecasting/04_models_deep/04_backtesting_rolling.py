@@ -1,17 +1,16 @@
-"""
-04_backtesting_rolling.py — Backtesting expanding-window para modelos deep
+"""Rolling expanding-window backtesting for deep models.
 
-Misma metodologia que 03_models_baseline/04_backtesting_rolling.py:
-  - Ventana expandiente, ordenes fijos, origenes mensuales
-  - Modelos: LSTM, N-BEATS, N-HiTS
-  - Horizontes: h = 1, 3, 6, 12
+Same methodology as 03_models_baseline/04_backtesting_rolling.py:
+  - Expanding window, fixed orders, monthly origins
+  - Models: LSTM, N-BEATS, N-HiTS
+  - Horizons: h = 1, 3, 6, 12
 
-Nota rendimiento: entrenar modelos deep es ~50x mas lento que ARIMA.
-Para hacer el rolling viable, usamos:
-  - Origenes cada 3 meses (trimestral) en vez de mensual
-  - max_steps reducido a 300 (convergencia suficiente para IPC)
+Performance note: training deep models is ~50x slower than ARIMA.
+To keep rolling viable:
+  - Quarterly origins instead of monthly
+  - max_steps reduced to 300 (sufficient convergence for CPI)
 
-Salida:
+Output:
   results/deep_rolling_predictions.parquet
   results/deep_rolling_metrics.json
 """
@@ -34,6 +33,9 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 
@@ -41,14 +43,14 @@ HORIZONS = [1, 3, 6, 12]
 MODEL_NAMES = ["lstm", "nbeats", "nhits"]
 TEST_END_TS = pd.Timestamp(DATE_TEST_END)
 
-# Origenes trimestrales para viabilidad computacional
+# Quarterly origins for computational viability
 ORIGINS_START = "2021-01-01"
 ORIGINS_END   = DATE_TEST_END
-ORIGIN_FREQ   = "3MS"  # cada 3 meses
+ORIGIN_FREQ   = "3MS"
 
 
 def load_full():
-    """Carga serie completa en formato NeuralForecast."""
+    """Load full series in NeuralForecast long format."""
     df = pd.read_parquet(ROOT / "data" / "processed" / "ipc_spain_index.parquet")
     y = df[["indice_general"]].copy()
     y.index.name = "ds"
@@ -60,7 +62,7 @@ def load_full():
 
 
 def build_models(horizon):
-    """Instancia los tres modelos deep para un horizonte dado."""
+    """Instantiate the three deep models for a given horizon."""
     if horizon < 4:
         nbeats_stacks = ["identity", "identity", "identity"]
     else:
@@ -105,7 +107,7 @@ def run_rolling(df_full):
     origins = pd.date_range(start=ORIGINS_START, end=ORIGINS_END, freq=ORIGIN_FREQ)
     y_series = df_full.set_index("ds")["y"]
 
-    # MASE scale (fija, sobre train set inicial)
+    # MASE scale (fixed, over initial train set)
     y_train_init = y_series.loc[:DATE_TRAIN_END].values
     mase_scale = float(np.mean(np.abs(y_train_init[12:] - y_train_init[:-12])))
 
@@ -134,7 +136,7 @@ def run_rolling(df_full):
 
                 y_true = y_actual.values
 
-                # Construir y entrenar modelos para este horizonte
+                # Build and fit models for this horizon
                 models = build_models(h)
                 nf = NeuralForecast(models=models, freq="MS")
                 nf.fit(df=df_train)
@@ -184,46 +186,44 @@ def compute_metrics(df_preds, mase_scale):
 
 
 def main():
-    print("=" * 60)
-    print("BACKTESTING ROLLING — Modelos deep (LSTM / N-BEATS / N-HiTS)")
-    print(f"Origenes: {ORIGINS_START} - {ORIGINS_END} (cada 3 meses)")
-    print(f"Horizontes: {HORIZONS}")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("ROLLING BACKTESTING — Deep models (LSTM / N-BEATS / N-HiTS)")
+    logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END} (every 3 months)")
+    logger.info(f"Horizons: {HORIZONS}")
+    logger.info("=" * 60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     df_full = load_full()
-    print(f"Datos: {len(df_full)} obs")
+    logger.info(f"Data: {len(df_full)} obs")
 
     df_preds, mase_scale = run_rolling(df_full)
-    print(f"\nTotal predicciones: {len(df_preds)}")
+    logger.info(f"\nTotal predictions: {len(df_preds)}")
 
     metrics = compute_metrics(df_preds, mase_scale)
 
-    # Tabla resumen
-    print("\n" + "=" * 60)
-    print("RESULTADOS ROLLING DEEP")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("DEEP ROLLING RESULTS")
+    logger.info("=" * 60)
     for h in HORIZONS:
         key = f"h{h}"
-        print(f"\n  h={h}:")
-        print(f"  {'Modelo':<10} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'N':>5}")
-        print(f"  {'-'*40}")
+        logger.info(f"\n  h={h}:")
+        logger.info(f"  {'Model':<10} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'N':>5}")
+        logger.info(f"  {'-'*40}")
         for model in MODEL_NAMES:
             if key in metrics.get(model, {}):
                 m = metrics[model][key]
-                print(f"  {model:<10} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} "
-                      f"{m['MASE']:>8.4f} {m['n_evals']:>5d}")
+                logger.info(f"  {model:<10} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} "
+                             f"{m['MASE']:>8.4f} {m['n_evals']:>5d}")
 
-    # Guardar
     preds_path = RESULTS_DIR / "deep_rolling_predictions.parquet"
     df_preds.to_parquet(preds_path, index=False)
-    print(f"\nPredicciones: {preds_path}")
+    logger.info(f"\nPredictions: {preds_path}")
 
     metrics_path = RESULTS_DIR / "deep_rolling_metrics.json"
     with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=2)
-    print(f"Metricas:     {metrics_path}")
+    logger.info(f"Metrics:     {metrics_path}")
 
 
 if __name__ == "__main__":

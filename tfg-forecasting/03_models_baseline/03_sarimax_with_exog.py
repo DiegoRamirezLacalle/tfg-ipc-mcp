@@ -1,19 +1,17 @@
-"""
-03_sarimax_with_exog.py — SARIMAX con tipo de deposito BCE (DFR) como exogena
+"""SARIMAX baseline with ECB Deposit Facility Rate (DFR) as exogenous variable.
 
-Variable exogena principal: dfr (Deposit Facility Rate)
-Justificacion economica: es el instrumento de politica monetaria principal del
-BCE desde 2014 y tiene relacion directa con la inflacion al consumo.
+Main exogenous variable: dfr (Deposit Facility Rate)
+Economic justification: primary ECB monetary policy instrument since 2014,
+directly related to consumer inflation.
 
-Nota sobre la evaluacion estatica:
-  En la prediccion sobre validacion se usan los valores REALES del DFR durante
-  2021-2022 (supuesto oraculo). Esto es correcto para la evaluacion estatica
-  del baseline; el backtesting rolling usara los valores conocidos en cada
-  origen de prediccion, que tambien son reales (el DFR es publico el mismo dia).
+Note on static evaluation:
+  Validation forecast uses the REAL DFR values for 2021-2022 (oracle assumption).
+  This is correct for static baseline evaluation; rolling backtesting uses values
+  known at each forecast origin, which are also real (DFR is public on the same day).
 
-Entrada:  data/processed/features_exog.parquet
-Salida:   03_models_baseline/results/sarimax_summary.txt
-          03_models_baseline/results/sarimax_metrics.json
+Input:  data/processed/features_exog.parquet
+Output: 03_models_baseline/results/sarimax_summary.txt
+        03_models_baseline/results/sarimax_metrics.json
 """
 
 import json
@@ -30,11 +28,13 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_VAL_END
+from shared.logger import get_logger
 from shared.metrics import mae, rmse, mase
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 
-# Variable exogena principal
 EXOG_COL = "dfr"
 
 
@@ -55,7 +55,7 @@ def load_data():
 
 
 def fit_sarimax(y_train, X_train):
-    """auto_arima con variable exogena. Mismos rangos que SARIMA para comparabilidad."""
+    """Fit auto_arima with exogenous variable. Same ranges as SARIMA for comparability."""
     model = pm.auto_arima(
         y_train,
         exogenous=X_train,
@@ -79,13 +79,13 @@ def diagnose_residuals(model):
     resid = model.resid()
     lb = acorr_ljungbox(resid, lags=[6, 12, 24], return_df=True)
 
-    print("\n--- Diagnostico de residuos (sarimax) ---")
-    print(f"  Media:     {resid.mean():.6f}")
-    print(f"  Std:       {resid.std():.4f}")
-    print("  Ljung-Box:")
+    logger.info("\n--- Residual diagnostics (sarimax) ---")
+    logger.info(f"  Mean:  {resid.mean():.6f}")
+    logger.info(f"  Std:   {resid.std():.4f}")
+    logger.info("  Ljung-Box:")
     for lag, row in lb.iterrows():
-        status = "OK" if row["lb_pvalue"] > 0.05 else "AUTOCORRELACION"
-        print(f"    Lag {lag:2d}: stat={row['lb_stat']:.2f}  p={row['lb_pvalue']:.4f}  [{status}]")
+        status = "OK" if row["lb_pvalue"] > 0.05 else "AUTOCORRELATION"
+        logger.info(f"    Lag {lag:2d}: stat={row['lb_stat']:.2f}  p={row['lb_pvalue']:.4f}  [{status}]")
 
     return lb
 
@@ -109,7 +109,7 @@ def forecast_and_evaluate(model, y_train, y_val, X_val):
 
 
 def load_previous_metrics():
-    """Carga metricas de ARIMA y SARIMA para comparativa."""
+    """Load ARIMA and SARIMA metrics for comparison."""
     results = {}
     for name in ["arima", "sarima"]:
         path = RESULTS_DIR / f"{name}_metrics.json"
@@ -125,74 +125,74 @@ def save_results(model, metrics):
     summary_path = RESULTS_DIR / "sarimax_summary.txt"
     with open(summary_path, "w", encoding="utf-8") as f:
         f.write(str(model.summary()))
-    print(f"\nSummary guardado en: {summary_path}")
+    logger.info(f"\nSummary saved: {summary_path}")
 
     out = {
-        "model": "sarimax",
-        "exog": EXOG_COL,
-        "order": list(model.order),
+        "model":          "sarimax",
+        "exog":           EXOG_COL,
+        "order":          list(model.order),
         "seasonal_order": list(model.seasonal_order),
-        "aic": round(model.aic(), 4),
-        "bic": round(model.bic(), 4),
-        "n_train": int(model.nobs_),
-        "metrics_val": metrics,
+        "aic":            round(model.aic(), 4),
+        "bic":            round(model.bic(), 4),
+        "n_train":        int(model.nobs_),
+        "metrics_val":    metrics,
     }
     metrics_path = RESULTS_DIR / "sarimax_metrics.json"
     with open(metrics_path, "w") as f:
         json.dump(out, f, indent=2)
-    print(f"Metricas guardadas en: {metrics_path}")
+    logger.info(f"Metrics saved: {metrics_path}")
 
     return out
 
 
 def main():
-    print("=" * 60)
-    print(f"SARIMAX — Baseline con exogena: {EXOG_COL}")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info(f"SARIMAX — baseline with exogenous: {EXOG_COL}")
+    logger.info("=" * 60)
 
     y, X, y_train, y_val, X_train, X_val = load_data()
-    print(f"Train: {y_train.index.min().date()} -> {y_train.index.max().date()} ({len(y_train)} obs)")
-    print(f"Val:   {y_val.index.min().date()} -> {y_val.index.max().date()} ({len(y_val)} obs)")
-    print(f"DFR train: min={X_train[EXOG_COL].min():.2f}  max={X_train[EXOG_COL].max():.2f}")
-    print(f"DFR val:   min={X_val[EXOG_COL].min():.2f}  max={X_val[EXOG_COL].max():.2f}")
+    logger.info(f"Train: {y_train.index.min().date()} -> {y_train.index.max().date()} ({len(y_train)} obs)")
+    logger.info(f"Val:   {y_val.index.min().date()} -> {y_val.index.max().date()} ({len(y_val)} obs)")
+    logger.info(f"DFR train: min={X_train[EXOG_COL].min():.2f}  max={X_train[EXOG_COL].max():.2f}")
+    logger.info(f"DFR val:   min={X_val[EXOG_COL].min():.2f}  max={X_val[EXOG_COL].max():.2f}")
 
-    print("\n--- Busqueda auto_arima con exogena ---")
+    logger.info("\n--- auto_arima search with exogenous ---")
     model = fit_sarimax(y_train, X_train)
 
     order   = model.order
     s_order = model.seasonal_order
-    print(f"\nModelo seleccionado: SARIMAX{order}x{s_order}")
-    print(f"AIC: {model.aic():.2f}  |  BIC: {model.bic():.2f}")
-    print(model.summary())
+    logger.info(f"\nSelected model: SARIMAX{order}x{s_order}")
+    logger.info(f"AIC: {model.aic():.2f}  |  BIC: {model.bic():.2f}")
+    logger.info(str(model.summary()))
 
     diagnose_residuals(model)
 
-    print(f"\n--- Prediccion sobre validacion ({len(y_val)} meses) ---")
+    logger.info(f"\n--- Forecast on validation ({len(y_val)} months) ---")
     fc, ci, metrics = forecast_and_evaluate(model, y_train, y_val, X_val)
 
-    print("\nMetricas sobre validacion:")
+    logger.info("\nValidation metrics:")
     for k, v in metrics.items():
-        print(f"  {k}: {v}")
+        logger.info(f"  {k}: {v}")
 
-    print(f"\n{'Fecha':>12} {'Real':>10} {'Pred':>10} {'Error':>10} {'DFR':>8}")
-    print("-" * 50)
+    logger.info(f"\n{'Date':>12} {'Actual':>10} {'Pred':>10} {'Error':>10} {'DFR':>8}")
+    logger.info("-" * 50)
     for date, real, pred, dfr_val in zip(y_val.index, y_val.values, fc.values, X_val[EXOG_COL].values):
-        print(f"{str(date.date()):>12} {real:10.3f} {pred:10.3f} {real - pred:10.3f} {dfr_val:8.2f}")
+        logger.info(f"{str(date.date()):>12} {real:10.3f} {pred:10.3f} {real - pred:10.3f} {dfr_val:8.2f}")
 
     result = save_results(model, metrics)
 
-    # Comparativa con ARIMA y SARIMA
+    # Comparison with ARIMA and SARIMA
     prev = load_previous_metrics()
     if prev:
-        print(f"\n{'=' * 60}")
-        print("COMPARATIVA ARIMA / SARIMA / SARIMAX (validacion)")
-        print(f"{'=' * 60}")
-        header = f"{'Metrica':<8}"
+        logger.info(f"\n{'=' * 60}")
+        logger.info("ARIMA / SARIMA / SARIMAX comparison (validation)")
+        logger.info(f"{'=' * 60}")
+        header = f"{'Metric':<8}"
         for name in ["arima", "sarima", "sarimax"]:
             if name in prev or name == "sarimax":
                 header += f" {name.upper():>10}"
-        print(header)
-        print("-" * 50)
+        logger.info(header)
+        logger.info("-" * 50)
 
         all_metrics = {**prev, "sarimax": result}
         for m_name in ["MAE", "RMSE", "MASE"]:
@@ -200,17 +200,17 @@ def main():
             for name in ["arima", "sarima", "sarimax"]:
                 if name in all_metrics:
                     row += f" {all_metrics[name]['metrics_val'][m_name]:10.4f}"
-            print(row)
+            logger.info(row)
 
-        print("\nAIC:")
+        logger.info("\nAIC:")
         for name in ["arima", "sarima", "sarimax"]:
             if name in all_metrics:
-                print(f"  {name.upper():<8}: {all_metrics[name]['aic']:.2f}")
+                logger.info(f"  {name.upper():<8}: {all_metrics[name]['aic']:.2f}")
 
-    print(f"\n{'=' * 60}")
-    print(f"RESUMEN: SARIMAX{order}x{s_order}  exog={EXOG_COL}")
-    print(f"  AIC={result['aic']}  MAE={metrics['MAE']}  RMSE={metrics['RMSE']}  MASE={metrics['MASE']}")
-    print(f"{'=' * 60}")
+    logger.info(f"\n{'=' * 60}")
+    logger.info(f"SUMMARY: SARIMAX{order}x{s_order}  exog={EXOG_COL}")
+    logger.info(f"  AIC={result['aic']}  MAE={metrics['MAE']}  RMSE={metrics['RMSE']}  MASE={metrics['MASE']}")
+    logger.info(f"{'=' * 60}")
 
 
 if __name__ == "__main__":

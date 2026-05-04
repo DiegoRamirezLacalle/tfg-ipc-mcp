@@ -1,16 +1,15 @@
-"""
-04_backtesting_rolling_deep_global.py — Backtesting expanding-window deep CPI Global
+"""Rolling expanding-window backtesting — Deep models CPI Global.
 
-Analogo a 04_backtesting_rolling.py (Espana) sobre la serie global.
-Modelos: LSTM, N-BEATS, N-HiTS.
+Analogous to 04_backtesting_rolling.py (Spain) on the global series.
+Models: LSTM, N-BEATS, N-HiTS.
 
-Diferencias clave respecto a Espana:
-  - Serie: cpi_global_monthly.parquet (cpi_global_rate)
-  - NBEATS stacks = identity x3 siempre (Fs=-0.08, sin estacionalidad)
-  - Origenes trimestrales (3MS) para viabilidad computacional
+Key differences from Spain:
+  - Series: cpi_global_monthly.parquet (cpi_global_rate)
+  - NBEATS stacks = identity x3 always (Fs=-0.08, no seasonality)
+  - Quarterly origins (3MS) for computational viability
   - max_steps = 300
 
-Salida:
+Output:
   08_results/deep_rolling_predictions_global.parquet
   08_results/deep_rolling_metrics_global.json
 """
@@ -33,6 +32,9 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = ROOT / "08_results"
 
@@ -98,7 +100,7 @@ def run_rolling(df_full):
 
     y_train_init = y_series.loc[:DATE_TRAIN_END].values
     mase_scale   = float(np.mean(np.abs(y_train_init[12:] - y_train_init[:-12])))
-    print(f"  MASE scale (naive lag-12, train): {mase_scale:.4f} pp")
+    logger.info(f"  MASE scale (naive lag-12, train): {mase_scale:.4f} pp")
 
     records = []
     total   = len(origins) * len(HORIZONS)
@@ -174,50 +176,50 @@ def compute_metrics(df_preds, mase_scale):
 
 
 def main():
-    print("=" * 60)
-    print("BACKTESTING ROLLING — Deep models CPI Global")
-    print(f"  Origenes: {ORIGINS_START} - {ORIGINS_END} (cada 3 meses)")
-    print(f"  Horizontes: {HORIZONS}")
-    print(f"  Modelos: {MODEL_NAMES}")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("ROLLING BACKTESTING — Deep models CPI Global")
+    logger.info(f"  Origins: {ORIGINS_START} - {ORIGINS_END} (every 3 months)")
+    logger.info(f"  Horizons: {HORIZONS}")
+    logger.info(f"  Models: {MODEL_NAMES}")
+    logger.info("=" * 60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     df_full = load_full()
-    print(f"CPI Global: {len(df_full)} obs  "
-          f"({df_full['ds'].min().date()} - {df_full['ds'].max().date()})\n")
+    logger.info(f"CPI Global: {len(df_full)} obs  "
+                f"({df_full['ds'].min().date()} - {df_full['ds'].max().date()})\n")
 
     df_preds, mase_scale = run_rolling(df_full)
-    print(f"\nTotal predicciones: {len(df_preds)}")
+    logger.info(f"\nTotal predictions: {len(df_preds)}")
 
     metrics = compute_metrics(df_preds, mase_scale)
 
-    print("\n" + "=" * 60)
-    print("RESULTADOS ROLLING DEEP — CPI Global")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("DEEP ROLLING RESULTS — CPI Global")
+    logger.info("=" * 60)
     for h in HORIZONS:
         key = f"h{h}"
-        print(f"\n  h={h}:")
-        print(f"  {'Modelo':<10} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'N':>5}")
-        print(f"  {'-'*42}")
+        logger.info(f"\n  h={h}:")
+        logger.info(f"  {'Model':<10} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'N':>5}")
+        logger.info(f"  {'-'*42}")
         for model in MODEL_NAMES:
             if key in metrics.get(model, {}):
                 m = metrics[model][key]
-                print(f"  {model:<10} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} "
-                      f"{m['MASE']:>8.4f} {m['n_evals']:>5d}")
+                logger.info(f"  {model:<10} {m['MAE']:>8.4f} {m['RMSE']:>8.4f} "
+                             f"{m['MASE']:>8.4f} {m['n_evals']:>5d}")
 
     preds_path = RESULTS_DIR / "deep_rolling_predictions_global.parquet"
     df_preds.to_parquet(preds_path, index=False)
-    print(f"\nPredicciones: {preds_path}")
+    logger.info(f"\nPredictions: {preds_path}")
 
     metrics_path = RESULTS_DIR / "deep_rolling_metrics_global.json"
     with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=2)
-    print(f"Metricas:     {metrics_path}")
+    logger.info(f"Metrics:     {metrics_path}")
 
-    print("\n" + "=" * 60)
-    print("BACKTESTING DEEP COMPLETADO")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("DEEP BACKTESTING COMPLETE")
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":
