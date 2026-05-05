@@ -1,5 +1,5 @@
 """
-05_diebold_mariano_europe.py — DM tests HICP Eurozone
+05_diebold_mariano_europe.py - DM tests HICP Eurozone
 
 Comparisons:
   1. C0 vs C1_inst, C1_mcp, C1_full (per family and sub-period)
@@ -136,7 +136,7 @@ def print_dm_table(results: list[dict]) -> None:
                 continue
             m = r[key]
             if m["dm_stat"] is None:
-                logger.info(f"{label:<42} {r['period']:<18} {h:>3} {'—':>9} {'—':>8} "
+                logger.info(f"{label:<42} {r['period']:<18} {h:>3} {'-':>9} {'-':>8} "
                             f"{'insuf':>14} {m.get('n', 0):>5}")
                 continue
             sig = "**" if m["p_value"] < 0.05 else ("*" if m["p_value"] < 0.10 else "")
@@ -147,7 +147,7 @@ def print_dm_table(results: list[dict]) -> None:
 
 def main():
     logger.info("=" * 65)
-    logger.info("DIEBOLD-MARIANO TESTS — HICP Eurozone")
+    logger.info("DIEBOLD-MARIANO TESTS - HICP Eurozone")
     logger.info("Metric: MAE (power=1) | ** p<0.05 | * p<0.10")
     logger.info("=" * 65)
 

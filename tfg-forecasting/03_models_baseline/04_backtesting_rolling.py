@@ -3,7 +3,7 @@
 Design:
   - Expanding window: at each origin t, train on all data up to t
   - Fixed orders determined by auto_arima in 01/02/03 (no re-selection
-    at each step — avoids look-ahead bias and reduces compute time)
+    at each step - avoids look-ahead bias and reduces compute time)
   - Models: ARIMA(1,1,2), SARIMA(0,1,1)(0,1,1)12, SARIMAX with dfr, seasonal naive
   - Horizons: h = 1, 3, 6, 12 months
   - Origins: 2021-01 to 2024-12 (48 points; for h=12 last useful origin is 2023-12)
@@ -12,8 +12,8 @@ Note SARIMAX: DFR is public in real time (ECB decisions published same day),
 so passing real DFR values as future exogenous does not introduce look-ahead bias.
 
 Output:
-  results/rolling_predictions.parquet  — tidy predictions (origin, horizon, model)
-  results/rolling_metrics.json         — MAE/RMSE/MASE per model x horizon
+  results/rolling_predictions.parquet  - tidy predictions (origin, horizon, model)
+  results/rolling_metrics.json         - MAE/RMSE/MASE per model x horizon
 """
 
 import json
@@ -197,7 +197,7 @@ def print_table(metrics: dict) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info("ROLLING BACKTESTING — baseline models")
+    logger.info("ROLLING BACKTESTING - baseline models")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END}")
     logger.info(f"Horizons: {HORIZONS}")
     logger.info(f"Models: {MODELS}")

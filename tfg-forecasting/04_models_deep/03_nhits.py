@@ -65,7 +65,7 @@ def train_and_evaluate(horizon):
 
 def main():
     logger.info("=" * 60)
-    logger.info("N-HiTS — Deep model for long horizons")
+    logger.info("N-HiTS - Deep model for long horizons")
     logger.info("=" * 60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)

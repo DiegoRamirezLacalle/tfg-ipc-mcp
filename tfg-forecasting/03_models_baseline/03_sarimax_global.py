@@ -1,4 +1,4 @@
-"""ARIMAX with Federal Funds Rate (FEDFUNDS) as exogenous variable — Global CPI.
+"""ARIMAX with Federal Funds Rate (FEDFUNDS) as exogenous variable - Global CPI.
 
 Exogenous variable: FEDFUNDS (Federal Funds Rate, % annual)
 Source: FRED (Federal Reserve Bank of St. Louis)
@@ -225,7 +225,7 @@ def load_prev_metrics():
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"ARIMAX GLOBAL — Baseline with exogenous: {EXOG_COL.upper()}")
+    logger.info(f"ARIMAX GLOBAL - Baseline with exogenous: {EXOG_COL.upper()}")
     logger.info("=" * 60)
 
     logger.info("\nLoading data...")

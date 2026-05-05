@@ -1,5 +1,5 @@
 """
-08_chronos2_C1_energy_only.py — Chronos-2 C1 with energy variables only
+08_chronos2_C1_energy_only.py - Chronos-2 C1 with energy variables only
 
 Ablation experiment: isolate the predictive effect of energy without MCP signals.
 
@@ -242,7 +242,7 @@ def log_subperiod_table(sub_metrics: dict) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Model: {CHRONOS_MODEL_ID}")
     logger.info(f"Covariates: {EXOG_COLS}")
     logger.info("=" * 60)
@@ -263,12 +263,12 @@ def main():
     sub_metrics = compute_subperiod_metrics(df_preds, mase_scale)
 
     logger.info("\n" + "=" * 60)
-    logger.info(f"GLOBAL RESULTS — {MODEL_NAME}")
+    logger.info(f"GLOBAL RESULTS - {MODEL_NAME}")
     logger.info("=" * 60)
     log_table(metrics)
 
     logger.info("\n" + "=" * 60)
-    logger.info(f"SUBPERIODS — {MODEL_NAME}")
+    logger.info(f"SUBPERIODS - {MODEL_NAME}")
     logger.info("=" * 60)
     log_subperiod_table(sub_metrics)
 

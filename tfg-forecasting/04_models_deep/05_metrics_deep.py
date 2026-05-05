@@ -157,7 +157,7 @@ def plot_comparison(metrics):
     ax.set_xticks(x)
     ax.set_xticklabels([f"h={h}" for h in HORIZONS])
     ax.set_ylabel("MAE (IPC index points)")
-    ax.set_title("Rolling MAE comparison — Baseline vs Deep (C0)")
+    ax.set_title("Rolling MAE comparison - Baseline vs Deep (C0)")
     ax.legend(ncol=4, fontsize=8, loc="upper left")
     ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
     ax.grid(axis="y", alpha=0.3)

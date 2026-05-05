@@ -123,7 +123,7 @@ def save_results(model, metrics, model_name):
 
 def main():
     logger.info("=" * 60)
-    logger.info("ARIMA AUTO — non-seasonal baseline")
+    logger.info("ARIMA AUTO - non-seasonal baseline")
     logger.info("=" * 60)
 
     y, train, val, test = load_data()

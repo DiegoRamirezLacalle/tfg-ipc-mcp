@@ -1,7 +1,7 @@
 """Process RSS texts from official sources (ECB, INE, BdE) with Ollama
 (qwen3:4b) and return structured signals via Pydantic + structured output.
 
-GDELT is NOT processed here — its signals are purely quantitative.
+GDELT is NOT processed here - its signals are purely quantitative.
 
 Requirements:
     1. Ollama installed and running

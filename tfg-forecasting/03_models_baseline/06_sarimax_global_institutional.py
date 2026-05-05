@@ -1,15 +1,15 @@
-"""ARIMAX C1_institutional — Global CPI with institutional signals.
+"""ARIMAX C1_institutional - Global CPI with institutional signals.
 
 ARIMA(3,1,0) with global institutional signals selected by
 correlation >= 0.2 with cpi_global_rate(t+1).
 
 Top signals (full-sample correlation):
-  imf_comm_ma3  (0.586) — IMF All Commodity Index
-  brent_log_ma3 (0.456) — Brent crude
-  dfr_ma3       (0.376) — ECB DFR
-  gscpi_ma3     (0.324) — NY Fed Supply Chain
-  fedfunds_ma3  (0.279) — Fed Funds
-  usg10y_ma3    (0.250) — 10Y UST
+  imf_comm_ma3  (0.586) - IMF All Commodity Index
+  brent_log_ma3 (0.456) - Brent crude
+  dfr_ma3       (0.376) - ECB DFR
+  gscpi_ma3     (0.324) - NY Fed Supply Chain
+  fedfunds_ma3  (0.279) - Fed Funds
+  usg10y_ma3    (0.250) - 10Y UST
 
 Rolling expanding-window protocol identical to baseline script 04.
 
@@ -178,7 +178,7 @@ def compute_metrics(df_preds, mase_scale):
 
 def main():
     logger.info("=" * 60)
-    logger.info("ARIMAX C1_institutional — CPI Global")
+    logger.info("ARIMAX C1_institutional - CPI Global")
     logger.info(f"  Order: {ARIMA_ORDER}  Exogenous: {len(EXOG_COLS)}")
     logger.info(f"  {EXOG_COLS}")
     logger.info("=" * 60)

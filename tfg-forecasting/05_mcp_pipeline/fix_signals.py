@@ -1,7 +1,7 @@
 """Repair BCE and INE signals in MongoDB.
 
 1. INE: Parse chart JSON from body to extract real CPI rates and generate
-   signals directly (no LLM — data is quantitative).
+   signals directly (no LLM - data is quantitative).
 2. BCE: Insert known historical ECB Governing Council decisions (2015-2024)
    with accurate signals. Well-documented public data.
 3. Clean garbage documents (BCE navigation pages, placeholders).

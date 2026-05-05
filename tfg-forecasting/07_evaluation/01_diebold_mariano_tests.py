@@ -164,7 +164,7 @@ def print_dm_table(results: list[dict]) -> None:
                 continue
             m = r[key]
             if m["dm_stat"] is None:
-                logger.info(f"{label:<32} {r['period']:<16} {h:>3} {'—':>9} {'—':>9} "
+                logger.info(f"{label:<32} {r['period']:<16} {h:>3} {'-':>9} {'-':>9} "
                             f"{'insuf':>10} {m.get('n', 0):>5}")
                 continue
             sig = "*" if m["p_value"] < 0.10 else ""
@@ -178,7 +178,7 @@ def print_dm_table(results: list[dict]) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info("DIEBOLD-MARIANO TESTS — C0 vs C1 and models vs naive")
+    logger.info("DIEBOLD-MARIANO TESTS - C0 vs C1 and models vs naive")
     logger.info("Metric: MAE (power=1), significance level: 5% (**) / 10% (*)")
     logger.info("=" * 60)
 

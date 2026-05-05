@@ -1,8 +1,8 @@
 """Download and process monthly energy price series.
 
 Series:
-  1. Brent Crude Oil (USD/barrel) — BZ=F from 2007-08, WTI proxy pre-2007
-  2. European Natural Gas TTF (EUR/MWh) — TTF=F from 2017-10, Henry Hub proxy pre-2017
+  1. Brent Crude Oil (USD/barrel) - BZ=F from 2007-08, WTI proxy pre-2007
+  2. European Natural Gas TTF (EUR/MWh) - TTF=F from 2017-10, Henry Hub proxy pre-2017
 
 Transformations per series (4 each, 8 columns total):
   _log:  log price (variance stabilisation)

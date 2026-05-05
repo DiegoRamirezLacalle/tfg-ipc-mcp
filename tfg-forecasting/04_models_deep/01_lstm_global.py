@@ -63,7 +63,7 @@ def train_and_evaluate(horizon):
 
 def main():
     logger.info("=" * 60)
-    logger.info("LSTM UNIVARIATE — CPI Global")
+    logger.info("LSTM UNIVARIATE - CPI Global")
     logger.info("=" * 60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)

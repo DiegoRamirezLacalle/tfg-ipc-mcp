@@ -1,5 +1,5 @@
 """
-06_timegpt_C1.py — TimeGPT condition C1 (IPC + MCP signals as exogenous)
+06_timegpt_C1.py - TimeGPT condition C1 (IPC + MCP signals as exogenous)
 
 The Nixtla API accepts exogenous variables via X_df (future) and historical
 exogenous integrated in df. Exogenous variables MUST be provided both for the
@@ -109,7 +109,7 @@ def build_nixtla_df(
     """
     Build df (historical with exogenous) and future_df (exogenous only for the horizon).
 
-    Fix v2 — separate IPC context from covariate context:
+    Fix v2 - separate IPC context from covariate context:
       - IPC series: COMPLETE context from 2002 (identical to C0) so that
         TimeGPT learns long-term trend and inflationary cycles
       - Covariates: only from SIGNAL_START (2015-01), NaN before so that
@@ -272,7 +272,7 @@ def main():
     args = parser.parse_args()
 
     logger.info("=" * 60)
-    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"ROLLING BACKTESTING - {MODEL_NAME}")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END} ({'5 TEST' if args.test_run else '48 FULL'})")
     logger.info(f"Horizons: {HORIZONS}")
     logger.info(f"Exogenous: {EXOG_COLS}")

@@ -131,7 +131,7 @@ def main() -> None:
         for iss in issues:
             logger.warning(f"  - {iss}")
     else:
-        logger.info("Monthly continuity OK — no gaps or duplicates")
+        logger.info("Monthly continuity OK - no gaps or duplicates")
 
     nan_counts = df.isna().sum()
     if nan_counts.any():

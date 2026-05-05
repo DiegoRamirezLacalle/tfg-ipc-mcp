@@ -1,7 +1,7 @@
 """
-02_timesfm_C1.py — TimesFM 2.5 condition C1 (historical + MCP signals)
+02_timesfm_C1.py - TimesFM 2.5 condition C1 (historical + MCP signals)
 
-Fix 1 — XReg restricted to the period with real signals (2015+):
+Fix 1 - XReg restricted to the period with real signals (2015+):
   The base TimesFM model receives the COMPLETE IPC context (282 obs,
   identical to C0). The MCP signal correction is computed via an
   external Ridge fitted ONLY on df.loc['2015':origin], where all
@@ -10,7 +10,7 @@ Fix 1 — XReg restricted to the period with real signals (2015+):
   signals (zeros). This correctly implements the base-TimesFM / XReg-MCP
   separation.
 
-Fix 2 — Covariate selection:
+Fix 2 - Covariate selection:
   Ridge input columns: gdelt_avg_tone, gdelt_tone_ma3,
   gdelt_tone_ma6, bce_shock_score, bce_tone_numeric, bce_cumstance,
   ine_surprise_score, ine_inflacion, signal_available.
@@ -231,7 +231,7 @@ def log_table(metrics: dict) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"ROLLING BACKTESTING - {MODEL_NAME}")
     logger.info(f"Fix 1: base TimesFM C0 (282 obs) + external Ridge over 2015:origin")
     logger.info(f"Fix 2: XReg covariates = {XREG_COVS}")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END}")

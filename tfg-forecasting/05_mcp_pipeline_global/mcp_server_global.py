@@ -4,9 +4,9 @@ mcp_server_global.py
 Servidor MCP (FastMCP, transporte stdio) para el pipeline semántico global.
 
 Herramientas:
-  1. fetch_fomc       — FOMC statements (Fed Reserve)
-  2. fetch_ecb_press  — ECB press conference transcripts
-  3. fetch_bls_cpi    — US BLS CPI news releases
+  1. fetch_fomc       - FOMC statements (Fed Reserve)
+  2. fetch_ecb_press  - ECB press conference transcripts
+  3. fetch_bls_cpi    - US BLS CPI news releases
 
 Cada herramienta llama al scraper correspondiente, guarda en fichero JSON
 y opcionalmente en MongoDB.

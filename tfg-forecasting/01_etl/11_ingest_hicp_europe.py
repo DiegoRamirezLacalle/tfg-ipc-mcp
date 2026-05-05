@@ -61,7 +61,7 @@ def download_raw() -> str:
     logger.info("Downloading HICP Eurozone from ECB SDMX...")
     r = httpx.get(ECB_URL, headers=HEADERS, timeout=60, follow_redirects=True)
     r.raise_for_status()
-    logger.info(f"  HTTP {r.status_code} — {len(r.text):,} characters received")
+    logger.info(f"  HTTP {r.status_code} - {len(r.text):,} characters received")
     return r.text
 
 
@@ -129,7 +129,7 @@ def plot_series(df: pd.DataFrame) -> None:
         arrowprops=dict(arrowstyle="->", color="#c0392b", lw=0.8),
     )
 
-    ax.set_title("HICP Eurozone — Price level index (base 2015=100)", fontsize=12)
+    ax.set_title("HICP Eurozone - Price level index (base 2015=100)", fontsize=12)
     ax.set_xlabel("Date")
     ax.set_ylabel("HICP index")
     ax.legend(fontsize=9)
@@ -148,7 +148,7 @@ def save(df: pd.DataFrame) -> None:
     df.to_csv(RAW_CSV, index=False)
     logger.info(f"  Raw CSV:   {RAW_CSV}")
 
-    # date as column, not index — consistent with ipc_spain_index.parquet
+    # date as column, not index - consistent with ipc_spain_index.parquet
     df.to_parquet(PROC_PQ, index=False)
     logger.info(f"  Processed: {PROC_PQ}")
 
@@ -159,7 +159,7 @@ def save(df: pd.DataFrame) -> None:
 
 def main() -> None:
     logger.info("=" * 55)
-    logger.info("ETL — HICP Eurozone (ECB SDMX)")
+    logger.info("ETL - HICP Eurozone (ECB SDMX)")
     logger.info("=" * 55)
 
     csv_text = download_raw()

@@ -1,5 +1,5 @@
 """
-13_timegpt_C1_inst.py — TimeGPT C1 institutional: EPU Europe
+13_timegpt_C1_inst.py - TimeGPT C1 institutional: EPU Europe
 
 Covariates (3): epu_europe_ma3 (0.737), epu_europe_log (0.701), epu_europe_lag1 (0.682)
 Complete data from 2002, no NaN. Full IPC context 2002+.
@@ -149,7 +149,7 @@ def main():
     args = parser.parse_args()
     n = 5 if args.test_run else 48
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME} ({'TEST' if args.test_run else 'FULL'})")
+    logger.info(f"BACKTESTING - {MODEL_NAME} ({'TEST' if args.test_run else 'FULL'})")
     logger.info(f"Covariates: {EXOG_COLS}")
     logger.info(f"Estimated cost: {n} API calls")
     logger.info("=" * 60)

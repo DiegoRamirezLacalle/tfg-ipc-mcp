@@ -170,7 +170,7 @@ def _insert_mongo(docs: list[dict]):
                 pass
         return n
     except ImportError:
-        print("  [WARN] pymongo no instalado — omitiendo MongoDB")
+        print("  [WARN] pymongo no instalado - omitiendo MongoDB")
         return 0
 
 
@@ -272,7 +272,7 @@ def fetch_fomc(
     use_mongo: bool = False,
 ) -> list[dict]:
     print(f"\n{'='*60}")
-    print(f"FOMC Statements — Federal Reserve ({start_year}-{end_year})")
+    print(f"FOMC Statements - Federal Reserve ({start_year}-{end_year})")
     print(f"{'='*60}")
 
     client = httpx.Client(headers=HEADERS, timeout=30.0, follow_redirects=True)

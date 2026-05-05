@@ -28,7 +28,7 @@ HORIZONS = [1, 3, 6, 12]
 
 def main():
     logger.info("=" * 55)
-    logger.info("N-HiTS — HICP Eurozone")
+    logger.info("N-HiTS - HICP Eurozone")
     logger.info("=" * 55)
     train, val, df_full, y_train_vals = load_nf_format_europe()
     logger.info(f"Train: {len(train)} obs  |  Val: {len(val)} obs")

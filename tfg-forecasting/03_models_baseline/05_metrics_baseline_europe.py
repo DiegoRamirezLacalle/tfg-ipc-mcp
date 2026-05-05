@@ -34,7 +34,7 @@ def main():
 
     lines = []
     lines.append("=" * 65)
-    lines.append("INFORME BASELINE — HICP Eurozona")
+    lines.append("INFORME BASELINE - HICP Eurozona")
     lines.append("  Rolling expanding-window | Origenes 2021-01 a 2024-12")
     lines.append("  Metrica principal: MAE (puntos de indice) | MASE (vs naive lag-12)")
     lines.append("=" * 65)

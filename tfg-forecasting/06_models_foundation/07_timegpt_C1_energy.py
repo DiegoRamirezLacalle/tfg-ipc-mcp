@@ -1,5 +1,5 @@
 """
-07_timegpt_C1_energy.py — TimeGPT C1 with energy variables + selected MCP signals
+07_timegpt_C1_energy.py - TimeGPT C1 with energy variables + selected MCP signals
 
 Covariates (8 total, optimal subset to avoid overfitting):
   Energy (real data from 2002, no NaN):
@@ -268,7 +268,7 @@ def main():
     args = parser.parse_args()
 
     logger.info("=" * 60)
-    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"ROLLING BACKTESTING - {MODEL_NAME}")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END} ({'5 TEST' if args.test_run else '48 FULL'})")
     logger.info(f"Horizons: {HORIZONS}")
     logger.info(f"Energy cols: {ENERGY_COLS}")

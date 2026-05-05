@@ -1,5 +1,5 @@
 """
-diagnostico_timegpt_c1_part2.py — D2 and D3 (continuation of diagnostic)
+diagnostico_timegpt_c1_part2.py - D2 and D3 (continuation of diagnostic)
 
 D1 already confirmed: Variant B (2015+) is best, MAE = 0.4038 vs C0 = 0.5646
 Now running D2 (subsets) and D3 (fill strategy) using Variant B.
@@ -137,7 +137,7 @@ def main():
     global api_calls
 
     logger.info("=" * 60)
-    logger.info("DIAGNOSTIC TIMEGPT C1 — Part 2 (D2 + D3)")
+    logger.info("DIAGNOSTIC TIMEGPT C1 - Part 2 (D2 + D3)")
     logger.info(f"Origins: {[o.strftime('%Y-%m') for o in TEST_ORIGINS]}")
     logger.info("All variants use context from 2015 (Variant B)")
     logger.info("=" * 60)
@@ -171,7 +171,7 @@ def main():
 
     # ── D2: Signal subsets (Variant B: from 2015) ──
     logger.info("\n" + "=" * 60)
-    logger.info("D2 — Signal subsets (context from 2015)")
+    logger.info("D2 - Signal subsets (context from 2015)")
     logger.info("=" * 60)
 
     subsets = {
@@ -196,7 +196,7 @@ def main():
 
     # ── D3: Fill strategy (with ALL_9, Variant B) ──
     logger.info("\n" + "=" * 60)
-    logger.info("D3 — Future horizon fill strategy (ALL_9, from 2015)")
+    logger.info("D3 - Future horizon fill strategy (ALL_9, from 2015)")
     logger.info("=" * 60)
 
     d3_results = {}

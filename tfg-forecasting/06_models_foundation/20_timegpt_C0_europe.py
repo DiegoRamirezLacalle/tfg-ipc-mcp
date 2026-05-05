@@ -1,5 +1,5 @@
 """
-20_timegpt_C0_europe.py — TimeGPT condition C0 (historical only) HICP Eurozone
+20_timegpt_C0_europe.py - TimeGPT condition C0 (historical only) HICP Eurozone
 
 Rolling-origin backtesting:
   - 48 origins: 2021-01 to 2024-12
@@ -199,7 +199,7 @@ def main():
     args = parser.parse_args()
 
     logger.info("=" * 60)
-    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"ROLLING BACKTESTING - {MODEL_NAME}")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END} "
                 f"({'5 TEST' if args.test_run else '48 FULL'})")
     logger.info(f"Horizons: {HORIZONS}")

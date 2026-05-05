@@ -1,13 +1,13 @@
 """
-16_timesfm_C1_inst_global.py — TimesFM C1_institutional CPI Global
+16_timesfm_C1_inst_global.py - TimesFM C1_institutional CPI Global
 
 Architecture: TimesFM base (full cpi_global_rate context 2002+) + Ridge correction.
 Ridge fitted over window 2002:origin with global institutional signals.
 
 Ridge covariates (top-3 by correlation):
-  imf_comm_ma3  (corr=0.586) — IMF All Commodity Index
-  brent_log_ma3 (corr=0.456) — Brent crude
-  gscpi_ma3     (corr=0.324) — NY Fed Supply Chain Pressure Index
+  imf_comm_ma3  (corr=0.586) - IMF All Commodity Index
+  brent_log_ma3 (corr=0.456) - Brent crude
+  gscpi_ma3     (corr=0.324) - NY Fed Supply Chain Pressure Index
 """
 
 from __future__ import annotations
@@ -132,7 +132,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Ridge covariates: {XREG_COVS}")
     logger.info("=" * 60)
 

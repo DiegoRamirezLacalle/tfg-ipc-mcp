@@ -1,5 +1,5 @@
 """
-05_timegpt_C0.py — TimeGPT condition C0 (historical IPC series only)
+05_timegpt_C0.py - TimeGPT condition C0 (historical IPC series only)
 
 Rolling-origin backtesting identical to the rest of the models:
   - 48 origins: 2021-01 to 2024-12
@@ -198,7 +198,7 @@ def main():
     args = parser.parse_args()
 
     logger.info("=" * 60)
-    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"ROLLING BACKTESTING - {MODEL_NAME}")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END} ({'5 TEST' if args.test_run else '48 FULL'})")
     logger.info(f"Horizons: {HORIZONS}")
     logger.info("=" * 60)

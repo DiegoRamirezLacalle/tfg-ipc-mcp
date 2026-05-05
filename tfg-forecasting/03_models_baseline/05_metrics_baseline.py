@@ -238,7 +238,7 @@ def plot_mae_by_horizon(rolling: dict) -> None:
     ax.set_xticks(x)
     ax.set_xticklabels([f"h={h}" for h in HORIZONS])
     ax.set_ylabel("MAE (IPC index points)")
-    ax.set_title("MAE rolling by horizon — Baseline C0")
+    ax.set_title("MAE rolling by horizon - Baseline C0")
     ax.legend(loc="upper left")
     ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
     ax.grid(axis="y", alpha=0.3)
@@ -279,11 +279,11 @@ def plot_error_by_period(period_metrics: dict) -> None:
         ax.set_xticklabels(["Pre-crisis\n2021-06/22", "Crisis\n07/22-06/23",
                              "Post-crisis\n07/23-12/24"], fontsize=8)
         ax.set_ylabel("MAE (IPC index points)")
-        ax.set_title(f"MAE by period — h={h} month{'s' if h > 1 else ''}")
+        ax.set_title(f"MAE by period - h={h} month{'s' if h > 1 else ''}")
         ax.legend(fontsize=8)
         ax.grid(axis="y", alpha=0.3)
 
-    fig.suptitle("Performance by economic period — Baseline C0", fontsize=11)
+    fig.suptitle("Performance by economic period - Baseline C0", fontsize=11)
     fig.tight_layout()
     path = PLOTS_DIR / "error_by_period.png"
     fig.savefig(path, dpi=150)
@@ -311,11 +311,11 @@ def plot_rolling_errors_over_time(preds: pd.DataFrame) -> None:
         ax.axvspan(pd.Timestamp("2022-07-01"), pd.Timestamp("2023-06-01"),
                    alpha=0.08, color="red", label="_Crisis BCE")
         ax.set_ylabel("Absolute error")
-        ax.set_title(f"Rolling absolute error — h={h} month{'s' if h > 1 else ''}")
+        ax.set_title(f"Rolling absolute error - h={h} month{'s' if h > 1 else ''}")
         ax.legend(ncol=5, fontsize=8)
         ax.grid(alpha=0.3)
 
-    fig.suptitle("Rolling error over time — Baseline C0", fontsize=11)
+    fig.suptitle("Rolling error over time - Baseline C0", fontsize=11)
     fig.tight_layout()
     path = PLOTS_DIR / "rolling_errors_h1_h12.png"
     fig.savefig(path, dpi=150)

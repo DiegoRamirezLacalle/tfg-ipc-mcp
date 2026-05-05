@@ -143,7 +143,7 @@ def save_results(model, metrics, model_name):
 
 def main():
     logger.info("=" * 60)
-    logger.info("SARIMA — seasonal baseline")
+    logger.info("SARIMA - seasonal baseline")
     logger.info("=" * 60)
 
     y, train, val, test = load_data()

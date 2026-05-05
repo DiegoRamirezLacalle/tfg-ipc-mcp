@@ -154,7 +154,7 @@ def process(sources: list[str]):
 
     for src_name, (src_dir, src_key) in to_process:
         print(f"\n{'='*50}")
-        print(f"LLM Extraction — {src_name.upper()}")
+        print(f"LLM Extraction - {src_name.upper()}")
         print(f"{'='*50}")
 
         pending = _load_pending_docs(src_dir, src_key)
@@ -283,11 +283,11 @@ def correlate(
 ) -> bool:
     """
     Calcula correlaciones por fuente usando SOLO los meses con datos reales
-    (no los defaults — evita dilución).
+    (no los defaults - evita dilución).
 
     Por fuente:
-      • corr(CPI t+1)       — poder predictivo directo
-      • corr(residuos h=1)  — poder predictivo incremental sobre Chronos-2
+      • corr(CPI t+1)       - poder predictivo directo
+      • corr(residuos h=1)  - poder predictivo incremental sobre Chronos-2
 
     Criterio de decisión:
       • Si max |corr residuos| de TODAS las fuentes < stop_threshold (0.15)
@@ -298,7 +298,7 @@ def correlate(
     Returns True si alguna fuente supera full_threshold.
     """
     print(f"\n{'='*65}")
-    print("CORRELACIONES MCP — Señales vs CPI y Residuos Chronos-2")
+    print("CORRELACIONES MCP - Señales vs CPI y Residuos Chronos-2")
     print(f"Umbrales: stop={stop_threshold}  |  continuar={full_threshold}")
     print(f"{'='*65}")
 
@@ -342,7 +342,7 @@ def correlate(
         df_src = _aggregate_source(src_dir, src_key)
 
         if df_src.empty:
-            print(f"\n  [{src_name}] Sin datos procesados aún — omitiendo")
+            print(f"\n  [{src_name}] Sin datos procesados aún - omitiendo")
             continue
 
         n_months = len(df_src)
@@ -421,7 +421,7 @@ def correlate(
              if v["corr_residuals"] is not None and not np.isnan(v["corr_residuals"])),
             default=0.0,
         )
-        print(f"DECISIÓN: PARAR — hallazgo negativo confirmado (max |corr res|={max_any:.3f})")
+        print(f"DECISIÓN: PARAR - hallazgo negativo confirmado (max |corr res|={max_any:.3f})")
         print(f"  Ninguna fuente MCP supera el umbral de continuación ({full_threshold}).")
         print(f"  Documentar en tesis: la capa semántica no aporta poder predictivo")
         print(f"  incremental sobre Chronos-2 C1_institutional.")
@@ -439,7 +439,7 @@ def build_c1():
     Exporta features_c1_global_full.parquet.
     """
     print(f"\n{'='*60}")
-    print("BUILD — features_c1_global_full.parquet")
+    print("BUILD - features_c1_global_full.parquet")
     print(f"{'='*60}")
 
     # Construir señales si no existen

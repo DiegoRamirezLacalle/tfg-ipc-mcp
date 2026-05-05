@@ -1,10 +1,10 @@
 """
-17_timegpt_C1_inst_global.py — TimeGPT C1_institutional CPI Global
+17_timegpt_C1_inst_global.py - TimeGPT C1_institutional CPI Global
 
 Covariates (top-3 by correlation with cpi_global_rate(t+1)):
-  imf_comm_ma3  (corr=0.586) — IMF All Commodity Index
-  brent_log_ma3 (corr=0.456) — Brent crude
-  gscpi_ma3     (corr=0.324) — NY Fed Supply Chain Pressure Index
+  imf_comm_ma3  (corr=0.586) - IMF All Commodity Index
+  brent_log_ma3 (corr=0.456) - Brent crude
+  gscpi_ma3     (corr=0.324) - NY Fed Supply Chain Pressure Index
 
 Usage: python 17_timegpt_C1_inst_global.py [--test-run]
   --test-run  Only 5 origins (verify API + pipeline before full run)
@@ -160,7 +160,7 @@ def main():
 
     n_orig = 5 if args.test_run else 48
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME} ({'TEST-RUN' if args.test_run else 'FULL'})")
+    logger.info(f"BACKTESTING - {MODEL_NAME} ({'TEST-RUN' if args.test_run else 'FULL'})")
     logger.info(f"Covariates: {EXOG_COLS}")
     logger.info(f"Estimated cost: {n_orig} API calls")
     logger.info("=" * 60)

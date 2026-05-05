@@ -2,10 +2,10 @@
 
 Downloads three FRED series and generates derived features:
 
-  ESIEZM    — ESI Eurozone Economic Sentiment Indicator (European Commission)
+  ESIEZM    - ESI Eurozone Economic Sentiment Indicator (European Commission)
               Fallback: BSCICP03EZM665S (OECD BCI Euro Area)
-  T5YIE     — 5-Year Breakeven Inflation Rate (market inflation expectations)
-  DEXUSEU   — EUR/USD exchange rate (daily average → monthly mean)
+  T5YIE     - 5-Year Breakeven Inflation Rate (market inflation expectations)
+  DEXUSEU   - EUR/USD exchange rate (daily average → monthly mean)
 
 Derived features per series: raw, ma3, lag1, diff.
 All shifted +1 to prevent leakage (month-t value used at t+1).
@@ -71,7 +71,7 @@ def make_features(s: pd.Series, name: str) -> pd.DataFrame:
     """Generate raw, ma3, lag1, diff with shift +1 to prevent leakage.
 
     NOTE: lag1 is computed as shift(2) on the raw series, because the base
-    series is already shifted by 1. This is lag-2 of the original — do not change.
+    series is already shifted by 1. This is lag-2 of the original - do not change.
     """
     df  = pd.DataFrame(index=s.index)
     raw = s.copy()
@@ -84,7 +84,7 @@ def make_features(s: pd.Series, name: str) -> pd.DataFrame:
 
 def main() -> None:
     logger.info("=" * 60)
-    logger.info("ETL EUROPE SIGNALS — ESI, Breakeven 5Y, EUR/USD")
+    logger.info("ETL EUROPE SIGNALS - ESI, Breakeven 5Y, EUR/USD")
     logger.info("=" * 60)
 
     target_idx = pd.date_range(start=DATE_START, end="2024-12-01", freq=FREQ)
@@ -101,7 +101,7 @@ def main() -> None:
         logger.info(f"  ESI Eurozone: {esi_m.dropna().shape[0]} valid obs, "
                     f"range {esi_m.min():.1f}-{esi_m.max():.1f}")
     else:
-        logger.warning("  ESI Eurozone not available — columns set to NaN")
+        logger.warning("  ESI Eurozone not available - columns set to NaN")
         frames.append(pd.DataFrame(np.nan, index=target_idx,
                                    columns=["esi_eurozone", "esi_eurozone_ma3",
                                             "esi_eurozone_lag1", "esi_eurozone_diff"]))
@@ -116,7 +116,7 @@ def main() -> None:
         logger.info(f"  Breakeven 5Y: {brk_m.dropna().shape[0]} valid obs, "
                     f"range {brk_m.min():.2f}%-{brk_m.max():.2f}%")
     else:
-        logger.warning("  Breakeven 5Y not available — columns set to NaN")
+        logger.warning("  Breakeven 5Y not available - columns set to NaN")
         frames.append(pd.DataFrame(np.nan, index=target_idx,
                                    columns=["breakeven_5y", "breakeven_5y_ma3",
                                             "breakeven_5y_lag1", "breakeven_5y_diff"]))
@@ -131,7 +131,7 @@ def main() -> None:
         logger.info(f"  EUR/USD: {eur_m.dropna().shape[0]} valid obs, "
                     f"range {eur_m.min():.4f}-{eur_m.max():.4f}")
     else:
-        logger.warning("  EUR/USD not available — columns set to NaN")
+        logger.warning("  EUR/USD not available - columns set to NaN")
         frames.append(pd.DataFrame(np.nan, index=target_idx,
                                    columns=["eurusd", "eurusd_ma3",
                                             "eurusd_lag1", "eurusd_diff"]))
@@ -159,7 +159,7 @@ def main() -> None:
         logger.info(f"  {c:<30} {df_out[c].notna().sum():>4}/{len(df_out)} valid")
 
     logger.info("\n" + "=" * 60)
-    logger.info("DONE — europe_signals_monthly.parquet generated")
+    logger.info("DONE - europe_signals_monthly.parquet generated")
     logger.info("=" * 60)
 
 

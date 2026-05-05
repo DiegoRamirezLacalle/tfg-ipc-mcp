@@ -1,5 +1,5 @@
 """
-23_chronos2_C1_full_europe.py — Chronos-2 C1_full HICP Eurozone
+23_chronos2_C1_full_europe.py - Chronos-2 C1_full HICP Eurozone
 
 Covariates: institutional + MCP (all available signals).
 C1_FULL = C1_INST + C1_MCP
@@ -129,7 +129,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Inst: {C1_INST}")
     logger.info(f"MCP:  {C1_MCP}")
     logger.info("=" * 60)

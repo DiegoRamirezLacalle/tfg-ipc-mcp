@@ -1,15 +1,15 @@
 """Download EPU Spain, EPU Europe, and ESI Spain institutional signals.
 
 Sources:
-  EPU Spain   — policyuncertainty.com (Spain_News_Index, Baker et al.)
-  EPU Europe  — policyuncertainty.com (European_News_Index)
-  ESI Spain   — Eurostat ei_bssi_m_r2 (EC Economic Sentiment Indicator, SA)
+  EPU Spain   - policyuncertainty.com (Spain_News_Index, Baker et al.)
+  EPU Europe  - policyuncertainty.com (European_News_Index)
+  ESI Spain   - Eurostat ei_bssi_m_r2 (EC Economic Sentiment Indicator, SA)
 
 Transformations per series:
-  _log   — log(x) to normalise scale
-  _diff  — monthly difference (momentum)
-  _ma3   — 3-month rolling mean (smoothed)
-  _lag1  — 1-month lag
+  _log   - log(x) to normalise scale
+  _diff  - monthly difference (momentum)
+  _ma3   - 3-month rolling mean (smoothed)
+  _lag1  - 1-month lag
 
 All features shifted +1 to prevent temporal leakage.
 Data available from 2002 without sparsity.

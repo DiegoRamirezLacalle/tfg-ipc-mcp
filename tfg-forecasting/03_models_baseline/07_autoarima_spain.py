@@ -1,4 +1,4 @@
-"""AutoSARIMA rolling backtesting — Spain CPI.
+"""AutoSARIMA rolling backtesting - Spain CPI.
 
 Key difference vs fixed SARIMA (04_backtesting_rolling.py):
   - At each rolling origin, pmdarima.auto_arima re-selects the optimal
@@ -159,7 +159,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info("AutoARIMA ROLLING — Spain CPI")
+    logger.info("AutoARIMA ROLLING - Spain CPI")
     logger.info(f"  Origins:  {ORIGINS_START} - {ORIGINS_END}")
     logger.info(f"  Horizons: {HORIZONS}")
     logger.info(f"  Method:   pmdarima.auto_arima re-fitted at each origin")

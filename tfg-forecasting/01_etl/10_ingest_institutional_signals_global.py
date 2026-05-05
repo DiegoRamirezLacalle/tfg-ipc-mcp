@@ -5,20 +5,20 @@ Equivalent to 09_ingest_institutional_signals.py but with global coverage.
 
 Signals:
   FRED (direct API):
-    GEPUCURRENT    — Global Economic Policy Uncertainty Index (Davis et al.)
-    PALLFNFINDEXM  — IMF All Commodity Price Index (2016=100)
-    DTWEXBGS       — Broad Real Dollar Index (USD vs. major currencies)
-    VIXCLS         — CBOE VIX (monthly mean)
-    DGS10          — 10Y US Treasury yield (global financial conditions)
-    FEDFUNDS       — Federal Funds Rate
+    GEPUCURRENT    - Global Economic Policy Uncertainty Index (Davis et al.)
+    PALLFNFINDEXM  - IMF All Commodity Price Index (2016=100)
+    DTWEXBGS       - Broad Real Dollar Index (USD vs. major currencies)
+    VIXCLS         - CBOE VIX (monthly mean)
+    DGS10          - 10Y US Treasury yield (global financial conditions)
+    FEDFUNDS       - Federal Funds Rate
 
   Direct downloads:
-    GSCPI          — NY Fed Global Supply Chain Pressure Index
-    GPR            — Geopolitical Risk Index (Caldara-Iacoviello, Fed)
+    GSCPI          - NY Fed Global Supply Chain Pressure Index
+    GPR            - Geopolitical Risk Index (Caldara-Iacoviello, Fed)
 
   Reused from existing parquets:
-    brent_log      — Brent price (log), from energy_prices_monthly.parquet
-    dfr            — ECB Deposit Facility Rate, from ecb_rates_monthly.parquet
+    brent_log      - Brent price (log), from energy_prices_monthly.parquet
+    dfr            - ECB Deposit Facility Rate, from ecb_rates_monthly.parquet
 
 Transformations per base signal: _ma3, _lag1, _diff.
 All series shifted +1 to prevent temporal leakage.
@@ -154,7 +154,7 @@ def download_gpr() -> pd.Series:
             continue
 
     if content is None:
-        logger.warning("GPR not available — using GPR=0 as fallback")
+        logger.warning("GPR not available - using GPR=0 as fallback")
         return pd.Series(0.0, index=pd.date_range(DATE_START, DATE_END, freq="MS"), name="gpr")
 
     xls = pd.read_excel(io.BytesIO(content), sheet_name=None)
@@ -230,7 +230,7 @@ def print_correlations(features: pd.DataFrame, cpi: pd.Series) -> list[str]:
 
 def main() -> None:
     logger.info("=" * 60)
-    logger.info("ETL C1_institutional — CPI Global")
+    logger.info("ETL C1_institutional - CPI Global")
     logger.info("=" * 60)
 
     logger.info("\n1. Downloading FRED signals...")

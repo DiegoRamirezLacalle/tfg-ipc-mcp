@@ -61,7 +61,7 @@ def train_and_evaluate(horizon):
 
 def main():
     logger.info("=" * 60)
-    logger.info("N-BEATS — CPI Global")
+    logger.info("N-BEATS - CPI Global")
     logger.info("=" * 60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)

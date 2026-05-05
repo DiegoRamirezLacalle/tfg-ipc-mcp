@@ -1,4 +1,4 @@
-"""SARIMAX with ECB DFR as exogenous variable — HICP Eurozone.
+"""SARIMAX with ECB DFR as exogenous variable - HICP Eurozone.
 
 Exogenous variable: DFR (ECB Deposit Facility Rate)
 Justification: HICP Eurozone is exactly the series the ECB targets with the DFR.
@@ -71,7 +71,7 @@ def main():
         logger.info(f"Fallback order: SARIMA{order}x{seasonal_order}")
 
     logger.info("=" * 60)
-    logger.info(f"SARIMAX{order}x{seasonal_order} + DFR — HICP Eurozone")
+    logger.info(f"SARIMAX{order}x{seasonal_order} + DFR - HICP Eurozone")
     logger.info("=" * 60)
 
     train_y, val_y, train_dfr, val_dfr = load_data()

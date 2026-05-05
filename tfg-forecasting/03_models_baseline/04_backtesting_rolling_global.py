@@ -7,10 +7,10 @@ Identical design to the Spain pipeline (04_backtesting_rolling.py):
   - Origins: 2021-01 to 2024-12 (48 points)
 
 Models:
-  naive    — Seasonal lag-12 naive (benchmark)
-  arima    — ARIMA(3,1,0)  [AIC winner from auto_arima, script 01]
-  arima111 — ARIMA(1,1,1)  [simple reference, script 02]
-  arimax   — ARIMA(3,1,0) + FEDFUNDS [script 03, evaluated with real exogenous]
+  naive    - Seasonal lag-12 naive (benchmark)
+  arima    - ARIMA(3,1,0)  [AIC winner from auto_arima, script 01]
+  arima111 - ARIMA(1,1,1)  [simple reference, script 02]
+  arimax   - ARIMA(3,1,0) + FEDFUNDS [script 03, evaluated with real exogenous]
 
 Note ARIMAX:
   Fed decisions are published on the same day as the FOMC meeting.
@@ -225,7 +225,7 @@ def print_mase_table(metrics: dict) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info("ROLLING BACKTESTING — Baseline CPI Global")
+    logger.info("ROLLING BACKTESTING - Baseline CPI Global")
     logger.info(f"  Origins:       {ORIGINS_START} - {ORIGINS_END}")
     logger.info(f"  Horizons:      {HORIZONS}")
     logger.info(f"  Models:        {MODELS}")
@@ -244,7 +244,7 @@ def main():
     metrics = compute_metrics(df_preds, mase_scale)
 
     logger.info("\n" + "=" * 60)
-    logger.info("ROLLING RESULTS — MAE / RMSE / MASE by model x horizon")
+    logger.info("ROLLING RESULTS - MAE / RMSE / MASE by model x horizon")
     logger.info("=" * 60)
     print_table(metrics)
 

@@ -1,4 +1,4 @@
-"""Shared utilities for Block 04 deep models — CPI Global pipeline.
+"""Shared utilities for Block 04 deep models - CPI Global pipeline.
 
 Analogous to _helpers.py (Spain) but loads cpi_global_monthly.parquet
 with column cpi_global_rate and writes to 08_results/ with _global suffix.

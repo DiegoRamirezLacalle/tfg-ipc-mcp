@@ -1,5 +1,5 @@
 """
-27_timegpt_C1_inst_europe.py — TimeGPT C1_institutional HICP Eurozone
+27_timegpt_C1_inst_europe.py - TimeGPT C1_institutional HICP Eurozone
 
 TimeGPT native with institutional covariates via X_df.
 Future horizon (h steps): signals propagated with last known value.
@@ -81,7 +81,7 @@ def build_nixtla_dfs(df: pd.DataFrame, origin: pd.Timestamp) -> tuple[pd.DataFra
     for c in XREG_COVS:
         df_tgt[c] = hist_reset[c].values
 
-    # X_df: future rows — forward-fill last known value
+    # X_df: future rows - forward-fill last known value
     future_idx = pd.date_range(
         start=origin + pd.DateOffset(months=1), periods=MAX_H, freq="MS"
     )
@@ -164,7 +164,7 @@ def main():
     args = parser.parse_args()
 
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Covariates: {XREG_COVS}")
     logger.info("=" * 60)
 

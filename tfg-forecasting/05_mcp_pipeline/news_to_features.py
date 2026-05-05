@@ -262,7 +262,7 @@ def build_c1():
 
     df_signals["dominant_topic"] = df_signals.apply(_dominant, axis=1)
 
-    # Derived features — sort by date before computing rolling windows
+    # Derived features - sort by date before computing rolling windows
     df_signals = df_signals.sort_values("date").reset_index(drop=True)
 
     # 1. Signal availability indicator (0 before 2015, 1 from 2015)
