@@ -1,4 +1,4 @@
-# Hiperparámetros por modelo — fuente de verdad única
+# Hiperparámetros por modelo - fuente de verdad única
 
 arima:
   max_p: 5

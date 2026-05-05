@@ -46,7 +46,7 @@ def load_data():
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"SARIMA{ORDER}x{SEASONAL_ORDER} — HICP Eurozone")
+    logger.info(f"SARIMA{ORDER}x{SEASONAL_ORDER} - HICP Eurozone")
     logger.info("=" * 60)
 
     train, val = load_data()

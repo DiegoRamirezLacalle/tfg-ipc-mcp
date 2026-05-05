@@ -1,5 +1,5 @@
 """
-04_chronos2_C1.py — Chronos-2 condition C1 (historical + MCP signals)
+04_chronos2_C1.py - Chronos-2 condition C1 (historical + MCP signals)
 
 Rolling-origin backtesting with MCP pipeline covariates.
 
@@ -56,7 +56,7 @@ SUBPERIODS = {
 # Quantiles: 21 levels [0.01..0.99]
 Q_IDX = {"p10": 2, "p50": 10, "p90": 18}
 
-# Numeric covariates — split into "known in the future" and "past only"
+# Numeric covariates - split into "known in the future" and "past only"
 # DFR/MRR are public in real time (ECB decisions), can be passed as future
 KNOWN_FUTURE_COVS = ["dfr", "mrr"]
 PAST_ONLY_COVS = [
@@ -66,7 +66,7 @@ PAST_ONLY_COVS = [
     "signal_available", "bce_tone_numeric", "bce_cumstance",
     "gdelt_tone_ma3", "gdelt_tone_ma6", "ine_inflacion",
 ]
-# Categorical covariates — Chronos-2 supports categoricals in numpy
+# Categorical covariates - Chronos-2 supports categoricals in numpy
 CAT_COVS = ["bce_tone", "dominant_topic"]
 
 
@@ -295,7 +295,7 @@ def log_subperiod_table(sub_metrics: dict) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"ROLLING BACKTESTING - {MODEL_NAME}")
     logger.info(f"Model: {CHRONOS_MODEL_ID}")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END}")
     logger.info(f"Horizons: {HORIZONS}")
@@ -320,12 +320,12 @@ def main():
     sub_metrics = compute_subperiod_metrics(df_preds, mase_scale)
 
     logger.info("\n" + "=" * 60)
-    logger.info(f"GLOBAL RESULTS — {MODEL_NAME}")
+    logger.info(f"GLOBAL RESULTS - {MODEL_NAME}")
     logger.info("=" * 60)
     log_table(metrics)
 
     logger.info("\n" + "=" * 60)
-    logger.info(f"RESULTS BY SUBPERIOD — {MODEL_NAME}")
+    logger.info(f"RESULTS BY SUBPERIOD - {MODEL_NAME}")
     logger.info("=" * 60)
     log_subperiod_table(sub_metrics)
 

@@ -1,5 +1,5 @@
 # Fechas de corte para backtesting rolling-origin
-# Congeladas — NO cambiar después de iniciar experimentos
+# Congeladas - NO cambiar después de iniciar experimentos
 
 splits:
   train_end: "2020-12-01"

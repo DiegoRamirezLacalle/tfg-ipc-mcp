@@ -260,7 +260,7 @@ def _find_pressconf_links(html: str, year: int) -> list[tuple[str, str]]:
 def _try_direct_urls(date_str: str, client: httpx.Client) -> tuple[str, str]:
     """
     Intenta URL directas del BCE para una fecha conocida del GC.
-    El BCE usa: ecb.is{YYYYMMDD}~{hash}.en.html — el hash varía.
+    El BCE usa: ecb.is{YYYYMMDD}~{hash}.en.html - el hash varía.
     Alternativa: usar el press release (mp) de la misma fecha.
     """
     ymd = date_str.replace("-", "")

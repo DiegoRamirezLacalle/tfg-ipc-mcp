@@ -1,5 +1,5 @@
 """
-01_timesfm_C0.py — TimesFM 2.5 condition C0 (historical only)
+01_timesfm_C0.py - TimesFM 2.5 condition C0 (historical only)
 
 Rolling-origin backtesting with the same protocol as baselines:
   - 48 origins: 2021-01 to 2024-12
@@ -154,7 +154,7 @@ def log_table(metrics: dict) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"ROLLING BACKTESTING - {MODEL_NAME}")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END}")
     logger.info(f"Horizons: {HORIZONS}")
     logger.info("=" * 60)

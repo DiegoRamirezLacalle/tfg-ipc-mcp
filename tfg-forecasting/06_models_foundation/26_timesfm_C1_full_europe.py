@@ -1,5 +1,5 @@
 """
-26_timesfm_C1_full_europe.py — TimesFM C1_full HICP Eurozone
+26_timesfm_C1_full_europe.py - TimesFM C1_full HICP Eurozone
 
 Architecture: TimesFM base + Ridge correction with all signals (inst + MCP).
 """
@@ -132,7 +132,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Total covariates: {len(XREG_COVS)}")
     logger.info("=" * 60)
 

@@ -1,4 +1,4 @@
-"""Rolling expanding-window backtesting — Deep models CPI Global.
+"""Rolling expanding-window backtesting - Deep models CPI Global.
 
 Analogous to 04_backtesting_rolling.py (Spain) on the global series.
 Models: LSTM, N-BEATS, N-HiTS.
@@ -177,7 +177,7 @@ def compute_metrics(df_preds, mase_scale):
 
 def main():
     logger.info("=" * 60)
-    logger.info("ROLLING BACKTESTING — Deep models CPI Global")
+    logger.info("ROLLING BACKTESTING - Deep models CPI Global")
     logger.info(f"  Origins: {ORIGINS_START} - {ORIGINS_END} (every 3 months)")
     logger.info(f"  Horizons: {HORIZONS}")
     logger.info(f"  Models: {MODEL_NAMES}")
@@ -195,7 +195,7 @@ def main():
     metrics = compute_metrics(df_preds, mase_scale)
 
     logger.info("\n" + "=" * 60)
-    logger.info("DEEP ROLLING RESULTS — CPI Global")
+    logger.info("DEEP ROLLING RESULTS - CPI Global")
     logger.info("=" * 60)
     for h in HORIZONS:
         key = f"h{h}"

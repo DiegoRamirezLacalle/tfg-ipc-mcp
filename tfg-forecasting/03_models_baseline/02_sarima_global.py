@@ -1,4 +1,4 @@
-"""ARIMA(1,1,1) fixed as simple reference model — Global CPI.
+"""ARIMA(1,1,1) fixed as simple reference model - Global CPI.
 
 Purpose: compare the auto-selected ARIMA(3,1,0) from script 01 against a
 lower-complexity ARIMA(1,1,1), which is the canonical Box-Jenkins starting
@@ -135,7 +135,7 @@ def compare_with_auto():
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"ARIMA{ARIMA_REF_ORDER} GLOBAL — Simple reference model")
+    logger.info(f"ARIMA{ARIMA_REF_ORDER} GLOBAL - Simple reference model")
     logger.info("=" * 60)
 
     y, train, val, test = load_data()

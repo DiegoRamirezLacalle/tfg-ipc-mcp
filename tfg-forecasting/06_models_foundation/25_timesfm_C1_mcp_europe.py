@@ -1,5 +1,5 @@
 """
-25_timesfm_C1_mcp_europe.py — TimesFM C1_mcp HICP Eurozone
+25_timesfm_C1_mcp_europe.py - TimesFM C1_mcp HICP Eurozone
 
 Architecture: TimesFM base + Ridge correction with MCP/BCE signals only.
 Pure MCP experiment: BCE Eurozone growth vs. HICP Europe.
@@ -129,7 +129,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Ridge MCP covariates: {XREG_COVS}")
     logger.info("=" * 60)
 

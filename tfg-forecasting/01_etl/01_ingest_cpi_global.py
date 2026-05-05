@@ -7,7 +7,7 @@ Source:
 
 Data format note:
   The hcpi_m sheet stores the consumer price INDEX (not the rate).
-  There is no "World" row — only individual countries.
+  There is no "World" row - only individual countries.
   The global monthly rate is computed as:
     (1) YoY rate per country: pct_change(12) on the index
     (2) Cross-sectional median across all countries with available data
@@ -141,7 +141,7 @@ def compute_global_rate(df_wide: pd.DataFrame, date_start: str, date_end: str) -
 
 def log_stats(series: pd.Series) -> None:
     logger.info("─" * 52)
-    logger.info("STATISTICS — cpi_global_rate (YoY median, %)")
+    logger.info("STATISTICS - cpi_global_rate (YoY median, %)")
     logger.info("─" * 52)
     logger.info(f"  Date range   : {series.index.min().date()} → {series.index.max().date()}")
     logger.info(f"  Observations : {len(series)}")
@@ -161,7 +161,7 @@ def plot_series(series: pd.Series, out_path: Path) -> None:
     fig, axes = plt.subplots(2, 1, figsize=(13, 7),
                              gridspec_kw={"height_ratios": [3, 1]})
     fig.suptitle(
-        "Global Monthly Inflation Rate — World Bank hcpi_m\n"
+        "Global Monthly Inflation Rate - World Bank hcpi_m\n"
         "(cross-country YoY median of 186 countries, replicates HCPI_GLOBAL_MED)",
         fontsize=12, fontweight="bold", y=0.99,
     )
@@ -215,7 +215,7 @@ def plot_series(series: pd.Series, out_path: Path) -> None:
 
 def main() -> None:
     logger.info("=" * 60)
-    logger.info("INGEST CPI GLOBAL — World Bank hcpi_m (186 countries)")
+    logger.info("INGEST CPI GLOBAL - World Bank hcpi_m (186 countries)")
     logger.info("=" * 60)
 
     # 1. Download

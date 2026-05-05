@@ -1,4 +1,4 @@
-# Configuración global del experimento — NO modificar entre runs sin versionar
+# Configuración global del experimento - NO modificar entre runs sin versionar
 experiment:
   name: "ipc_mcp_forecasting"
   version: "v1"

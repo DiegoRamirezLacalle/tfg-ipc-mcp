@@ -1,5 +1,5 @@
 """
-11_timesfm_C1_inst.py — TimesFM C1 institutional: Ridge XReg with EPU Europe
+11_timesfm_C1_inst.py - TimesFM C1 institutional: Ridge XReg with EPU Europe
 
 Architecture: TimesFM base (full IPC context 2002+) + Ridge correction.
 Ridge fitted over full window 2002:origin (EPU Europe available since 1987).
@@ -38,7 +38,7 @@ MODEL_NAME = "timesfm_C1_inst"
 TEST_END_TS = pd.Timestamp(DATE_TEST_END)
 RIDGE_ALPHA = 1.0
 
-# EPU Europe available from 2002 complete — no clipping needed
+# EPU Europe available from 2002 complete - no clipping needed
 XREG_COVS = ["epu_europe_ma3", "epu_europe_log", "epu_europe_lag1"]
 
 
@@ -130,7 +130,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"XReg covs: {XREG_COVS}")
     logger.info("=" * 60)
     df = load_data()

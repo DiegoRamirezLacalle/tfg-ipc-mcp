@@ -1,5 +1,5 @@
 """
-24_timesfm_C1_inst_europe.py — TimesFM C1_institutional HICP Eurozone
+24_timesfm_C1_inst_europe.py - TimesFM C1_institutional HICP Eurozone
 
 Architecture: TimesFM base + Ridge correction with institutional signals.
 Ridge trained over expanding window 2002:origin.
@@ -132,7 +132,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Ridge covariates: {XREG_COVS}")
     logger.info("=" * 60)
 

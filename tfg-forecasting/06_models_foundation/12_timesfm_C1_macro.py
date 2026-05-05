@@ -1,5 +1,5 @@
 """
-12_timesfm_C1_macro.py — TimesFM C1 macro: brent + ttf + EPU Europe
+12_timesfm_C1_macro.py - TimesFM C1 macro: brent + ttf + EPU Europe
 
 Architecture: TimesFM base (full IPC context 2002+) + Ridge correction.
 Ridge covariates (3): brent_ma3, ttf_ma3, epu_europe_ma3
@@ -126,7 +126,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"XReg covs: {XREG_COVS}")
     logger.info("=" * 60)
     df = load_data()

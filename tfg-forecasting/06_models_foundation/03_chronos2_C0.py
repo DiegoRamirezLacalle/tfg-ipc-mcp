@@ -1,5 +1,5 @@
 """
-03_chronos2_C0.py — Chronos-2 condition C0 (historical only)
+03_chronos2_C0.py - Chronos-2 condition C0 (historical only)
 
 Rolling-origin backtesting:
   - 48 origins: 2021-01 to 2024-12
@@ -88,7 +88,7 @@ def run_rolling(y: pd.Series, model) -> tuple[pd.DataFrame, float]:
         preds = model.predict([context], prediction_length=MAX_H)
         # Shape: (n_variates, n_quantiles, pred_len) = (1, 21, 12) for univariate
         quantiles = preds[0].numpy()  # (1, 21, 12)
-        q = quantiles[0]  # (21, 12) — remove variates dimension
+        q = quantiles[0]  # (21, 12) - remove variates dimension
 
         p50 = q[Q_IDX["p50"]]
         p10 = q[Q_IDX["p10"]]
@@ -166,7 +166,7 @@ def log_table(metrics: dict) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"ROLLING BACKTESTING - {MODEL_NAME}")
     logger.info(f"Model: {CHRONOS_MODEL_ID}")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END}")
     logger.info(f"Horizons: {HORIZONS}")

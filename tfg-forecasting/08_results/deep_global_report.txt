@@ -1,5 +1,5 @@
 ======================================================================
-REPORTE DEEP MODELS + COMPARATIVA BASELINE — CPI Global
+REPORTE DEEP MODELS + COMPARATIVA BASELINE - CPI Global
 Condicion C0: todos los modelos sin senales exogenas adicionales
 Nota: rolling baseline mensual (N~47), deep trimestral (N~16)
 ======================================================================

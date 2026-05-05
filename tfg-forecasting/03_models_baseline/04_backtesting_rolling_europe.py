@@ -1,4 +1,4 @@
-"""Rolling expanding-window backtesting — HICP Eurozone.
+"""Rolling expanding-window backtesting - HICP Eurozone.
 
 Identical design to Spain and Global pipelines:
   - Expanding window: train on all data up to origin t
@@ -7,9 +7,9 @@ Identical design to Spain and Global pipelines:
   - Origins: 2021-01 to 2024-12 (48 points)
 
 Models:
-  naive   — seasonal lag-12
-  sarima  — SARIMA with auto_arima order
-  sarimax — SARIMA + DFR (real values known, no leakage)
+  naive   - seasonal lag-12
+  sarima  - SARIMA with auto_arima order
+  sarimax - SARIMA + DFR (real values known, no leakage)
 
 MASE scale: fixed over initial train set (2002-01 to 2020-12).
 
@@ -206,7 +206,7 @@ def print_results(metrics: dict) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info("ROLLING BACKTESTING — HICP Eurozone")
+    logger.info("ROLLING BACKTESTING - HICP Eurozone")
     logger.info(f"  Origins:  {ORIGINS_START} - {ORIGINS_END}")
     logger.info(f"  Horizons: {HORIZONS}")
     logger.info("=" * 60)

@@ -1,5 +1,5 @@
 """
-28_timegpt_C1_mcp_europe.py — TimeGPT C1_mcp HICP Eurozone
+28_timegpt_C1_mcp_europe.py - TimeGPT C1_mcp HICP Eurozone
 
 TimeGPT native with MCP/BCE signals only as covariates.
 Future horizon (h steps): carry-forward last known value for all MCP signals;
@@ -80,7 +80,7 @@ def build_nixtla_dfs(df: pd.DataFrame, origin: pd.Timestamp) -> tuple[pd.DataFra
     for c in XREG_COVS:
         df_tgt[c] = hist_reset[c].values
 
-    # X_df: future rows — carry-forward last known MCP values to avoid
+    # X_df: future rows - carry-forward last known MCP values to avoid
     # level discontinuity (bce_cumstance is unbounded cumulative, not in [-1,1])
     future_idx = pd.date_range(
         start=origin + pd.DateOffset(months=1), periods=MAX_H, freq="MS"
@@ -164,7 +164,7 @@ def main():
     args = parser.parse_args()
 
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"MCP covariates: {XREG_COVS}")
     logger.info("=" * 60)
 

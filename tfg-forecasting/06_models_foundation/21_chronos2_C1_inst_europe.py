@@ -1,11 +1,11 @@
 """
-21_chronos2_C1_inst_europe.py — Chronos-2 C1_institutional HICP Eurozone
+21_chronos2_C1_inst_europe.py - Chronos-2 C1_institutional HICP Eurozone
 
 Institutional covariates (top by correlation with HICP(t+1)):
-  epu_europe_ma3  (corr=0.81) — EPU Europe
-  brent_ma3       (corr=0.44) — Brent crude
-  esi_eurozone    (corr=0.15) — ESI Eurozone (European Commission)
-  eurusd_ma3      (corr=-0.28) — EUR/USD
+  epu_europe_ma3  (corr=0.81) - EPU Europe
+  brent_ma3       (corr=0.44) - Brent crude
+  esi_eurozone    (corr=0.15) - ESI Eurozone (European Commission)
+  eurusd_ma3      (corr=-0.28) - EUR/USD
 
 Architecture: Chronos-2 native with past/future covariates.
 """
@@ -120,7 +120,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Covariates: {EXOG_COLS}")
     logger.info("=" * 60)
 

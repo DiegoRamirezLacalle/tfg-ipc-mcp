@@ -1,8 +1,8 @@
 """Download historical official press releases (2015-2024) from three sources:
 
-  BCE — ECB monetary policy decisions from press releases.
-  INE — Monthly CPI press releases via predictable URL.
-  BdE — Banco de Espana press releases via RSS.
+  BCE - ECB monetary policy decisions from press releases.
+  INE - Monthly CPI press releases via predictable URL.
+  BdE - Banco de Espana press releases via RSS.
 
 Each release is saved as normalized JSON in:
   data/raw/rss_raw/{source}/YYYY-MM.json
@@ -458,7 +458,7 @@ def _normalize_ine_pdf_text(text: str) -> str:
     repaired = unicodedata.normalize("NFKC", repaired)
 
     # Unify minus/dash to ASCII '-' so regex captures negatives.
-    for ch in ["−", "–", "—", "‑", "‒", "―", "﹣"]:
+    for ch in ["−", "–", "-", "‑", "‒", "―", "﹣"]:
         repaired = repaired.replace(ch, "-")
     for bad in ["â€"", "â€"", "âˆ'"]:
         repaired = repaired.replace(bad, "-")
@@ -473,7 +473,7 @@ def _normalize_ine_pdf_text(text: str) -> str:
 
 
 def _parse_ine_pdf_signals(text: str) -> dict:
-    """Extract CPI signals from PDF text using regex (no LLM — data is numeric)."""
+    """Extract CPI signals from PDF text using regex (no LLM - data is numeric)."""
     text_norm = _normalize_ine_pdf_text(text)
     number = r"([+\-]?\s*\d+(?:\.\d+)?)"
 
@@ -513,7 +513,7 @@ def _parse_ine_pdf_signals(text: str) -> dict:
 
     # Build signals
     if annual_rate is None and monthly_rate is None:
-        # Could not extract rates — return neutral defaults
+        # Could not extract rates - return neutral defaults
         return {
             "decision": "dato",
             "magnitude": None,
@@ -603,7 +603,7 @@ def fetch_ine_pdfs(
                 _rate_limit()
 
                 if resp.status_code != 200:
-                    logger.info(f"  {ym}: HTTP {resp.status_code} — not available")
+                    logger.info(f"  {ym}: HTTP {resp.status_code} - not available")
                     total_errors += 1
                     continue
 
@@ -648,11 +648,11 @@ def fetch_ine_pdfs(
 
                 total_new += 1
                 logger.info(
-                    f"  {ym}: OK — {ipc_str} | {signals['tone']} | shock={signals['shock_score']}"
+                    f"  {ym}: OK - {ipc_str} | {signals['tone']} | shock={signals['shock_score']}"
                 )
 
             except Exception as e:
-                logger.warning(f"  {ym}: ERROR — {e}")
+                logger.warning(f"  {ym}: ERROR - {e}")
                 total_errors += 1
                 _rate_limit()
 
@@ -667,7 +667,7 @@ def fetch_ine_pdfs(
 
 BDE_RSS_URL = "https://www.bde.es/rss/es/"
 
-# Keywords to filter relevant notes (Spanish text matching — must stay in Spanish)
+# Keywords to filter relevant notes (Spanish text matching - must stay in Spanish)
 BDE_KEYWORDS = [
     "tipo", "interes", "inflacion", "ipc", "precio",
     "politica monetaria", "euribor", "credito", "hipoteca",

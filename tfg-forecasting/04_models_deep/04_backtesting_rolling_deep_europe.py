@@ -1,4 +1,4 @@
-"""Rolling expanding-window backtesting — HICP Eurozone deep models.
+"""Rolling expanding-window backtesting - HICP Eurozone deep models.
 
 Models: LSTM, N-BEATS, N-HiTS (NeuralForecast).
 
@@ -70,7 +70,7 @@ def build_models(horizon):
         NBEATS(
             h=horizon,
             input_size=24,
-            # significant seasonality (Fs=0.664) — identity stacks
+            # significant seasonality (Fs=0.664) - identity stacks
             stack_types=["identity", "identity", "identity"],
             max_steps=300,
             scaler_type="standard",
@@ -178,7 +178,7 @@ def compute_metrics(df_preds, mase_scale):
 
 def main():
     logger.info("=" * 60)
-    logger.info("ROLLING BACKTESTING DEEP — HICP Eurozone")
+    logger.info("ROLLING BACKTESTING DEEP - HICP Eurozone")
     logger.info(f"  Origins: {ORIGINS_START} - {ORIGINS_END} (every 3 months)")
     logger.info(f"  Horizons: {HORIZONS}")
     logger.info(f"  Models: {MODEL_NAMES}")
@@ -196,7 +196,7 @@ def main():
     metrics = compute_metrics(df_preds, mase_scale)
 
     logger.info("\n" + "=" * 60)
-    logger.info("DEEP ROLLING RESULTS — HICP Eurozone")
+    logger.info("DEEP ROLLING RESULTS - HICP Eurozone")
     logger.info("=" * 60)
 
     baseline_path = RESULTS_DIR / "rolling_metrics_europe.json"

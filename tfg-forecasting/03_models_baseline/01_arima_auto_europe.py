@@ -75,7 +75,7 @@ def diagnose(model):
 
 def main():
     logger.info("=" * 60)
-    logger.info("auto_arima SARIMA — HICP Eurozone")
+    logger.info("auto_arima SARIMA - HICP Eurozone")
     logger.info("=" * 60)
 
     y, train, val = load_data()

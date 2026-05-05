@@ -1,5 +1,5 @@
 """
-10_chronos2_C1_macro.py — Chronos-2 C1 macro: brent + ttf + EPU Europe
+10_chronos2_C1_macro.py - Chronos-2 C1 macro: brent + ttf + EPU Europe
 
 Covariates (3, best-of-domain):
   brent_ma3       # corr 0.715 energy
@@ -130,7 +130,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Covariates: {EXOG_COLS}")
     logger.info("=" * 60)
     df = load_data()

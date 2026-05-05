@@ -187,7 +187,7 @@ def compute_metrics(df_preds, mase_scale):
 
 def main():
     logger.info("=" * 60)
-    logger.info("ROLLING BACKTESTING — Deep models (LSTM / N-BEATS / N-HiTS)")
+    logger.info("ROLLING BACKTESTING - Deep models (LSTM / N-BEATS / N-HiTS)")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END} (every 3 months)")
     logger.info(f"Horizons: {HORIZONS}")
     logger.info("=" * 60)

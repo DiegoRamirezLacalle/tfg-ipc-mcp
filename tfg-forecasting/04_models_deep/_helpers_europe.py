@@ -1,4 +1,4 @@
-"""Shared utilities for deep models — HICP Eurozone."""
+"""Shared utilities for deep models - HICP Eurozone."""
 
 import sys
 from pathlib import Path

@@ -1,10 +1,10 @@
 """
-15_chronos2_C1_inst_global.py — Chronos-2 C1_institutional CPI Global
+15_chronos2_C1_inst_global.py - Chronos-2 C1_institutional CPI Global
 
 Top-3 covariates by correlation with cpi_global_rate(t+1):
-  imf_comm_ma3  (corr=0.586) — IMF All Commodity Index
-  brent_log_ma3 (corr=0.456) — Brent crude
-  gscpi_ma3     (corr=0.324) — NY Fed Supply Chain Pressure Index
+  imf_comm_ma3  (corr=0.586) - IMF All Commodity Index
+  brent_log_ma3 (corr=0.456) - Brent crude
+  gscpi_ma3     (corr=0.324) - NY Fed Supply Chain Pressure Index
 
 Architecture identical to 09_chronos2_C1_inst.py (Spain) but using
 features_c1_global_institutional.parquet and target cpi_global_rate.
@@ -147,7 +147,7 @@ def compute_subperiod_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Covariates: {EXOG_COLS}")
     logger.info("=" * 60)
 

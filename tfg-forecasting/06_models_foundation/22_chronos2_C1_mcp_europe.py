@@ -1,5 +1,5 @@
 """
-22_chronos2_C1_mcp_europe.py — Chronos-2 C1_mcp HICP Eurozone
+22_chronos2_C1_mcp_europe.py - Chronos-2 C1_mcp HICP Eurozone
 
 Exclusively semantic BCE/GDELT covariates (pure MCP experiment):
   bce_shock_score   (corr C0 residuals = +0.36) ***
@@ -127,7 +127,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"MCP covariates: {EXOG_COLS}")
     logger.info("=" * 60)
 
