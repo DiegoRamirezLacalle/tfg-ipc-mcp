@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ────────────────────────────────────────────────────────────
+ * Design tokens — from Stitch DESIGN.md (prose, not YAML)
+ * Bloomberg Terminal × Academic Journal × Signal-in-Noise
+ * ──────────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    /* Surfaces — zinc-tinted near-black, never pure */
+    --background:        240   5%   4%;  /* #0A0A0C */
+    --card:              240   5%   7%;  /* #11111A-ish */
+    --muted:             240   4%  10%;  /* #18181B */
+    --border:            240   4%  16%;  /* #27272A */
+    --border-strong:     240   4%  24%;  /* #3F3F46 */
+    --input:             240   4%  16%;
+    --ring:              262  83%  68%;  /* matches --mcp on focus */
+
+    /* Text */
+    --foreground:           0   0%  98%;  /* #FAFAFA */
+    --foreground-muted:   240   5%  65%;  /* #A1A1AA */
+    --foreground-subtle:  240   4%  46%;  /* #71717A */
+
+    /* Status — semantic colors used everywhere */
+    --success:      160  84%  39%;  /* #10B981 */
+    --info:         189  94%  43%;  /* #06B6D4 */
+    --warning:       38  92%  50%;  /* #F59E0B */
+    --destructive:    0  84%  60%;  /* #EF4444 */
+
+    /* Brand accents — used sparingly */
+    --mcp:          262  83%  68%;  /* #8B5CF6 — MCP only */
+    --gold:          39  60%  65%;  /* #E0B96A — thesis identity */
+
+    /* Chart series — one per model slug, colour-blind safe ish */
+    --series-naive:    0   0%  88%;  /* #E4E4E7 — baseline reference (off-white) */
+    --series-sarima: 189  94%  53%;  /* cyan */
+    --series-ridge:   38  92%  50%;  /* amber */
+    --series-timesfm: 262 83%  72%;  /* violet (distinct from --mcp) */
+    --series-chronos: 158 64%  52%;  /* emerald */
+    --series-timegpt: 351 95%  71%;  /* rose */
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+ * Base
+ * ──────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "cv11" 1;
+  }
+
+  /* Tabular numerals for all monospace — keeps columns aligned */
+  .font-mono,
+  .tabular {
+    font-feature-settings: "tnum" 1, "calt" 0;
+  }
+
+  /* Selection */
+  ::selection {
+    background: hsl(var(--mcp) / 0.35);
+    color: hsl(var(--foreground));
+  }
+
+  /* Scrollbar — keep technical */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--border-strong)); }
+}
+
+/* ────────────────────────────────────────────────────────────
+ * Signal-in-Noise — page-wide grain overlay
+ *
+ * Fixed, low-opacity SVG noise on top of the whole app.
+ * The grain is what makes the dark surfaces feel like paper /
+ * a CRT terminal rather than pure-black digital flatness.
+ * ──────────────────────────────────────────────────────────── */
+@layer base {
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+ * Reusable utility classes
+ * ──────────────────────────────────────────────────────────── */
+@layer components {
+  /* Hair-line divider — used everywhere instead of shadows */
+  .hr-tech {
+    @apply border-t border-border;
+  }
+
+  /* Card primitive — used by everything */
+  .card-tech {
+    @apply bg-card border border-border rounded;
+  }
+
+  /* Header micro-label, e.g. "RUNS · 4" */
+  .micro {
+    @apply font-mono text-label-caps uppercase text-foreground-muted;
+  }
+
+  /* Status pill — base; modifier classes set the colour */
+  .pill {
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-mono text-data-sm border;
+  }
+  .pill-success     { @apply bg-success/15      text-success      border-success/30; }
+  .pill-info        { @apply bg-info/15         text-info         border-info/30; }
+  .pill-warning     { @apply bg-warning/15      text-warning      border-warning/30; }
+  .pill-destructive { @apply bg-destructive/15  text-destructive  border-destructive/30; }
+  .pill-mcp         { @apply bg-mcp/15          text-mcp          border-mcp/30; }
+  .pill-muted       { @apply bg-muted           text-foreground-muted border-border; }
+
+  /* The blinking cursor that anchors the wordmark identity */
+  .cursor-block {
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    margin-left: 0.1em;
+    background: hsl(var(--gold));
+    vertical-align: -0.12em;
+    @apply animate-blink;
+  }
+
+  /* Subtle gold rule — used once per page as identity marker */
+  .gold-rule {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(var(--gold) / 0.7) 30%,
+      hsl(var(--gold) / 0.7) 70%,
+      transparent 100%
+    );
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+ * Stagger reveal — apply animation-delay via inline style
+ * ──────────────────────────────────────────────────────────── */
+.reveal { animation: none; opacity: 0; }
+.reveal-on { @apply animate-fade-up; }

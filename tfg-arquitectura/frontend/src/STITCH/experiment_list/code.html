@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TFG-IPC-MCP | Experiments</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&amp;family=Geist:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#d0bcff",
+                        "primary-container": "#a078ff",
+                        "on-secondary-container": "#00424e",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "on-secondary-fixed": "#001f26",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#322f39",
+                        "surface": "#15121b",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "tertiary-fixed": "#ffdcbb",
+                        "on-tertiary-fixed": "#2c1700",
+                        "surface-variant": "#37333d",
+                        "outline-variant": "#494454",
+                        "on-primary-fixed-variant": "#5516be",
+                        "tertiary": "#ffb869",
+                        "surface-bright": "#3b3742",
+                        "surface-dim": "#15121b",
+                        "surface-container-low": "#1d1a23",
+                        "on-primary-container": "#340080",
+                        "on-surface": "#e7e0ed",
+                        "on-background": "#e7e0ed",
+                        "surface-container-high": "#2c2832",
+                        "secondary-container": "#03b5d3",
+                        "secondary": "#4cd7f6",
+                        "on-tertiary": "#482900",
+                        "on-tertiary-container": "#3f2300",
+                        "surface-container-lowest": "#0f0d15",
+                        "on-primary-fixed": "#23005c",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#e9ddff",
+                        "primary": "#d0bcff",
+                        "inverse-primary": "#6d3bd7",
+                        "background": "#15121b",
+                        "on-surface-variant": "#cbc3d7",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "surface-tint": "#d0bcff",
+                        "on-secondary": "#003640",
+                        "error": "#ffb4ab",
+                        "secondary-fixed": "#acedff",
+                        "outline": "#958ea0",
+                        "on-primary": "#3c0091",
+                        "surface-container-highest": "#37333d",
+                        "surface-container": "#211e27",
+                        "on-error-container": "#ffdad6",
+                        "inverse-surface": "#e7e0ed",
+                        "tertiary-container": "#ca801e",
+                        "status-success": "#10B981",
+                        "status-info": "#06B6D4",
+                        "status-warning": "#F59E0B",
+                        "status-destructive": "#EF4444"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "nav-height": "56px",
+                        "4": "4px",
+                        "8": "8px",
+                        "48": "48px",
+                        "12": "12px",
+                        "16": "16px",
+                        "32": "32px",
+                        "64": "64px",
+                        "24": "24px"
+                    },
+                    "fontFamily": {
+                        "data-sm": ["Geist Mono"],
+                        "data-lg": ["Geist Mono"],
+                        "headline-md": ["Geist Sans"],
+                        "body-base": ["Geist Sans"],
+                        "label-caps": ["Geist Mono"],
+                        "data-base": ["Geist Mono"],
+                        "body-sm": ["Geist Sans"],
+                        "display-lg": ["Geist Sans"]
+                    },
+                    "fontSize": {
+                        "data-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "data-lg": ["18px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                        "headline-md": ["20px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-base": ["14px", {"lineHeight": "1.5", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "data-base": ["14px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+                        "body-sm": ["12px", {"lineHeight": "1.4", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "display-lg": ["32px", {"lineHeight": "1.1", "letterSpacing": "-0.05em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #09090B; color: #e7e0ed; }
+        .table-container { border: 1px solid #27272A; }
+        .table-row { border-bottom: 1px solid #27272A; }
+        .table-row:last-child { border-bottom: none; }
+        .table-header { background-color: #18181B; border-bottom: 1px solid #27272A; }
+        .table-row:hover { background-color: #18181B; }
+    </style>
+</head>
+<body class="font-body-base text-body-base antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col">
+<!-- TopNavBar (Shared Component JSON injected styling) -->
+<header class="bg-surface dark:bg-surface fixed top-0 w-full h-nav-height border-b border-outline-variant dark:border-outline-variant flat no shadows flex items-center justify-between px-12 z-50">
+<div class="flex items-center gap-24">
+<span class="font-data-lg text-data-lg lowercase text-on-surface dark:text-on-surface tracking-tighter">tfg-ipc-mcp</span>
+<nav class="flex h-full">
+<!-- Active Item -->
+<a class="h-nav-height flex items-center px-12 text-primary dark:text-primary font-bold border-b border-primary hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors cursor-pointer active:opacity-80" href="#">
+                    Experiments
+                </a>
+<!-- Inactive Items -->
+<a class="h-nav-height flex items-center px-12 text-on-surface-variant dark:text-on-surface-variant font-data-base text-data-base hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors cursor-pointer active:opacity-80" href="#">
+                    New
+                </a>
+<a class="h-nav-height flex items-center px-12 text-on-surface-variant dark:text-on-surface-variant font-data-base text-data-base hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors cursor-pointer active:opacity-80" href="#">
+                    Compare
+                </a>
+</nav>
+</div>
+<div class="flex items-center gap-16">
+<span class="font-label-caps text-label-caps text-on-surface-variant border border-outline-variant px-8 py-4 rounded">Researcher</span>
+<button class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors">Sign Out</button>
+<div class="flex items-center gap-8 text-on-surface-variant">
+<span class="material-symbols-outlined cursor-pointer hover:text-on-surface transition-colors" style="font-variation-settings: 'FILL' 0;">account_circle</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-on-surface transition-colors" style="font-variation-settings: 'FILL' 0;">logout</span>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 mt-[56px] w-full max-w-[1440px] mx-auto px-12 py-24 flex flex-col gap-24">
+<!-- Header & Primary Actions -->
+<div class="flex items-end justify-between border-b border-[#27272A] pb-12">
+<div class="flex items-baseline gap-12">
+<h1 class="font-display-lg text-display-lg text-on-surface">Experiments</h1>
+<span class="font-data-base text-data-base text-on-surface-variant">1,204 total</span>
+</div>
+<button class="bg-primary hover:bg-primary-fixed-dim text-on-primary px-16 py-8 rounded font-data-base text-data-base transition-colors flex items-center gap-8">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New experiment
+            </button>
+</div>
+<!-- Filters & Controls -->
+<div class="flex items-center justify-between">
+<div class="flex gap-8">
+<!-- Filter Pills -->
+<button class="px-12 py-4 rounded font-data-sm text-data-sm border border-outline-variant bg-surface-container-high text-on-surface transition-colors">All</button>
+<button class="px-12 py-4 rounded font-data-sm text-data-sm border border-[#27272A] bg-transparent text-on-surface-variant hover:bg-[#18181B] hover:text-on-surface transition-colors">Running <span class="ml-4 opacity-50">12</span></button>
+<button class="px-12 py-4 rounded font-data-sm text-data-sm border border-[#27272A] bg-transparent text-on-surface-variant hover:bg-[#18181B] hover:text-on-surface transition-colors">Completed <span class="ml-4 opacity-50">1.1k</span></button>
+<button class="px-12 py-4 rounded font-data-sm text-data-sm border border-[#27272A] bg-transparent text-on-surface-variant hover:bg-[#18181B] hover:text-on-surface transition-colors">Failed <span class="ml-4 opacity-50">42</span></button>
+</div>
+<div class="flex items-center gap-12">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-8 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant">search</span>
+<input class="bg-[#09090B] border border-[#27272A] rounded pl-28 pr-12 py-4 font-data-sm text-data-sm text-on-surface focus:border-primary focus:outline-none focus:ring-0 w-64 placeholder:text-on-surface-variant/50 transition-colors" placeholder="Search ID or Name" type="text"/>
+</div>
+<button class="p-4 border border-[#27272A] rounded text-on-surface-variant hover:text-on-surface hover:bg-[#18181B] transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+</button>
+</div>
+</div>
+<!-- Data Table Area -->
+<div class="table-container rounded bg-[#0F0F12] flex-1 overflow-hidden flex flex-col">
+<!-- Table Header -->
+<div class="table-header grid grid-cols-12 gap-12 px-16 py-8 items-center font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+<div class="col-span-2">ID</div>
+<div class="col-span-3">Name</div>
+<div class="col-span-2">Model</div>
+<div class="col-span-3">Created At</div>
+<div class="col-span-2 text-right">Status</div>
+</div>
+<!-- Table Body (Scrollable if needed, but flex-1 fills remaining) -->
+<div class="flex-1 overflow-y-auto">
+<!-- Row 1: Running (Info) -->
+<div class="table-row grid grid-cols-12 gap-12 px-16 py-12 items-center cursor-pointer transition-colors group">
+<div class="col-span-2 font-data-sm text-data-sm text-on-surface-variant group-hover:text-primary transition-colors">EXP-8892A</div>
+<div class="col-span-3 font-body-sm text-body-sm text-on-surface truncate pr-8">Q3_Inflation_Baseline_V2</div>
+<div class="col-span-2 font-data-sm text-data-sm text-on-surface-variant">XGBoost-Tuning</div>
+<div class="col-span-3 font-data-sm text-data-sm text-on-surface-variant">2023-10-27 14:32:01 UTC</div>
+<div class="col-span-2 flex justify-end">
+<span class="px-8 py-4 rounded font-data-sm text-data-sm border border-status-info/30 bg-status-info/15 text-status-info flex items-center gap-4">
+<span class="w-4 h-4 rounded-full bg-status-info animate-pulse"></span>
+                            Running
+                        </span>
+</div>
+</div>
+<!-- Row 2: Success -->
+<div class="table-row grid grid-cols-12 gap-12 px-16 py-12 items-center cursor-pointer transition-colors group">
+<div class="col-span-2 font-data-sm text-data-sm text-on-surface-variant group-hover:text-primary transition-colors">EXP-8891C</div>
+<div class="col-span-3 font-body-sm text-body-sm text-on-surface truncate pr-8">CPI_Energy_Sector_Forecast</div>
+<div class="col-span-2 font-data-sm text-data-sm text-on-surface-variant">ARIMA-Seasonal</div>
+<div class="col-span-3 font-data-sm text-data-sm text-on-surface-variant">2023-10-26 09:15:44 UTC</div>
+<div class="col-span-2 flex justify-end">
+<span class="px-8 py-4 rounded font-data-sm text-data-sm border border-status-success/30 bg-status-success/15 text-status-success">Completed</span>
+</div>
+</div>
+<!-- Row 3: Warning -->
+<div class="table-row grid grid-cols-12 gap-12 px-16 py-12 items-center cursor-pointer transition-colors group">
+<div class="col-span-2 font-data-sm text-data-sm text-on-surface-variant group-hover:text-primary transition-colors">EXP-8890F</div>
+<div class="col-span-3 font-body-sm text-body-sm text-on-surface truncate pr-8">Housing_Index_Stress_Test</div>
+<div class="col-span-2 font-data-sm text-data-sm text-on-surface-variant">LSTM-Deep</div>
+<div class="col-span-3 font-data-sm text-data-sm text-on-surface-variant">2023-10-25 18:45:12 UTC</div>
+<div class="col-span-2 flex justify-end">
+<span class="px-8 py-4 rounded font-data-sm text-data-sm border border-status-warning/30 bg-status-warning/15 text-status-warning flex items-center gap-4" title="Sub-optimal convergence detected">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                            Degraded
+                        </span>
+</div>
+</div>
+<!-- Row 4: Destructive (Failed) -->
+<div class="table-row grid grid-cols-12 gap-12 px-16 py-12 items-center cursor-pointer transition-colors group">
+<div class="col-span-2 font-data-sm text-data-sm text-on-surface-variant group-hover:text-primary transition-colors">EXP-8889A</div>
+<div class="col-span-3 font-body-sm text-body-sm text-on-surface truncate pr-8">Macro_Aggregate_Model_Gen4</div>
+<div class="col-span-2 font-data-sm text-data-sm text-on-surface-variant">Transformer-TS</div>
+<div class="col-span-3 font-data-sm text-data-sm text-on-surface-variant">2023-10-24 22:11:05 UTC</div>
+<div class="col-span-2 flex justify-end">
+<span class="px-8 py-4 rounded font-data-sm text-data-sm border border-status-destructive/30 bg-status-destructive/15 text-status-destructive flex items-center gap-4">
+<span class="material-symbols-outlined text-[14px]">error</span>
+                            Failed
+                        </span>
+</div>
+</div>
+<!-- Row 5: Success -->
+<div class="table-row grid grid-cols-12 gap-12 px-16 py-12 items-center cursor-pointer transition-colors group">
+<div class="col-span-2 font-data-sm text-data-sm text-on-surface-variant group-hover:text-primary transition-colors">EXP-8888B</div>
+<div class="col-span-3 font-body-sm text-body-sm text-on-surface truncate pr-8">Core_PCE_Deflator_Analysis</div>
+<div class="col-span-2 font-data-sm text-data-sm text-on-surface-variant">Prophet-Ensemble</div>
+<div class="col-span-3 font-data-sm text-data-sm text-on-surface-variant">2023-10-23 11:05:33 UTC</div>
+<div class="col-span-2 flex justify-end">
+<span class="px-8 py-4 rounded font-data-sm text-data-sm border border-status-success/30 bg-status-success/15 text-status-success">Completed</span>
+</div>
+</div>
+<!-- Row 6: Success -->
+<div class="table-row grid grid-cols-12 gap-12 px-16 py-12 items-center cursor-pointer transition-colors group">
+<div class="col-span-2 font-data-sm text-data-sm text-on-surface-variant group-hover:text-primary transition-colors">EXP-8887D</div>
+<div class="col-span-3 font-body-sm text-body-sm text-on-surface truncate pr-8">Labor_Market_Indicator_Corr</div>
+<div class="col-span-2 font-data-sm text-data-sm text-on-surface-variant">VAR-Structural</div>
+<div class="col-span-3 font-data-sm text-data-sm text-on-surface-variant">2023-10-22 08:20:10 UTC</div>
+<div class="col-span-2 flex justify-end">
+<span class="px-8 py-4 rounded font-data-sm text-data-sm border border-status-success/30 bg-status-success/15 text-status-success">Completed</span>
+</div>
+</div>
+</div>
+<!-- Table Footer / Pagination Placeholder -->
+<div class="border-t border-[#27272A] bg-[#0F0F12] px-16 py-8 flex justify-between items-center text-on-surface-variant font-data-sm text-data-sm">
+<span>Showing 1-6 of 1,204</span>
+<div class="flex gap-8">
+<button class="px-8 py-4 border border-[#27272A] rounded hover:bg-[#18181B] hover:text-on-surface transition-colors disabled:opacity-50" disabled="">Prev</button>
+<button class="px-8 py-4 border border-[#27272A] rounded hover:bg-[#18181B] hover:text-on-surface transition-colors">Next</button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

@@ -29,18 +29,13 @@ dependencies = [
     "anthropic>=0.25",
     "mcp>=1.0",
 
-    # Backend FastAPI
-    "fastapi>=0.111",
-    "uvicorn[standard]>=0.29",
-    "sqlalchemy>=2.0",
-    "alembic>=1.13",
-    "motor>=3.4",           # MongoDB async
-    "pydantic-settings>=2.2",
-
     # Métricas / evaluación
     "scikit-learn>=1.4",
     "scipy>=1.13",
 ]
+
+[tool.uv.workspace]
+members = ["tfg-arquitectura/backend"]
 
 [tool.setuptools.packages.find]
 where = ["."]
