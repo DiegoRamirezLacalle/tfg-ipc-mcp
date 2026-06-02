@@ -15,6 +15,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
+from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
@@ -65,12 +66,15 @@ def compute_xreg_correction(df: pd.DataFrame, origin: pd.Timestamp) -> float:
         return 0.0
     ipc_mom = window["indice_general"].diff(1)
     valid = ~ipc_mom.isna()
-    X = window.loc[valid, XREG_COVS].fillna(0.0).values.astype(np.float64)
+    X_raw = window.loc[valid, XREG_COVS].fillna(0.0).values.astype(np.float64)
     y_diff = ipc_mom[valid].values.astype(np.float64)
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X_raw)
     reg = Ridge(alpha=RIDGE_ALPHA, fit_intercept=True)
     reg.fit(X, y_diff)
-    current = df.loc[origin:origin, XREG_COVS].fillna(0.0).values.astype(np.float64)
-    neutral = np.zeros_like(current)
+    current_raw = df.loc[origin:origin, XREG_COVS].fillna(0.0).values.astype(np.float64)
+    current = scaler.transform(current_raw)
+    neutral = np.zeros_like(current)  # scaled-space 0 = historical mean of each feature
     return float(reg.predict(current)[0] - reg.predict(neutral)[0])
 
 

@@ -82,7 +82,7 @@ All exogenous signals use **shift+1** (value known at forecast time) and are nor
 
 4. **Horizon matters**: statistical models (ARIMA/SARIMA) are nearly unbeatable at h=1; foundation models start competing at h=3–6 and win at h=12 for Global and Europe.
 
-5. **Dynamic AutoARIMA ≠ better**: reselecting ARIMA orders at each rolling origin consistently *worsens* performance versus a fixed model calibrated once on the full historical sample.
+5. **Dynamic AutoARIMA — it depends on the series and horizon**: reselecting ARIMA orders at each rolling origin *helps* for Global CPI (−6% at h=1, −14% at h=12 vs fixed ARIMA), *hurts* for Spain (≈−5% at h=1 but +21% at h=12), and is roughly neutral for Europe (competitive at short horizons, +4% at h=12 vs fixed SARIMA). A model whose orders are fixed once on the full historical sample is more robust for series with stable seasonal dynamics (Spain), whereas dynamic re-selection pays off for series with more structural change (Global).
 
 6. **Scaling is critical**: without StandardScaler, Ridge coefficients become spurious (EPU std~65 vs diff(HICP) std~0.44), inflating MAE by +534%. StandardScaler is mandatory before any exogenous correction.
 

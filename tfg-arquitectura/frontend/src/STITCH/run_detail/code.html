@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Run Details - TFG Inflation Forecasting Platform</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#d0bcff",
+                        "primary-container": "#a078ff",
+                        "on-secondary-container": "#00424e",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "on-secondary-fixed": "#001f26",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#322f39",
+                        "surface": "#15121b",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "tertiary-fixed": "#ffdcbb",
+                        "on-tertiary-fixed": "#2c1700",
+                        "surface-variant": "#37333d",
+                        "outline-variant": "#494454",
+                        "on-primary-fixed-variant": "#5516be",
+                        "tertiary": "#ffb869",
+                        "surface-bright": "#3b3742",
+                        "surface-dim": "#15121b",
+                        "surface-container-low": "#1d1a23",
+                        "on-primary-container": "#340080",
+                        "on-surface": "#e7e0ed",
+                        "on-background": "#e7e0ed",
+                        "surface-container-high": "#2c2832",
+                        "secondary-container": "#03b5d3",
+                        "secondary": "#4cd7f6",
+                        "on-tertiary": "#482900",
+                        "on-tertiary-container": "#3f2300",
+                        "surface-container-lowest": "#0f0d15",
+                        "on-primary-fixed": "#23005c",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#e9ddff",
+                        "primary": "#d0bcff",
+                        "inverse-primary": "#6d3bd7",
+                        "background": "#15121b",
+                        "on-surface-variant": "#cbc3d7",
+                        "tertiary-fixed-dim": "#ffb869",
+                        "on-tertiary-fixed-variant": "#673d00",
+                        "surface-tint": "#d0bcff",
+                        "on-secondary": "#003640",
+                        "error": "#ffb4ab",
+                        "secondary-fixed": "#acedff",
+                        "outline": "#958ea0",
+                        "on-primary": "#3c0091",
+                        "surface-container-highest": "#37333d",
+                        "surface-container": "#211e27",
+                        "on-error-container": "#ffdad6",
+                        "inverse-surface": "#e7e0ed",
+                        "tertiary-container": "#ca801e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "nav-height": "56px",
+                        "4": "4px",
+                        "8": "8px",
+                        "48": "48px",
+                        "12": "12px",
+                        "16": "16px",
+                        "32": "32px",
+                        "64": "64px",
+                        "24": "24px"
+                    },
+                    "fontFamily": {
+                        "data-sm": ["Geist Mono"],
+                        "data-lg": ["Geist Mono"],
+                        "headline-md": ["Geist Sans"],
+                        "body-base": ["Geist Sans"],
+                        "label-caps": ["Geist Mono"],
+                        "data-base": ["Geist Mono"],
+                        "body-sm": ["Geist Sans"],
+                        "display-lg": ["Geist Sans"]
+                    },
+                    "fontSize": {
+                        "data-sm": ["12px", { "lineHeight": "1.2", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "data-lg": ["18px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "headline-md": ["20px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-base": ["14px", { "lineHeight": "1.5", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "data-base": ["14px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+                        "body-sm": ["12px", { "lineHeight": "1.4", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "display-lg": ["32px", { "lineHeight": "1.1", "letterSpacing": "-0.05em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { background-color: #09090B; color: #e7e0ed; }
+        .level-1 { background-color: #0F0F12; border: 1px solid #27272A; }
+        .level-2 { background-color: #18181B; }
+    </style>
+</head>
+<body class="font-body-base text-body-base antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-surface fixed top-0 w-full h-nav-height border-b border-outline-variant dark:border-outline-variant flat no shadows flex items-center justify-between px-12 z-50">
+<div class="flex items-center gap-8 h-full">
+<span class="font-data-lg text-data-lg lowercase text-on-surface dark:text-on-surface tracking-tighter">tfg-ipc-mcp</span>
+<nav class="flex items-center gap-1 h-full">
+<a class="h-full flex items-center px-4 text-primary dark:text-primary font-bold border-b-2 border-primary font-data-base text-data-base cursor-pointer active:opacity-80 hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors" href="#">Experiments</a>
+<a class="h-full flex items-center px-4 text-on-surface-variant dark:text-on-surface-variant font-data-base text-data-base cursor-pointer active:opacity-80 hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors" href="#">New</a>
+<a class="h-full flex items-center px-4 text-on-surface-variant dark:text-on-surface-variant font-data-base text-data-base cursor-pointer active:opacity-80 hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors" href="#">Compare</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-80 font-data-base text-data-base flex items-center gap-2">
+                Researcher
+            </button>
+<div class="w-px h-4 bg-outline-variant dark:bg-outline-variant mx-2"></div>
+<button class="text-on-surface dark:text-on-surface hover:text-primary transition-colors cursor-pointer active:opacity-80 font-data-base text-data-base flex items-center gap-2">
+                Sign Out
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">logout</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-[calc(56px+24px)] px-12 pb-24 w-full max-w-[1600px] mx-auto flex flex-col gap-8">
+<!-- Header & Breadcrumbs -->
+<div class="flex flex-col gap-2">
+<nav class="flex items-center gap-2 text-on-surface-variant font-data-sm text-data-sm uppercase tracking-wider">
+<a class="hover:text-primary transition-colors" href="#">Experiments</a>
+<span class="text-outline-variant">/</span>
+<a class="hover:text-primary transition-colors" href="#">US_CPI_Baseline_Q3</a>
+<span class="text-outline-variant">/</span>
+<span class="text-primary font-medium">RUN-8F2A9</span>
+</nav>
+<h1 class="font-headline-md text-headline-md text-on-surface mt-2">Run Detail: RUN-8F2A9</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-2xl">Completed 14 mins ago. Focus: Core inflation forecasting using multivariate structural models.</p>
+</div>
+<!-- Metrics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+<!-- MAE -->
+<div class="level-1 rounded p-16 flex flex-col gap-4">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Mean Absolute Error (MAE)</span>
+<span class="material-symbols-outlined text-outline-variant text-[16px]" style="font-variation-settings: 'FILL' 0;">analytics</span>
+</div>
+<div class="flex items-baseline gap-3">
+<span class="font-display-lg text-display-lg font-data-lg font-bold text-on-surface">0.142</span>
+<span class="font-data-sm text-data-sm text-secondary-fixed-dim flex items-center">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 0;">arrow_downward</span>
+                        -0.03 vs naive
+                    </span>
+</div>
+</div>
+<!-- RMSE -->
+<div class="level-1 rounded p-16 flex flex-col gap-4">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Root Mean Sq Error (RMSE)</span>
+<span class="material-symbols-outlined text-outline-variant text-[16px]" style="font-variation-settings: 'FILL' 0;">ssid_chart</span>
+</div>
+<div class="flex items-baseline gap-3">
+<span class="font-display-lg text-display-lg font-data-lg font-bold text-on-surface">0.185</span>
+<span class="font-data-sm text-data-sm text-secondary-fixed-dim flex items-center">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 0;">arrow_downward</span>
+                        -0.04 vs naive
+                    </span>
+</div>
+</div>
+<!-- MAPE -->
+<div class="level-1 rounded p-16 flex flex-col gap-4">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Mean Abs % Error (MAPE)</span>
+<span class="material-symbols-outlined text-outline-variant text-[16px]" style="font-variation-settings: 'FILL' 0;">percent</span>
+</div>
+<div class="flex items-baseline gap-3">
+<span class="font-display-lg text-display-lg font-data-lg font-bold text-on-surface">1.24%</span>
+<span class="font-data-sm text-data-sm text-error flex items-center">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 0;">arrow_upward</span>
+                        +0.1% vs naive
+                    </span>
+</div>
+</div>
+</div>
+<!-- Chart Section -->
+<div class="level-1 rounded flex flex-col">
+<div class="border-b border-[#27272A] p-12 flex justify-between items-center bg-[#0F0F12]">
+<h2 class="font-label-caps text-label-caps text-on-surface uppercase">Forecast Trajectory vs Actuals (YoY %)</h2>
+<div class="flex gap-4">
+<div class="flex items-center gap-2 font-data-sm text-data-sm">
+<div class="w-8 h-[2px] bg-white"></div>
+<span class="text-on-surface-variant">Actuals</span>
+</div>
+<div class="flex items-center gap-2 font-data-sm text-data-sm">
+<div class="w-8 h-[2px] bg-primary"></div>
+<span class="text-on-surface-variant">Predictions</span>
+</div>
+</div>
+</div>
+<div class="p-16 h-[400px] w-full relative bg-[#09090B]">
+<!-- Placeholder for Chart -->
+<div class="absolute inset-0 flex items-end justify-between px-16 pb-8 pt-8">
+<!-- Y Axis Lines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none py-8">
+<div class="w-full h-px border-t border-dashed border-[#27272A]"></div>
+<div class="w-full h-px border-t border-dashed border-[#27272A]"></div>
+<div class="w-full h-px border-t border-dashed border-[#27272A]"></div>
+<div class="w-full h-px border-t border-dashed border-[#27272A]"></div>
+<div class="w-full h-px border-t border-solid border-[#494454]"></div>
+</div>
+<!-- SVG Chart Mockup -->
+<svg class="absolute inset-0 w-full h-full p-8" preserveaspectratio="none" viewbox="0 0 100 100">
+<!-- Actuals (White) -->
+<polyline fill="none" points="0,80 10,75 20,60 30,65 40,50 50,45 60,30 70,35 80,20 90,15 100,25" stroke="white" stroke-width="0.5"></polyline>
+<!-- Predictions (Primary/Violet) -->
+<polyline fill="none" points="0,82 10,73 20,62 30,64 40,52 50,48 60,32 70,33 80,22 90,18 100,22" stroke="#d0bcff" stroke-width="0.5"></polyline>
+</svg>
+<!-- X Axis Labels -->
+<div class="absolute bottom-2 left-0 w-full flex justify-between px-8 font-data-sm text-data-sm text-outline-variant">
+<span>2023-Q1</span>
+<span>2023-Q2</span>
+<span>2023-Q3</span>
+<span>2023-Q4</span>
+<span>2024-Q1</span>
+<span>2024-Q2</span>
+</div>
+<!-- Y Axis Labels -->
+<div class="absolute left-2 top-0 h-full flex flex-col justify-between py-8 font-data-sm text-data-sm text-outline-variant">
+<span>8.0%</span>
+<span>6.0%</span>
+<span>4.0%</span>
+<span>2.0%</span>
+<span>0.0%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- MCP Context Collapsible -->
+<div class="level-1 rounded overflow-hidden">
+<button class="w-full border-b border-[#27272A] p-12 flex justify-between items-center bg-[#0F0F12] hover:bg-[#18181B] transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#8B5CF6]" style="font-variation-settings: 'FILL' 0;">memory</span>
+<h2 class="font-label-caps text-label-caps text-on-surface uppercase tracking-wider">MCP Context</h2>
+</div>
+<span class="material-symbols-outlined text-outline-variant" style="font-variation-settings: 'FILL' 0;">expand_more</span>
+</button>
+<div class="p-16 bg-[#09090B] font-data-sm text-data-sm text-on-surface-variant grid grid-cols-1 md:grid-cols-2 gap-12">
+<div class="flex flex-col gap-4">
+<div class="flex justify-between border-b border-[#27272A] pb-2">
+<span class="text-outline-variant">Model Checkpoint:</span>
+<span class="text-primary-fixed-dim">v2.4.1-rc3</span>
+</div>
+<div class="flex justify-between border-b border-[#27272A] pb-2">
+<span class="text-outline-variant">Feature Set:</span>
+<span>core_macro_v8 + sentiment_indices</span>
+</div>
+<div class="flex justify-between border-b border-[#27272A] pb-2">
+<span class="text-outline-variant">Training Epochs:</span>
+<span>5,000</span>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex justify-between border-b border-[#27272A] pb-2">
+<span class="text-outline-variant">Loss Function:</span>
+<span>Huber (delta=1.5)</span>
+</div>
+<div class="flex justify-between border-b border-[#27272A] pb-2">
+<span class="text-outline-variant">Optimizer:</span>
+<span>AdamW (lr=3e-4)</span>
+</div>
+<div class="flex justify-between border-b border-[#27272A] pb-2">
+<span class="text-outline-variant">Hardware:</span>
+<span>NVIDIA A100 x 4</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Predictions Table Collapsible -->
+<div class="level-1 rounded overflow-hidden">
+<button class="w-full border-b border-[#27272A] p-12 flex justify-between items-center bg-[#0F0F12] hover:bg-[#18181B] transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">table_chart</span>
+<h2 class="font-label-caps text-label-caps text-on-surface uppercase tracking-wider">Raw Predictions Table</h2>
+</div>
+<span class="material-symbols-outlined text-outline-variant" style="font-variation-settings: 'FILL' 0;">expand_more</span>
+</button>
+<div class="overflow-x-auto bg-[#09090B]">
+<table class="w-full text-left font-data-sm text-data-sm border-collapse">
+<thead>
+<tr class="bg-[#18181B] border-b border-[#27272A]">
+<th class="p-12 font-medium text-on-surface-variant">Date</th>
+<th class="p-12 font-medium text-on-surface-variant text-right">Actual (YoY %)</th>
+<th class="p-12 font-medium text-primary text-right">Predicted (YoY %)</th>
+<th class="p-12 font-medium text-on-surface-variant text-right">Error</th>
+<th class="p-12 font-medium text-on-surface-variant text-right">Conf Interval (95%)</th>
+</tr>
+</thead>
+<tbody class="text-on-surface">
+<tr class="border-b border-[#27272A] hover:bg-[#18181B] transition-colors">
+<td class="p-12">2023-01-31</td>
+<td class="p-12 text-right">6.40</td>
+<td class="p-12 text-right text-primary-fixed-dim">6.42</td>
+<td class="p-12 text-right text-secondary-fixed-dim">+0.02</td>
+<td class="p-12 text-right text-outline-variant">[6.20, 6.64]</td>
+</tr>
+<tr class="border-b border-[#27272A] hover:bg-[#18181B] transition-colors">
+<td class="p-12">2023-02-28</td>
+<td class="p-12 text-right">6.00</td>
+<td class="p-12 text-right text-primary-fixed-dim">6.15</td>
+<td class="p-12 text-right text-error">+0.15</td>
+<td class="p-12 text-right text-outline-variant">[5.95, 6.35]</td>
+</tr>
+<tr class="border-b border-[#27272A] hover:bg-[#18181B] transition-colors">
+<td class="p-12">2023-03-31</td>
+<td class="p-12 text-right">5.00</td>
+<td class="p-12 text-right text-primary-fixed-dim">4.92</td>
+<td class="p-12 text-right text-secondary-fixed-dim">-0.08</td>
+<td class="p-12 text-right text-outline-variant">[4.70, 5.14]</td>
+</tr>
+<tr class="border-b border-[#27272A] hover:bg-[#18181B] transition-colors">
+<td class="p-12">2023-04-30</td>
+<td class="p-12 text-right">4.90</td>
+<td class="p-12 text-right text-primary-fixed-dim">4.85</td>
+<td class="p-12 text-right text-secondary-fixed-dim">-0.05</td>
+<td class="p-12 text-right text-outline-variant">[4.65, 5.05]</td>
+</tr>
+<tr class="border-b border-[#27272A] hover:bg-[#18181B] transition-colors">
+<td class="p-12">2023-05-31</td>
+<td class="p-12 text-right">4.00</td>
+<td class="p-12 text-right text-primary-fixed-dim">4.12</td>
+<td class="p-12 text-right text-error">+0.12</td>
+<td class="p-12 text-right text-outline-variant">[3.90, 4.34]</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</body></html>

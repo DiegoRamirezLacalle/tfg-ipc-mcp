@@ -5,7 +5,8 @@ Rolling-origin backtesting with MCP pipeline covariates.
 
 Chronos-2 natively supports covariates via dict inputs:
   - past_covariates: historical values of all covariates
-  - future_covariates: future values of known covariates (DFR/MRR)
+  - future_covariates: known-future covariates (DFR/MRR) carried forward
+    from their last observed value at the origin (no look-ahead).
   For MCP signals (not known in the future): only past_covariates
 
 Model: amazon/chronos-2
@@ -31,6 +32,7 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.exog_policies import ExogPolicy, build_future_covariates
 from shared.logger import get_logger
 
 logger = get_logger(__name__)
@@ -114,7 +116,8 @@ def prepare_input(
     Structure:
       - target: 1D array of historical IPC
       - past_covariates: dict of arrays (len = context)
-      - future_covariates: dict of arrays (len = h), only for DFR/MRR
+      - future_covariates: dict of arrays (len = h), only for DFR/MRR,
+        carried forward from the last value known at `origin`
     """
     context_df = df.loc[SIGNAL_START:origin]
     target = context_df["indice_general"].values.astype(np.float64)
@@ -127,17 +130,16 @@ def prepare_input(
         if col in context_df.columns:
             past_covs[col] = context_df[col].values.astype(str)
 
-    fc_dates = pd.date_range(
-        start=origin + pd.DateOffset(months=1), periods=h, freq="MS"
+    # No look-ahead: at the forecast origin the future ECB rate path is unknown,
+    # so carry forward the last value observed up to `origin`. The explicit
+    # CARRY_FORWARD policy (shared/exog_policies.py) reads only df.loc[:origin].
+    future_covs = build_future_covariates(
+        df,
+        [c for c in KNOWN_FUTURE_COVS if c in df.columns],
+        origin,
+        h,
+        ExogPolicy.CARRY_FORWARD,
     )
-    future_covs = {}
-    for col in KNOWN_FUTURE_COVS:
-        if col in df.columns:
-            future_vals = df[col].reindex(fc_dates)
-            if future_vals.isna().any():
-                last_val = float(context_df[col].iloc[-1])
-                future_vals = future_vals.fillna(last_val)
-            future_covs[col] = future_vals.values.astype(np.float64)
 
     return {
         "target": target,

@@ -1,6 +1,6 @@
 # PROJECT_CONTEXT.md
 > External memory for Claude Code sessions without prior context.
-> Last updated: 2026-05-04
+> Last updated: 2026-05-21
 
 ---
 
@@ -498,7 +498,7 @@ Required environment variables:
 
 ## 9. Project Status (2026-05-04)
 
-### Completed ✅
+### Completed 
 
 **ETL and features**:
 - [x] Ingestion and cleaning of all 3 target series
@@ -556,10 +556,24 @@ Required environment variables:
 - [ ] Chapter 6: Conclusions
 
 **Web platform (`tfg-arquitectura/`)**:
-- [ ] FastAPI backend: real-time forecasting endpoints
-- [ ] React frontend: inflation dashboard with visualizations
-- [ ] MCP pipeline integration in production
-- [ ] Deployment (Docker Compose + nginx)
+- [x] FastAPI backend: real-time forecasting endpoints (all 9 adapters wired)
+- [x] React frontend: inflation dashboard with visualizations (full UI + comparison dashboard)
+- [x] MCP pipeline integration in production (SSE transport, signals stored in MongoDB)
+- [x] Deployment (Docker Compose + nginx gateway on port 80, production build)
+- [x] All 4 datasets seeded: ipc-spain-ine, cpi-global-monthly, hicp-europe-monthly, features-exog
+- [x] 11/13 baseline experiments run (TimeGPT blocked by free-tier rate limit)
+- [x] **Phase D — GDELT sentiment via MCP (FinBERT)**:
+  - `mcp_server/server.py`: new `get_news_sentiment(country, year_month)` tool; lazy-loads ProsusAI/finbert (440MB, CPU, double-checked locking), queries MongoDB `news_raw`, returns `{sentiment_mean, sentiment_std, n_articles, hawkish_score}`. `sentiment_mean = mean(pos_prob − neg_prob)` per article.
+  - `mcp_server/Dockerfile`: added `torch>=2.2 (CPU wheel)` + `transformers>=4.40`; `hf_cache` named Docker volume at `/root/.cache/huggingface` so model survives restarts
+  - `backend/app/mcp/client.py`: `fetch_signals_for_timestamps` now calls both `get_macro_signals` AND `get_news_sentiment` per timestamp; merges `sentiment_mean`, `sentiment_std`, `sentiment_n`, `sentiment_hawkish` into signal dict; graceful per-call error handling
+  - `frontend/src/components/charts/SentimentChart.tsx`: dual-axis Recharts `LineChart`; violet line = sentiment (yAxis −1 to +1), rose dashed = hawkish% (right yAxis 0–1)
+  - `frontend/src/pages/RunDetail.tsx`: renders `<SentimentChart>` when MCP context contains at least one `sentiment_mean` value
+- [x] **Phase E — Methodological rigor**:
+  - **Ensemble-stack**: `backend/app/forecasting/adapters/ensemble.py` — `EnsembleStackAdapter` (slug `ensemble-stack`); takes `config.stack_run_ids=[id1,id2,...]`; loads predictions+MAEs from N runs, combines with inverse-MAE weights (`w = 1/(mae + eps)`, normalized); `ForecastInput` extended with `stack_preds: pd.DataFrame | None` and `stack_weights: np.ndarray | None`. Registered in `registry.py` + seeded in `etl/load_parquets.py` (model_type `"ensemble"`).
+  - **Alembic migration 0004**: `migrations/versions/20260519_0004_model_type_ensemble.py` — `ALTER TYPE model_type ADD VALUE IF NOT EXISTS 'ensemble'`; `ModelType` enum in `models/model_catalog.py` updated.
+  - **MLflow tracking**: `docker-compose.yml` adds `mlflow` service (`ghcr.io/mlflow/mlflow:v2.16.0`), SQLite backend, port 5000; `backend` gets `MLFLOW_TRACKING_URI: http://mlflow:5000`; `backend/app/api/v1/runs.py` logs params+metrics after each run via `mlflow.start_run()`; gracefully skipped on failure.
+  - **KS drift detector**: `backend/app/api/v1/drift.py` — `GET /drift?experiment_id=N`; finds latest `done` run, loads predictions vs actuals, computes residuals, 60/40 split, `scipy.stats.ks_2samp`; returns `{drifted, p_value, ks_statistic, n_early, n_recent, message}`. Registered in `api/v1/__init__.py`.
+  - **Drift UI**: `frontend/src/lib/queries.ts` adds `DriftResult` interface + `useDrift(experimentId)` hook; `frontend/src/pages/ExperimentDetail.tsx` shows animated warning banner with KS stats when `drift.data.drifted === true`.
 
 **Possible experimental additions**:
 - [ ] Diebold-Mariano tests for Global (only exists for Spain and Europe)
