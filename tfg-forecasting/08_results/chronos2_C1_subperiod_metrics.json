@@ -2,91 +2,91 @@
   "chronos2_C1": {
     "A_2021": {
       "h1": {
-        "MAE": 0.5046,
-        "RMSE": 0.6063,
-        "MASE": 0.3591,
+        "MAE": 0.4979,
+        "RMSE": 0.5969,
+        "MASE": 0.3543,
         "coverage_80": 0.4167,
         "n_origins": 12
       },
       "h3": {
-        "MAE": 1.0302,
-        "RMSE": 1.2287,
-        "MASE": 0.7332,
-        "coverage_80": 0.2778,
+        "MAE": 1.0387,
+        "RMSE": 1.2431,
+        "MASE": 0.7392,
+        "coverage_80": 0.25,
         "n_origins": 12
       },
       "h6": {
-        "MAE": 1.8789,
-        "RMSE": 2.2529,
-        "MASE": 1.3372,
-        "coverage_80": 0.1667,
+        "MAE": 1.8937,
+        "RMSE": 2.2711,
+        "MASE": 1.3477,
+        "coverage_80": 0.125,
         "n_origins": 12
       },
       "h12": {
-        "MAE": 3.6884,
-        "RMSE": 4.3742,
-        "MASE": 2.625,
-        "coverage_80": 0.1111,
+        "MAE": 3.7063,
+        "RMSE": 4.3811,
+        "MASE": 2.6377,
+        "coverage_80": 0.0833,
         "n_origins": 12
       }
     },
     "B_2022_shock": {
       "h1": {
-        "MAE": 0.976,
-        "RMSE": 1.3086,
-        "MASE": 0.6946,
+        "MAE": 1.0056,
+        "RMSE": 1.2789,
+        "MASE": 0.7157,
         "coverage_80": 0.8333,
         "n_origins": 12
       },
       "h3": {
-        "MAE": 1.2956,
-        "RMSE": 1.6153,
-        "MASE": 0.9221,
-        "coverage_80": 0.8889,
+        "MAE": 1.2939,
+        "RMSE": 1.5945,
+        "MASE": 0.9208,
+        "coverage_80": 0.7778,
         "n_origins": 12
       },
       "h6": {
-        "MAE": 1.8777,
-        "RMSE": 2.2684,
-        "MASE": 1.3363,
-        "coverage_80": 0.8889,
+        "MAE": 1.7272,
+        "RMSE": 2.0903,
+        "MASE": 1.2292,
+        "coverage_80": 0.7778,
         "n_origins": 12
       },
       "h12": {
-        "MAE": 2.6465,
-        "RMSE": 3.3082,
-        "MASE": 1.8835,
-        "coverage_80": 0.9375,
+        "MAE": 2.2115,
+        "RMSE": 2.6469,
+        "MASE": 1.5739,
+        "coverage_80": 0.8681,
         "n_origins": 12
       }
     },
     "C_2023_2024": {
       "h1": {
-        "MAE": 0.3896,
-        "RMSE": 0.4666,
-        "MASE": 0.2773,
+        "MAE": 0.3374,
+        "RMSE": 0.4166,
+        "MASE": 0.2401,
         "coverage_80": 0.8696,
         "n_origins": 23
       },
       "h3": {
-        "MAE": 0.515,
-        "RMSE": 0.6119,
-        "MASE": 0.3665,
-        "coverage_80": 0.8571,
+        "MAE": 0.4828,
+        "RMSE": 0.5854,
+        "MASE": 0.3436,
+        "coverage_80": 0.873,
         "n_origins": 21
       },
       "h6": {
-        "MAE": 0.6451,
-        "RMSE": 0.7982,
-        "MASE": 0.4591,
-        "coverage_80": 0.8796,
+        "MAE": 0.6502,
+        "RMSE": 0.8036,
+        "MASE": 0.4627,
+        "coverage_80": 0.8519,
         "n_origins": 18
       },
       "h12": {
-        "MAE": 0.8291,
-        "RMSE": 1.0362,
-        "MASE": 0.5901,
-        "coverage_80": 0.9583,
+        "MAE": 0.8797,
+        "RMSE": 1.0873,
+        "MASE": 0.6261,
+        "coverage_80": 0.9653,
         "n_origins": 12
       }
     }

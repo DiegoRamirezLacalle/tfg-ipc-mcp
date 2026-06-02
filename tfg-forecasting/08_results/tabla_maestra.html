@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Tabla Maestra de Modelos - TFG IPC/MCP</title>
+<title>Master Model Table - TFG IPC/MCP</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -128,32 +128,32 @@ tr.tier-separator td {
 </style>
 </head>
 <body>
-<h1>Tabla Maestra de Modelos - TFG IPC/MCP</h1>
+<h1>Master Model Table - TFG IPC/MCP</h1>
 <p class="subtitle">
   Backtesting rolling expanding-window (2021-01 → 2024-12) &nbsp;|&nbsp;
-  Métrica: MAE &nbsp;|&nbsp;
-  Δ% = diferencia relativa vs. mejor baseline C0 del mismo país &nbsp;|&nbsp;
-  ★ = mejor modelo overall por país (h=12)
+  Metric: MAE &nbsp;|&nbsp;
+  Δ% = relative difference vs. best C0 baseline for the same country &nbsp;|&nbsp;
+  ★ = best overall model per country (h=12)
 </p>
 <div class="legend">
-  <span><span class="legend-dot" style="background:#eafaf1;border:1px solid #1b7f3a"></span> Δ% negativo = mejora</span>
-  <span><span class="legend-dot" style="background:#fffbeb;border:1px solid #c97a00"></span> Δ% 10–50% peor</span>
-  <span><span class="legend-dot" style="background:#fdf0ef;border:1px solid #c0392b"></span> Δ% &gt;50% peor</span>
-  <span><span class="legend-dot" style="background:#e8fdf0;border:1px solid #1b7f3a"></span> ★ Mejor overall h=12</span>
+  <span><span class="legend-dot" style="background:#eafaf1;border:1px solid #1b7f3a"></span> Δ% negative = improvement</span>
+  <span><span class="legend-dot" style="background:#fffbeb;border:1px solid #c97a00"></span> Δ% 10–50% worse</span>
+  <span><span class="legend-dot" style="background:#fdf0ef;border:1px solid #c0392b"></span> Δ% &gt;50% worse</span>
+  <span><span class="legend-dot" style="background:#e8fdf0;border:1px solid #1b7f3a"></span> ★ Best overall h=12</span>
 </div>
 <div class="section-header global-header">Global</div>
 <table>
 <thead><tr>
   <th class="left" style="width:50px">Tier</th>
-  <th class="left" style="width:140px">Señales</th>
-  <th class="left" style="width:150px">Modelo</th>
+  <th class="left" style="width:140px">Signals</th>
+  <th class="left" style="width:150px">Model</th>
   <th>h=1 MAE</th><th>Δ%</th>
   <th>h=3 MAE</th><th>Δ%</th>
   <th>h=6 MAE</th><th>Δ%</th>
   <th>h=12 MAE</th><th>Δ%</th>
 </tr></thead>
 <tbody>
-<tr class="tier-separator"><td colspan="11">C0 - Sin señales exógenas</td></tr>
+<tr class="tier-separator"><td colspan="11">C0 - No exogenous signals</td></tr>
 <tr>
   <td class="tier-c0">C0</td>
   <td class="signal">-</td>
@@ -284,7 +284,7 @@ tr.tier-separator td {
   <td class="mae">2.0096</td>
   <td class="delta-pos-mid">+32.0%</td>
 </tr>
-<tr class="tier-separator"><td colspan="11">C1 - Con señales exógenas &nbsp;›&nbsp; Institucionales (Fed, BCE, commodities)</td></tr>
+<tr class="tier-separator"><td colspan="11">C1 - With exogenous signals &nbsp;›&nbsp; Institutional (Fed, ECB, commodities)</td></tr>
 <tr>
   <td class="tier-c1">C1</td>
   <td class="signal">institutional</td>
@@ -315,14 +315,14 @@ tr.tier-separator td {
   <td class="tier-c1">C1</td>
   <td class="signal">institutional</td>
   <td class="model">TimesFM</td>
-  <td class="mae">0.2694</td>
-  <td class="delta-pos-mid">+43.6%</td>
-  <td class="mae">0.4353</td>
-  <td class="delta-pos-mid">+22.6%</td>
-  <td class="mae">0.7121</td>
-  <td class="delta-pos-lo">+4.6%</td>
-  <td class="mae">1.2843</td>
-  <td class="delta-neg">-15.7%</td>
+  <td class="mae">0.2137</td>
+  <td class="delta-pos-mid">+13.9%</td>
+  <td class="mae">0.3487</td>
+  <td class="delta-neg">-1.8%</td>
+  <td class="mae">0.6072</td>
+  <td class="delta-neg">-10.8%</td>
+  <td class="mae">1.1913</td>
+  <td class="delta-neg">-21.8%</td>
 </tr>
 <tr>
   <td class="tier-c1">C1</td>
@@ -338,19 +338,19 @@ tr.tier-separator td {
   <td class="delta-pos-mid">+38.8%</td>
 </tr>
 </tbody></table>
-<div class="section-header espana-header">España</div>
+<div class="section-header espana-header">Spain</div>
 <table>
 <thead><tr>
   <th class="left" style="width:50px">Tier</th>
-  <th class="left" style="width:140px">Señales</th>
-  <th class="left" style="width:150px">Modelo</th>
+  <th class="left" style="width:140px">Signals</th>
+  <th class="left" style="width:150px">Model</th>
   <th>h=1 MAE</th><th>Δ%</th>
   <th>h=3 MAE</th><th>Δ%</th>
   <th>h=6 MAE</th><th>Δ%</th>
   <th>h=12 MAE</th><th>Δ%</th>
 </tr></thead>
 <tbody>
-<tr class="tier-separator"><td colspan="11">C0 - Sin señales exógenas</td></tr>
+<tr class="tier-separator"><td colspan="11">C0 - No exogenous signals</td></tr>
 <tr>
   <td class="tier-c0">C0</td>
   <td class="signal">-</td>
@@ -481,7 +481,7 @@ tr.tier-separator td {
   <td class="mae">2.0096</td>
   <td class="delta-pos-mid">+30.4%</td>
 </tr>
-<tr class="tier-separator"><td colspan="11">C1 - Con señales exógenas &nbsp;›&nbsp; Energía (Brent, gas)</td></tr>
+<tr class="tier-separator"><td colspan="11">C1 - With exogenous signals &nbsp;›&nbsp; Energy (Brent, gas)</td></tr>
 <tr>
   <td class="tier-c1">C1</td>
   <td class="signal">energy</td>
@@ -508,7 +508,7 @@ tr.tier-separator td {
   <td class="mae">2.9966</td>
   <td class="delta-pos-hi">+94.5%</td>
 </tr>
-<tr class="tier-separator"><td colspan="11">C1 - Con señales exógenas &nbsp;›&nbsp; Sólo energía</td></tr>
+<tr class="tier-separator"><td colspan="11">C1 - With exogenous signals &nbsp;›&nbsp; Energy only</td></tr>
 <tr>
   <td class="tier-c1">C1</td>
   <td class="signal">energy only</td>
@@ -535,7 +535,7 @@ tr.tier-separator td {
   <td class="mae">3.1023</td>
   <td class="delta-pos-hi">+101.3%</td>
 </tr>
-<tr class="tier-separator"><td colspan="11">C1 - Con señales exógenas &nbsp;›&nbsp; Macro (PPI, tasas, USD)</td></tr>
+<tr class="tier-separator"><td colspan="11">C1 - With exogenous signals &nbsp;›&nbsp; Macro (PPI, rates, USD)</td></tr>
 <tr>
   <td class="tier-c1">C1</td>
   <td class="signal">macro</td>
@@ -553,14 +553,14 @@ tr.tier-separator td {
   <td class="tier-c1">C1</td>
   <td class="signal">macro</td>
   <td class="model">TimesFM</td>
-  <td class="mae">0.6017</td>
-  <td class="delta-pos-hi">+67.7%</td>
-  <td class="mae">0.8376</td>
-  <td class="delta-pos-mid">+25.0%</td>
-  <td class="mae">1.1869</td>
-  <td class="delta-pos-mid">+22.9%</td>
-  <td class="mae">1.9875</td>
-  <td class="delta-pos-mid">+29.0%</td>
+  <td class="mae">0.4615</td>
+  <td class="delta-pos-mid">+28.6%</td>
+  <td class="mae">0.7470</td>
+  <td class="delta-pos-mid">+11.4%</td>
+  <td class="mae">1.0974</td>
+  <td class="delta-pos-mid">+13.6%</td>
+  <td class="mae">1.8839</td>
+  <td class="delta-pos-mid">+22.3%</td>
 </tr>
 <tr>
   <td class="tier-c1">C1</td>
@@ -575,7 +575,7 @@ tr.tier-separator td {
   <td class="mae">3.0741</td>
   <td class="delta-pos-hi">+99.5%</td>
 </tr>
-<tr class="tier-separator"><td colspan="11">C1 - Con señales exógenas &nbsp;›&nbsp; Institucionales (Fed, BCE, commodities)</td></tr>
+<tr class="tier-separator"><td colspan="11">C1 - With exogenous signals &nbsp;›&nbsp; Institutional (Fed, ECB, commodities)</td></tr>
 <tr>
   <td class="tier-c1">C1</td>
   <td class="signal">institutional</td>
@@ -593,14 +593,14 @@ tr.tier-separator td {
   <td class="tier-c1">C1</td>
   <td class="signal">institutional</td>
   <td class="model">TimesFM</td>
-  <td class="mae">0.4229</td>
-  <td class="delta-pos-mid">+17.9%</td>
-  <td class="mae">0.7056</td>
-  <td class="delta-pos-lo">+5.3%</td>
-  <td class="mae">1.0460</td>
-  <td class="delta-pos-lo">+8.3%</td>
-  <td class="mae">1.8157</td>
-  <td class="delta-pos-mid">+17.8%</td>
+  <td class="mae">0.4454</td>
+  <td class="delta-pos-mid">+24.1%</td>
+  <td class="mae">0.7460</td>
+  <td class="delta-pos-mid">+11.3%</td>
+  <td class="mae">1.1000</td>
+  <td class="delta-pos-mid">+13.9%</td>
+  <td class="mae">1.8781</td>
+  <td class="delta-pos-mid">+21.9%</td>
 </tr>
 <tr>
   <td class="tier-c1">C1</td>
@@ -615,32 +615,32 @@ tr.tier-separator td {
   <td class="mae">2.6028</td>
   <td class="delta-pos-hi">+68.9%</td>
 </tr>
-<tr class="tier-separator"><td colspan="11">C1 - Con señales exógenas &nbsp;›&nbsp; Energía + Macro (completo)</td></tr>
+<tr class="tier-separator"><td colspan="11">C1 - With exogenous signals &nbsp;›&nbsp; Energy + Macro (full)</td></tr>
 <tr>
   <td class="tier-c1">C1</td>
   <td class="signal">energy+macro</td>
   <td class="model">Chronos-2</td>
-  <td class="mae">0.5687</td>
-  <td class="delta-pos-hi">+58.5%</td>
-  <td class="mae">0.8605</td>
-  <td class="delta-pos-mid">+28.4%</td>
-  <td class="mae">1.3498</td>
-  <td class="delta-pos-mid">+39.7%</td>
-  <td class="mae">2.3880</td>
-  <td class="delta-pos-hi">+55.0%</td>
+  <td class="mae">0.5490</td>
+  <td class="delta-pos-hi">+53.0%</td>
+  <td class="mae">0.8473</td>
+  <td class="delta-pos-mid">+26.4%</td>
+  <td class="mae">1.3132</td>
+  <td class="delta-pos-mid">+35.9%</td>
+  <td class="mae">2.2659</td>
+  <td class="delta-pos-mid">+47.0%</td>
 </tr>
 <tr>
   <td class="tier-c1">C1</td>
   <td class="signal">energy+macro</td>
   <td class="model">TimesFM</td>
-  <td class="mae">0.6811</td>
-  <td class="delta-pos-hi">+89.8%</td>
-  <td class="mae">1.0144</td>
-  <td class="delta-pos-hi">+51.3%</td>
-  <td class="mae">1.4468</td>
-  <td class="delta-pos-mid">+49.8%</td>
-  <td class="mae">2.5001</td>
-  <td class="delta-pos-hi">+62.2%</td>
+  <td class="mae">0.4482</td>
+  <td class="delta-pos-mid">+24.9%</td>
+  <td class="mae">0.7725</td>
+  <td class="delta-pos-mid">+15.2%</td>
+  <td class="mae">1.2001</td>
+  <td class="delta-pos-mid">+24.2%</td>
+  <td class="mae">2.2176</td>
+  <td class="delta-pos-mid">+43.9%</td>
 </tr>
 <tr>
   <td class="tier-c1">C1</td>

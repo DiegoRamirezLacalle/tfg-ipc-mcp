@@ -65,15 +65,15 @@ All exogenous signals use **shift+1** (value known at forecast time) and are nor
 
 | Series | Best statistical | MASE | Best foundation | MASE | C1 effect |
 |--------|-----------------|------|-----------------|------|-----------|
-| Spain CPI | ARIMA | 0.868 | TimesFM C1_inst | 0.862 | ~0% (neutral) |
-| Global CPI | ARIMA | 1.326 | Chronos-2 C1_inst ★★ | **0.976** | −26% |
+| Spain CPI | ARIMA | **1.097** | TimesFM C0 | 1.326 | −3% (C1_inst vs C0, neutral) |
+| Global CPI | AutoARIMA | 1.134 | Chronos-2 C1_inst ★★ | **0.976** | −14% vs AutoARIMA |
 | Europe HICP | SARIMA | 1.656 | TimesFM C1_full ★★ | **1.370** | −17% |
 
 ### Main findings
 
 1. **Foundation models are context-dependent**: they beat statistical baselines for Global and Europe at long horizons (h≥3–6), but not for Spain where ARIMA dominates at all horizons.
 
-2. **C1 signals are beneficial only for the right series**: they improve Global (−26% Chronos-2 h=12) and Europe (−17% TimesFM C1_full h=12), but *degrade* Spain (+55% TimesFM C1-MCP — signals only available from 2021, insufficient history).
+2. **C1 signals are beneficial only for the right series**: they improve Global (Chronos-2 C1_inst −26% vs fixed ARIMA, −14% vs AutoARIMA) and Europe (−17% TimesFM C1_full h=12), but are neutral-to-negative for Spain (short signal history since 2015, MCP signals only from 2021).
 
 3. **Family ranking**:
    - **Chronos-2**: most robust with global institutional signals. Only model with MASE < 1.0 (Global h=12 = 0.976).

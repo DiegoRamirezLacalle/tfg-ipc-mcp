@@ -309,34 +309,36 @@ Each family has C0, C1_inst, C1_mcp, C1_full (scripts 18–29):
 | AutoARIMA | 0.456 | 0.761 | 1.138 | 1.866 | 0.325 | 1.328 |
 | N-BEATS | **0.359** | **0.670** | 1.195 | 1.895 | **0.255** | 1.348 |
 | TimesFM C0 | 0.436 | 0.785 | 1.129 | 1.864 | 0.311 | 1.326 |
-| TimesFM C1_inst ★ | **0.423** | 0.706 | 1.046 | 1.816 | **0.301** | 1.292 |
+| TimesFM C1_inst | 0.445 | 0.746 | 1.100 | 1.878 | 0.317 | 1.337 |
+| TimesFM C1_macro | 0.462 | 0.747 | 1.097 | 1.884 | 0.329 | 1.341 |
 | Chronos-2 C0 | 0.520 | — | — | 1.990 | 0.370 | 1.416 |
 | TimeGPT C0 | 0.549 | — | — | 2.010 | 0.391 | 1.430 |
 
 **Spain verdict**:
 - Fixed ARIMA is the best model at h≥3 and h=12. No foundation model beats ARIMA at long horizons.
 - N-BEATS wins at h=1 (MAE=0.359), but deteriorates badly at h=12 (MAE=1.895, worse than ARIMA).
-- `timesfm_C1_inst` improves over ARIMA at h=1 (−11.5%), but loses at h≥3 (+5–18%).
-- C1_mcp (GDELT) **systematically degrades** all models (+33% to +57%).
+- `timesfm_C1_inst` and `timesfm_C1_macro` are close to TimesFM C0 at h=12 (neutral C1 effect); neither beats ARIMA.
+- C1_mcp (GDELT) **systematically degrades** all models.
 - The most informative signal is EPU Europe (level correlation +0.737 with CPI), but this is spurious level correlation — it does not predict month-to-month changes.
 
 ### Global — World CPI (MASE scale: 1.1720 pp)
 
 | Model | MAE h=1 | MAE h=6 | MAE h=12 | MASE h=12 |
 |-------|---------|---------|----------|----------|
-| ARIMA | 0.191 | 0.682 | 1.544 | 1.317 |
+| ARIMA | 0.191 | 0.682 | 1.544 | 1.318 |
 | AutoARIMA | **0.179** | 0.567 | **1.329** | **1.134** |
 | Chronos-2 C1_inst ★★ | 0.200 | **0.591** | **1.143** | **0.976** |
-| TimesFM C1_inst | 0.269 | 0.712 | 1.284 | 1.096 |
+| TimesFM C1_inst | **0.214** | **0.607** | **1.191** | **1.016** |
 | TimeGPT C1_inst | 0.415 | 1.180 | 2.114 | 1.803 |
 
 **Global verdict**:
 - `chronos2_C1_inst_global` is the **only model with MASE < 1.0 at h=12** (0.976) — beats the seasonal naive.
 - Chronos-2 beats ARIMA from h=3 onwards (h=3: −4.2%, h=6: −13.3%, h=12: **−26.0%**).
-- At h=1 ARIMA is still better (+5.1% penalty for Chronos-2).
+- **After the StandardScaler fix**, TimesFM C1_inst improved significantly: h=1 −20.7%, h=12 −7.2% vs old unscaled result; now MASE=1.016 at h=12 (near-Chronos-2 territory).
+- At h=1 ARIMA is still better; both Chronos-2 and TimesFM C1_inst beat it from h=3 onward.
 - AutoARIMA also beats fixed ARIMA in Global (h=1: −6.3%, h=12: −13.9%) — the one case where dynamic order selection helps.
 - TimeGPT severely degrades with signals (+77% worse than ARIMA at h=12).
-- C1_inst signals used: GEPU, FEDFUNDS, GSCPI, Brent, DFR (ECB).
+- C1_inst signals used: IMF commodity index, Brent log MA3, GSCPI (NY Fed supply chain pressure).
 
 ### Europe — HICP Eurozone (MASE scale: 1.4558 pp)
 
@@ -361,8 +363,8 @@ Each family has C0, C1_inst, C1_mcp, C1_full (scripts 18–29):
 
 | Series | Best statistical | MASE h=12 | Best foundation | MASE h=12 | C1 effect |
 |--------|-----------------|-----------|-----------------|-----------|-----------|
-| Spain CPI | ARIMA | 1.097 | TimesFM C1_inst | 1.292 | ~0% (neutral / slightly worse) |
-| Global CPI | ARIMA | 1.317 | Chronos-2 C1_inst ★★ | **0.976** | −26% |
+| Spain CPI | ARIMA | **1.097** | TimesFM C0 | 1.326 | neutral (C1_inst = 1.337, +0.8%) |
+| Global CPI | AutoARIMA | 1.134 | Chronos-2 C1_inst ★★ | **0.976** | −14% vs AutoARIMA, −26% vs ARIMA |
 | Europe HICP | SARIMA | 1.656 | TimesFM C1_full ★★ | **1.370** | −17% |
 
 ### AutoARIMA — Cross-series methodological finding
