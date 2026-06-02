@@ -236,26 +236,26 @@
     "model2": "timesfm_C1_inst_global",
     "period": "global",
     "h1": {
-      "dm_stat": -2.8804,
-      "p_value": 0.006,
-      "better": "model1",
+      "dm_stat": -1.071,
+      "p_value": 0.2898,
+      "better": "tie",
       "n": 47
     },
     "h3": {
-      "dm_stat": -1.5858,
-      "p_value": 0.1151,
+      "dm_stat": 0.2253,
+      "p_value": 0.8221,
       "better": "tie",
       "n": 135
     },
     "h6": {
-      "dm_stat": -0.3204,
-      "p_value": 0.7489,
+      "dm_stat": 1.0799,
+      "p_value": 0.2812,
       "better": "tie",
       "n": 252
     },
     "h12": {
-      "dm_stat": 1.0806,
-      "p_value": 0.2805,
+      "dm_stat": 1.7531,
+      "p_value": 0.0803,
       "better": "tie",
       "n": 432
     }
@@ -265,26 +265,26 @@
     "model2": "timesfm_C1_inst_global",
     "period": "A_pre_crisis",
     "h1": {
-      "dm_stat": -5.9725,
-      "p_value": 0.0,
-      "better": "model1",
+      "dm_stat": 0.3555,
+      "p_value": 0.7268,
+      "better": "tie",
       "n": 17
     },
     "h3": {
-      "dm_stat": -5.4588,
-      "p_value": 0.0,
-      "better": "model1",
+      "dm_stat": -0.1331,
+      "p_value": 0.8947,
+      "better": "tie",
       "n": 48
     },
     "h6": {
-      "dm_stat": -5.4163,
-      "p_value": 0.0,
-      "better": "model1",
+      "dm_stat": -1.4253,
+      "p_value": 0.1577,
+      "better": "tie",
       "n": 87
     },
     "h12": {
-      "dm_stat": -4.3024,
-      "p_value": 0.0,
+      "dm_stat": -1.9842,
+      "p_value": 0.0492,
       "better": "model1",
       "n": 138
     }
@@ -294,26 +294,26 @@
     "model2": "timesfm_C1_inst_global",
     "period": "B_shock",
     "h1": {
-      "dm_stat": 0.1965,
-      "p_value": 0.8478,
+      "dm_stat": -0.7428,
+      "p_value": 0.4732,
       "better": "tie",
       "n": 12
     },
     "h3": {
-      "dm_stat": 1.1077,
-      "p_value": 0.2756,
+      "dm_stat": 1.4465,
+      "p_value": 0.1569,
       "better": "tie",
       "n": 36
     },
     "h6": {
-      "dm_stat": 1.4971,
-      "p_value": 0.1388,
-      "better": "tie",
+      "dm_stat": 2.972,
+      "p_value": 0.004,
+      "better": "model2",
       "n": 72
     },
     "h12": {
-      "dm_stat": 0.5994,
-      "p_value": 0.5499,
+      "dm_stat": 0.9991,
+      "p_value": 0.3194,
       "better": "tie",
       "n": 144
     }
@@ -323,26 +323,26 @@
     "model2": "timesfm_C1_inst_global",
     "period": "C_normalizacion",
     "h1": {
-      "dm_stat": -0.8267,
-      "p_value": 0.4199,
+      "dm_stat": -1.3922,
+      "p_value": 0.1818,
       "better": "tie",
       "n": 18
     },
     "h3": {
-      "dm_stat": -0.6126,
-      "p_value": 0.5429,
+      "dm_stat": -0.645,
+      "p_value": 0.5219,
       "better": "tie",
       "n": 51
     },
     "h6": {
-      "dm_stat": 0.437,
-      "p_value": 0.6632,
+      "dm_stat": 0.3652,
+      "p_value": 0.7158,
       "better": "tie",
       "n": 93
     },
     "h12": {
-      "dm_stat": 1.8443,
-      "p_value": 0.0671,
+      "dm_stat": 1.7338,
+      "p_value": 0.085,
       "better": "tie",
       "n": 150
     }
@@ -468,27 +468,27 @@
     "model2": "timesfm_C1_inst_global",
     "period": "global",
     "h1": {
-      "dm_stat": -2.6905,
-      "p_value": 0.0099,
-      "better": "model1",
+      "dm_stat": -0.5135,
+      "p_value": 0.6101,
+      "better": "tie",
       "n": 47
     },
     "h3": {
-      "dm_stat": -3.2909,
-      "p_value": 0.0013,
-      "better": "model1",
+      "dm_stat": -0.2451,
+      "p_value": 0.8067,
+      "better": "tie",
       "n": 135
     },
     "h6": {
-      "dm_stat": -3.1408,
-      "p_value": 0.0019,
-      "better": "model1",
+      "dm_stat": -0.4376,
+      "p_value": 0.6621,
+      "better": "tie",
       "n": 252
     },
     "h12": {
-      "dm_stat": -2.0972,
-      "p_value": 0.0366,
-      "better": "model1",
+      "dm_stat": -0.8773,
+      "p_value": 0.3808,
+      "better": "tie",
       "n": 432
     }
   },
@@ -497,27 +497,27 @@
     "model2": "timesfm_C1_inst_global",
     "period": "A_pre_crisis",
     "h1": {
-      "dm_stat": -3.881,
-      "p_value": 0.0013,
-      "better": "model1",
+      "dm_stat": 1.2418,
+      "p_value": 0.2322,
+      "better": "tie",
       "n": 17
     },
     "h3": {
-      "dm_stat": -2.8275,
-      "p_value": 0.0069,
-      "better": "model1",
+      "dm_stat": 1.7696,
+      "p_value": 0.0833,
+      "better": "tie",
       "n": 48
     },
     "h6": {
-      "dm_stat": -3.1939,
-      "p_value": 0.002,
-      "better": "model1",
+      "dm_stat": 0.8398,
+      "p_value": 0.4033,
+      "better": "tie",
       "n": 87
     },
     "h12": {
-      "dm_stat": -3.7233,
-      "p_value": 0.0003,
-      "better": "model1",
+      "dm_stat": -0.3227,
+      "p_value": 0.7474,
+      "better": "tie",
       "n": 138
     }
   },
@@ -526,27 +526,27 @@
     "model2": "timesfm_C1_inst_global",
     "period": "B_shock",
     "h1": {
-      "dm_stat": -0.3943,
-      "p_value": 0.7009,
+      "dm_stat": -0.7924,
+      "p_value": 0.4449,
       "better": "tie",
       "n": 12
     },
     "h3": {
-      "dm_stat": -1.2802,
-      "p_value": 0.2089,
+      "dm_stat": -1.7446,
+      "p_value": 0.0898,
       "better": "tie",
       "n": 36
     },
     "h6": {
-      "dm_stat": -1.8508,
-      "p_value": 0.0684,
+      "dm_stat": -1.5751,
+      "p_value": 0.1197,
       "better": "tie",
       "n": 72
     },
     "h12": {
-      "dm_stat": -2.0337,
-      "p_value": 0.0438,
-      "better": "model1",
+      "dm_stat": -1.8202,
+      "p_value": 0.0708,
+      "better": "tie",
       "n": 144
     }
   },
@@ -555,26 +555,26 @@
     "model2": "timesfm_C1_inst_global",
     "period": "C_normalizacion",
     "h1": {
-      "dm_stat": -0.2778,
-      "p_value": 0.7845,
+      "dm_stat": -1.4398,
+      "p_value": 0.1681,
       "better": "tie",
       "n": 18
     },
     "h3": {
-      "dm_stat": -1.7165,
-      "p_value": 0.0923,
+      "dm_stat": -1.6406,
+      "p_value": 0.1072,
       "better": "tie",
       "n": 51
     },
     "h6": {
-      "dm_stat": -0.3579,
-      "p_value": 0.7213,
+      "dm_stat": -0.4587,
+      "p_value": 0.6476,
       "better": "tie",
       "n": 93
     },
     "h12": {
-      "dm_stat": 0.9673,
-      "p_value": 0.335,
+      "dm_stat": 0.0395,
+      "p_value": 0.9685,
       "better": "tie",
       "n": 150
     }

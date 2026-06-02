@@ -468,26 +468,26 @@
     "model2": "timesfm_C1_mcp_europe",
     "period": "global",
     "h1": {
-      "dm_stat": -2.4907,
-      "p_value": 0.0127,
+      "dm_stat": -2.1917,
+      "p_value": 0.0284,
       "better": "model1",
       "n": 47
     },
     "h3": {
-      "dm_stat": -0.0173,
-      "p_value": 0.9862,
+      "dm_stat": -0.2875,
+      "p_value": 0.7738,
       "better": "tie",
       "n": 135
     },
     "h6": {
-      "dm_stat": 0.5897,
-      "p_value": 0.5554,
+      "dm_stat": 0.4799,
+      "p_value": 0.6313,
       "better": "tie",
       "n": 252
     },
     "h12": {
-      "dm_stat": -0.429,
-      "p_value": 0.6679,
+      "dm_stat": -0.2612,
+      "p_value": 0.7939,
       "better": "tie",
       "n": 432
     }
@@ -497,26 +497,26 @@
     "model2": "timesfm_C1_mcp_europe",
     "period": "A_pre_shock",
     "h1": {
-      "dm_stat": -0.4993,
-      "p_value": 0.6176,
+      "dm_stat": -0.6936,
+      "p_value": 0.4879,
       "better": "tie",
       "n": 18
     },
     "h3": {
-      "dm_stat": 1.5073,
-      "p_value": 0.1317,
+      "dm_stat": 1.0598,
+      "p_value": 0.2893,
       "better": "tie",
       "n": 54
     },
     "h6": {
-      "dm_stat": 2.1798,
-      "p_value": 0.0293,
+      "dm_stat": 2.2127,
+      "p_value": 0.0269,
       "better": "model2",
       "n": 108
     },
     "h12": {
-      "dm_stat": 1.7273,
-      "p_value": 0.0841,
+      "dm_stat": 1.6599,
+      "p_value": 0.0969,
       "better": "tie",
       "n": 216
     }
@@ -526,26 +526,26 @@
     "model2": "timesfm_C1_mcp_europe",
     "period": "B_shock",
     "h1": {
-      "dm_stat": -1.9885,
-      "p_value": 0.0468,
-      "better": "model1",
+      "dm_stat": -1.8436,
+      "p_value": 0.0652,
+      "better": "tie",
       "n": 12
     },
     "h3": {
-      "dm_stat": -0.3241,
-      "p_value": 0.7458,
+      "dm_stat": -0.5839,
+      "p_value": 0.5593,
       "better": "tie",
       "n": 36
     },
     "h6": {
-      "dm_stat": -0.0746,
-      "p_value": 0.9406,
+      "dm_stat": -0.2117,
+      "p_value": 0.8323,
       "better": "tie",
       "n": 72
     },
     "h12": {
-      "dm_stat": -2.0154,
-      "p_value": 0.0439,
+      "dm_stat": -2.1499,
+      "p_value": 0.0316,
       "better": "model1",
       "n": 144
     }
@@ -555,26 +555,26 @@
     "model2": "timesfm_C1_mcp_europe",
     "period": "C_normalizacion",
     "h1": {
-      "dm_stat": -2.5507,
-      "p_value": 0.0108,
-      "better": "model1",
+      "dm_stat": -1.8329,
+      "p_value": 0.0668,
+      "better": "tie",
       "n": 17
     },
     "h3": {
-      "dm_stat": -0.9069,
-      "p_value": 0.3644,
+      "dm_stat": -1.1496,
+      "p_value": 0.2503,
       "better": "tie",
       "n": 45
     },
     "h6": {
-      "dm_stat": -0.9713,
-      "p_value": 0.3314,
+      "dm_stat": -1.5468,
+      "p_value": 0.1219,
       "better": "tie",
       "n": 72
     },
     "h12": {
-      "dm_stat": -1.4268,
-      "p_value": 0.1536,
+      "dm_stat": -1.2345,
+      "p_value": 0.217,
       "better": "tie",
       "n": 72
     }
@@ -1077,26 +1077,26 @@
     "model2": "timesfm_C1_mcp_europe",
     "period": "global",
     "h1": {
-      "dm_stat": -1.7698,
-      "p_value": 0.0768,
+      "dm_stat": -1.5585,
+      "p_value": 0.1191,
       "better": "tie",
       "n": 47
     },
     "h3": {
-      "dm_stat": -0.8822,
-      "p_value": 0.3776,
+      "dm_stat": -1.0725,
+      "p_value": 0.2835,
       "better": "tie",
       "n": 135
     },
     "h6": {
-      "dm_stat": -0.6598,
-      "p_value": 0.5094,
+      "dm_stat": -0.6414,
+      "p_value": 0.5213,
       "better": "tie",
       "n": 252
     },
     "h12": {
-      "dm_stat": -0.9225,
-      "p_value": 0.3563,
+      "dm_stat": -0.5436,
+      "p_value": 0.5867,
       "better": "tie",
       "n": 432
     }
@@ -1222,26 +1222,26 @@
     "model2": "timesfm_C1_full_europe",
     "period": "global",
     "h1": {
-      "dm_stat": 0.1161,
-      "p_value": 0.9075,
+      "dm_stat": 0.7849,
+      "p_value": 0.4325,
       "better": "tie",
       "n": 47
     },
     "h3": {
-      "dm_stat": 0.283,
-      "p_value": 0.7772,
+      "dm_stat": 0.8055,
+      "p_value": 0.4205,
       "better": "tie",
       "n": 135
     },
     "h6": {
-      "dm_stat": 0.696,
-      "p_value": 0.4864,
+      "dm_stat": 0.9717,
+      "p_value": 0.3312,
       "better": "tie",
       "n": 252
     },
     "h12": {
-      "dm_stat": 1.4455,
-      "p_value": 0.1483,
+      "dm_stat": 1.5219,
+      "p_value": 0.128,
       "better": "tie",
       "n": 432
     }
@@ -1512,26 +1512,26 @@
     "model2": "timesfm_C1_mcp_europe",
     "period": "global",
     "h1": {
-      "dm_stat": -0.4797,
-      "p_value": 0.6314,
+      "dm_stat": -0.6216,
+      "p_value": 0.5342,
       "better": "tie",
       "n": 47
     },
     "h3": {
-      "dm_stat": 0.2931,
-      "p_value": 0.7695,
+      "dm_stat": 0.1659,
+      "p_value": 0.8682,
       "better": "tie",
       "n": 135
     },
     "h6": {
-      "dm_stat": 2.2211,
-      "p_value": 0.0263,
+      "dm_stat": 2.1072,
+      "p_value": 0.0351,
       "better": "model2",
       "n": 252
     },
     "h12": {
-      "dm_stat": 2.6208,
-      "p_value": 0.0088,
+      "dm_stat": 2.5733,
+      "p_value": 0.0101,
       "better": "model2",
       "n": 432
     }
