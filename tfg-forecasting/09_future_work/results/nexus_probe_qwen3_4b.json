@@ -1,0 +1,425 @@
+{
+  "2021-01": {
+    "prior_h1": 82.54910278320312,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.15,
+      "reasoning": "Spain's CPI slightly above baseline, ECB rate stable but energy prices low, EPU high suggests inflationary pressure, and BCE shock score dovish with low Brent deviation indicating potential for higher CPI than forecast."
+    }
+  },
+  "2021-02": {
+    "prior_h1": 82.15888977050781,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.25,
+      "reasoning": "Spain's CPI decline is offset by low Brent oil prices and high EPU Europe percentile, but ECB's stable rates and dovish tone suggest delayed energy pass-through and tightening, leading to moderate CPI uplift."
+    }
+  },
+  "2021-03": {
+    "prior_h1": 83.36021423339844,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.2,
+      "reasoning": "Spain's CPI MoM rise (+0.794) and high EPU Europe percentile (63.6%) suggest near-term inflation pressure, while Brent oil near average and ECB rate stability indicate limited energy pass-through and no immediate tightening, but uncertainty (GDELT tone) and energy pass-through (1-3 mo) may push CPI above baseline."
+    }
+  },
+  "2021-04": {
+    "prior_h1": 84.56021118164062,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI MoM rise (+0.977) and high EPU Europe percentile (77.6%) suggest near-term inflation pressure, while Brent oil near average and ECB rate stability indicate limited energy pass-through and no immediate tightening, but uncertainty (GDELT tone) and ECB dovishness delay clear policy response."
+    }
+  },
+  "2021-05": {
+    "prior_h1": 84.45033264160156,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.15,
+      "reasoning": "Spain's CPI MoM increase (0.394) suggests near-term inflation pressure, while Brent oil being near average and ECB rate stable indicate moderate energy pass-through and no immediate tightening, but high EPU (60.9%) and dovish BCE tone imply uncertainty that could push CPI above baseline by 0.15pp in one month."
+    }
+  },
+  "2021-06": {
+    "prior_h1": 84.245849609375,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.15,
+      "reasoning": "Spain's CPI MoM increase (+0.4%) and near-average Brent oil prices suggest mild inflationary pressure, while ECB rates remain stable and EPU at normal levels indicate moderate uncertainty."
+    }
+  },
+  "2021-07": {
+    "prior_h1": 83.84614562988281,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.1,
+      "reasoning": "Spain's CPI decline is likely temporary due to energy price volatility and ECB's stable rates, but Brent's high deviation suggests near-term inflation pressure."
+    }
+  },
+  "2021-08": {
+    "prior_h1": 84.66077423095703,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.25,
+      "reasoning": "Spain's CPI MoM rise (+0.382) and high Brent oil deviation suggest energy pass-through acceleration, while ECB's stable rates and high EPU percentile indicate persistent inflationary pressure despite dovish signals."
+    }
+  },
+  "2021-09": {
+    "prior_h1": 85.91355895996094,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.2,
+      "reasoning": "Spain's CPI MoM rise and high Brent oil deviation suggest energy pass-through acceleration, while ECB rate stability implies no immediate tightening, but high EPU and neutral BCE tone indicate persistent inflationary pressures."
+    }
+  },
+  "2021-10": {
+    "prior_h1": 87.27328491210938,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI MoM rise (+1.562) and high Brent oil deviation suggest energy pass-through acceleration, while ECB rate stability and high EPU indicate persistent inflationary pressure."
+    }
+  },
+  "2021-11": {
+    "prior_h1": 87.04229736328125,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI MoM rise and high Brent oil deviation suggest energy pass-through acceleration, while ECB rate stability implies no immediate tightening, but EPU Europe percentile (68.2%) indicates elevated inflation expectations."
+    }
+  },
+  "2021-12": {
+    "prior_h1": 87.36148071289062,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI is rising sharply (+1.036 MoM), Brent crude is deviating significantly above historical mean (0.104), and EPU Europe is at 90th percentile (very high), indicating strong energy and inflationary pressures that will likely push CPI above the baseline within the next month."
+    }
+  },
+  "2022-01": {
+    "prior_h1": 87.6413345336914,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.25,
+      "reasoning": "Brent log dev vs hist mean is high (0.201) indicating strong energy price pressure, which will pass through in 1-3 months, while ECB deposit rate stability suggests no immediate tightening, but high EPU (96.3%) and hawkish BCE shock score imply strong inflation expectations driving CPI above baseline."
+    }
+  },
+  "2022-02": {
+    "prior_h1": 88.79811096191406,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI MoM rise (+0.707) and high Brent oil deviation indicate strong energy pass-through (1-3 mo) pushing CPI above baseline"
+    }
+  },
+  "2022-03": {
+    "prior_h1": 92.19416809082031,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI MoM surge (+2.67%) and high Brent oil deviation suggest energy pass-through acceleration, while ECB's stable rates and hawkish BCE shock indicate tightening pressure, but EPU and GDELT uncertainty limit near-term clarity."
+    }
+  },
+  "2022-04": {
+    "prior_h1": 91.3034896850586,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.5,
+      "reasoning": "Brent log dev vs hist mean is high (0.523) indicating strong energy price pressure, which will pass through to CPI within 1-3 months, while ECB deposit rate remains stable (no tightening yet) but EPU Europe percentile is very high (98.8%) suggesting strong inflationary expectations."
+    }
+  },
+  "2022-05": {
+    "prior_h1": 91.68267822265625,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.25,
+      "reasoning": "Spain's CPI is rising strongly (MoM +0.750), Brent crude is significantly above historical mean (log dev 0.534), and EPU Europe is at 97.6% (very high) indicating high inflation expectations, while ECB deposit rate remains stable (no tightening yet) but energy prices are likely to pass through quickly (1-3 mo) leading to higher CPI than baseline."
+    }
+  },
+  "2022-06": {
+    "prior_h1": 93.55496215820312,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.4,
+      "reasoning": "Spain's CPI is rising sharply (+1.692 MoM), Brent crude is significantly above historical mean (0.531), and EPU Europe is at 97.6% (very high), indicating strong energy and inflationary pressures that will likely push CPI above the baseline within 1 month."
+    }
+  },
+  "2022-07": {
+    "prior_h1": 93.63851928710938,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.8,
+      "reasoning": "Spain's CPI decline is offset by high Brent oil prices and ECB's hawkish stance, with energy pass-through expected to boost inflation within 1-3 months."
+    }
+  },
+  "2022-08": {
+    "prior_h1": 93.85456848144531,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI is rising, Brent crude is significantly above historical mean, and EPU Europe is at 99.2% percentile indicating high uncertainty, suggesting strong energy pass-through and potential for ECB tightening in 6-12 months."
+    }
+  },
+  "2022-09": {
+    "prior_h1": 93.61026763916016,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI decline is offset by high Brent oil prices and ECB rate hikes, with energy pass-through expected to boost inflation within 1-3 months."
+    }
+  },
+  "2022-10": {
+    "prior_h1": 93.04041290283203,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI is rising sharply (MoM +0.310), Brent crude is significantly above historical mean (log dev 0.306), and EPU Europe is at 98.4% (very high) indicating strong inflationary pressures, with ECB rates stable but energy pass-through expected to boost CPI within 1-3 months."
+    }
+  },
+  "2022-11": {
+    "prior_h1": 92.830810546875,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.25,
+      "reasoning": "Spain's CPI decline is offset by high Brent oil prices and ECB's hawkish stance, with energy pass-through expected to boost inflation within 1-3 months."
+    }
+  },
+  "2022-12": {
+    "prior_h1": 92.35501098632812,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.2,
+      "reasoning": "Spain's CPI is rising, Brent crude is significantly above historical mean, and EPU Europe is at very high percentile indicating strong inflationary pressures, with energy pass-through expected to take 1-3 months and ECB tightening likely in 6-12 months."
+    }
+  },
+  "2023-01": {
+    "prior_h1": 92.63885498046875,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.1,
+      "reasoning": "Spain's CPI is slightly below baseline but Brent crude is significantly above historical mean (high dev) and ECB's hawkish tone suggests strong energy pass-through within 1-3 months, likely pushing CPI above baseline by 0.1pp."
+    }
+  },
+  "2023-02": {
+    "prior_h1": 93.90034484863281,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI is rising strongly (MoM +0.874) and Brent crude is deviating significantly above historical mean, indicating energy price pressures that will likely pass through to CPI within 1-3 months, while ECB's rising deposit rate suggests tightening is imminent but energy shocks dominate the near-term CPI trajectory."
+    }
+  },
+  "2023-03": {
+    "prior_h1": 94.22509765625,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.4,
+      "reasoning": "Spain's CPI is rising, Brent crude is deviating significantly above historical mean, and ECB deposit rate is rising, indicating strong energy pass-through and tightening expectations driving CPI above baseline."
+    }
+  },
+  "2023-04": {
+    "prior_h1": 94.71491241455078,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI is rising sharply (MoM +0.559), Brent crude is significantly above historical mean (log dev 0.202), and EPU Europe is at very high percentile (94.1%), indicating strong inflationary pressures that will likely push CPI above the baseline forecast within the next month."
+    }
+  },
+  "2023-05": {
+    "prior_h1": 94.71397399902344,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.25,
+      "reasoning": "Spain's CPI decline is offset by high Brent oil prices and ECB rate hikes, with energy pass-through expected within 1-3 months driving CPI above baseline."
+    }
+  },
+  "2023-06": {
+    "prior_h1": 94.73423767089844,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.15,
+      "reasoning": "Spain's CPI is rising sharply (MoM +0.536), Brent crude is deviating significantly above historical mean (log dev 0.108), and ECB deposit rate is rising, indicating strong energy pass-through and hawkish expectations driving CPI above baseline."
+    }
+  },
+  "2023-07": {
+    "prior_h1": 95.4177474975586,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.25,
+      "reasoning": "Spain's CPI is rising (MoM +0.161), Brent crude is significantly above historical mean (log dev 0.137), and EPU Europe is at very high percentile (84.9%), indicating strong inflationary pressures that will likely push CPI above the baseline forecast within the next month."
+    }
+  },
+  "2023-08": {
+    "prior_h1": 95.68135070800781,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.15,
+      "reasoning": "Spain's CPI is rising sharply (MoM +0.510), Brent crude is significantly above historical mean (log dev 0.269), and ECB deposit rate is rising, indicating strong energy pass-through and tightening expectations driving CPI above baseline."
+    }
+  },
+  "2023-09": {
+    "prior_h1": 96.01285552978516,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.25,
+      "reasoning": "Spain's CPI is rising, Brent crude is deviating significantly above historical mean, and EPU Europe is at very high percentile indicating strong inflationary pressures, with energy pass-through expected within 1-3 months driving CPI above baseline."
+    }
+  },
+  "2023-10": {
+    "prior_h1": 96.24919128417969,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI MoM rise (+0.277) and high Brent oil deviation indicate strong energy pass-through (1-3 mo) pushing CPI above baseline, with ECB rate stability and hawkish tone supporting tightness."
+    }
+  },
+  "2023-11": {
+    "prior_h1": 96.03605651855469,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI decline is offset by high Brent oil prices and high EPU Europe, indicating strong energy pass-through and ECB tightening expectations."
+    }
+  },
+  "2023-12": {
+    "prior_h1": 95.3504409790039,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.15,
+      "reasoning": "Spain's CPI MoM rise (+0.024) and high Brent oil deviation indicate strong energy pass-through (1-3 mo), while ECB rate stability suggests no immediate tightening, but EPU Europe's very high percentile and GDELT tone imply elevated uncertainty (3-6 mo) pushing CPI above baseline."
+    }
+  },
+  "2024-01": {
+    "prior_h1": 96.08531188964844,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.25,
+      "reasoning": "Spain's CPI is rising, Brent crude is significantly above historical mean, and EPU Europe is at very high percentile indicating strong inflationary pressures, with energy pass-through expected to take 1-3 months and ECB tightening likely in 6-12 months."
+    }
+  },
+  "2024-02": {
+    "prior_h1": 96.39927673339844,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.2,
+      "reasoning": "Spain's CPI is rising (MoM +0.340) and Brent crude is significantly above historical mean (log dev 0.217), indicating strong energy pass-through in the near term (1-3 mo), which will likely push European CPI above the baseline forecast."
+    }
+  },
+  "2024-03": {
+    "prior_h1": 97.4927978515625,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI is rising strongly (MoM +0.732), Brent crude is significantly above historical mean (log dev 0.239), and EPU Europe is at very high percentile (87.6%), indicating strong inflationary pressures that will likely push CPI above the baseline forecast within the next month."
+    }
+  },
+  "2024-04": {
+    "prior_h1": 98.03924560546875,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.2,
+      "reasoning": "Spain's CPI is rising strongly (MoM +0.674), Brent crude is deviating significantly above historical mean (0.283), and EPU Europe is at high percentile (76.1%), suggesting strong inflationary pressures that may persist for 1-3 months, though ECB's stable deposit rate and dovish BCE shock score indicate some moderation potential."
+    }
+  },
+  "2024-05": {
+    "prior_h1": 98.16488647460938,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.25,
+      "reasoning": "Spain's CPI MoM rise (+0.257) and high Brent oil deviation suggest energy pass-through (1-3 mo) will boost inflation, while ECB rate stability and high EPU percentile indicate persistent inflationary pressure."
+    }
+  },
+  "2024-06": {
+    "prior_h1": 97.98179626464844,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.25,
+      "reasoning": "Spain's CPI is rising sharply (+0.368 MoM), ECB deposit rate is falling, and Brent crude is significantly above historical mean (0.212), indicating strong energy pass-through and inflationary pressure that will likely push CPI above the baseline forecast."
+    }
+  },
+  "2024-07": {
+    "prior_h1": 97.66914367675781,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.01,
+      "reasoning": "Spain's CPI decline is offset by high Brent oil prices and high EPU Europe, suggesting energy pass-through and ECB tightening will push CPI above baseline in 1 month."
+    }
+  },
+  "2024-08": {
+    "prior_h1": 97.94830322265625,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.15,
+      "reasoning": "Spain's CPI shows recent upward pressure, Brent crude is significantly above historical mean (energy pass-through), and EPU Europe is at very high percentile indicating strong inflationary expectations, suggesting a potential CPI rise above baseline."
+    }
+  },
+  "2024-09": {
+    "prior_h1": 97.80599975585938,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI decline is offset by high Brent oil prices and elevated EPU Europe, suggesting energy pass-through and ECB rate cuts will boost inflation in the next 3-6 months."
+    }
+  },
+  "2024-10": {
+    "prior_h1": 98.16437530517578,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI is rising sharply (+0.606 MoM), ECB deposit rate is falling, and Brent crude is significantly above historical mean (0.174), indicating strong energy pass-through and inflationary pressure that will likely push CPI above the baseline within 1 month."
+    }
+  },
+  "2024-11": {
+    "prior_h1": 98.49240112304688,
+    "answer": {
+      "direction": "UP",
+      "confidence": "HIGH",
+      "magnitude_pp": 0.3,
+      "reasoning": "Spain's CPI MoM rise (+0.239) and high EPU Europe percentile (97.8%) indicate strong inflationary pressure, while ECB rate stability suggests no immediate tightening, but energy prices (Brent log dev near average) and ECB's dovish tone imply delayed pass-through, leading to a 0.3pp CPI overshoot."
+    }
+  }
+}

@@ -1,0 +1,425 @@
+{
+  "2021-01": {
+    "prior_h1": 82.54910278320312,
+    "answer": {
+      "direction": "DOWN",
+      "confidence": "MEDIUM",
+      "magnitude_pp": -0.15,
+      "reasoning": "Low energy prices and high uncertainty are expected to drag CPI below the baseline forecast."
+    }
+  },
+  "2021-02": {
+    "prior_h1": 82.15888977050781,
+    "answer": {
+      "direction": "DOWN",
+      "confidence": "MEDIUM",
+      "magnitude_pp": -0.25,
+      "reasoning": "Low energy prices and high uncertainty are expected to drag CPI below the forecast."
+    }
+  },
+  "2021-03": {
+    "prior_h1": 83.36021423339844,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.65,
+      "reasoning": "Recent Spain CPI rise and high EPU suggest upward pressure, offsetting stable ECB rates and moderate energy pass-through."
+    }
+  },
+  "2021-04": {
+    "prior_h1": 84.56021118164062,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 1.36,
+      "reasoning": "Recent Spain CPI momentum and high EPU suggest upward pressure, despite stable ECB rates and moderate energy pass-through."
+    }
+  },
+  "2021-05": {
+    "prior_h1": 84.45033264160156,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.35,
+      "reasoning": "Recent Spain CPI and Brent near average suggest upward pressure, while high EPU and dovish BCE may temper but not offset the pass-through."
+    }
+  },
+  "2021-06": {
+    "prior_h1": 84.245849609375,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.25,
+      "reasoning": "Spain's CPI is above the baseline and energy prices are near average, suggesting a modest upward pressure."
+    }
+  },
+  "2021-07": {
+    "prior_h1": 83.84614562988281,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.01,
+      "reasoning": "Recent Spain CPI and Brent log deviation suggest upward pressure despite ECB stability and moderate uncertainty."
+    }
+  },
+  "2021-08": {
+    "prior_h1": 84.66077423095703,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.43,
+      "reasoning": "High Brent prices and elevated energy pass-through are likely to push CPI above the baseline forecast."
+    }
+  },
+  "2021-09": {
+    "prior_h1": 85.91355895996094,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 1.0,
+      "reasoning": "High Brent prices and elevated energy pass-through are likely to push CPI above the baseline forecast."
+    }
+  },
+  "2021-10": {
+    "prior_h1": 87.27328491210938,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.8733,
+      "reasoning": "High Brent prices and elevated energy pass-through are likely to push CPI above the baseline forecast."
+    }
+  },
+  "2021-11": {
+    "prior_h1": 87.04229736328125,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.28,
+      "reasoning": "High Brent prices and elevated energy pass-through are likely to push CPI above the baseline forecast."
+    }
+  },
+  "2021-12": {
+    "prior_h1": 87.36148071289062,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.43,
+      "reasoning": "High Brent prices and elevated EPU suggest upward pressure on energy costs, offsetting stable ECB rates and moderate BCE shock tone."
+    }
+  },
+  "2022-01": {
+    "prior_h1": 87.6413345336914,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.18,
+      "reasoning": "High Brent prices and hawkish BCE signals suggest upward pressure despite recent Spain CPI decline."
+    }
+  },
+  "2022-02": {
+    "prior_h1": 88.79811096191406,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.63,
+      "reasoning": "High Brent prices and elevated energy pass-through are likely to push CPI above the baseline forecast."
+    }
+  },
+  "2022-03": {
+    "prior_h1": 92.19416809082031,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 1.36,
+      "reasoning": "High energy prices and elevated uncertainty are likely to push CPI above the baseline forecast."
+    }
+  },
+  "2022-04": {
+    "prior_h1": 91.3034896850586,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 1.2,
+      "reasoning": "High Brent prices and hawkish BCE signals suggest upward pressure despite stable ECB rates and elevated uncertainty."
+    }
+  },
+  "2022-05": {
+    "prior_h1": 91.68267822265625,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.26,
+      "reasoning": "High Brent prices and elevated EPU suggest upward pressure on energy costs, offsetting stable ECB rates and moderate BCE hawkishness."
+    }
+  },
+  "2022-06": {
+    "prior_h1": 93.55496215820312,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.45,
+      "reasoning": "High Brent prices and elevated energy pass-through are likely to push CPI above the baseline forecast."
+    }
+  },
+  "2022-07": {
+    "prior_h1": 93.63851928710938,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 1.5,
+      "reasoning": "High energy prices and hawkish BCE signals suggest upward pressure despite recent CPI decline."
+    }
+  },
+  "2022-08": {
+    "prior_h1": 93.85456848144531,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.75,
+      "reasoning": "High Brent prices and hawkish BCE signals suggest upward pressure on CPI despite stable ECB rates and elevated uncertainty."
+    }
+  },
+  "2022-09": {
+    "prior_h1": 93.61026763916016,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 1.2,
+      "reasoning": "High energy prices and rising ECB rates are expected to push CPI above the baseline forecast."
+    }
+  },
+  "2022-10": {
+    "prior_h1": 93.04041290283203,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.26,
+      "reasoning": "High Brent prices and hawkish BCE signals suggest upward pressure despite stable ECB rates and elevated uncertainty."
+    }
+  },
+  "2022-11": {
+    "prior_h1": 92.830810546875,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.17,
+      "reasoning": "High energy prices and hawkish BCE signals suggest upward pressure despite recent CPI decline."
+    }
+  },
+  "2022-12": {
+    "prior_h1": 92.35501098632812,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.45,
+      "reasoning": "Recent Spain CPI and high Brent prices suggest upward pressure, despite ECB tightening and uncertainty."
+    }
+  },
+  "2023-01": {
+    "prior_h1": 92.63885498046875,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.03,
+      "reasoning": "High Brent prices and hawkish BCE signals suggest upward pressure despite stable ECB rates and moderate uncertainty."
+    }
+  },
+  "2023-02": {
+    "prior_h1": 93.90034484863281,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.4,
+      "reasoning": "High energy prices and rising ECB rates are expected to push CPI above the baseline forecast."
+    }
+  },
+  "2023-03": {
+    "prior_h1": 94.22509765625,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.4,
+      "reasoning": "Recent Spain CPI and high Brent prices suggest upward pressure, though ECB tightening and uncertainty may temper the effect."
+    }
+  },
+  "2023-04": {
+    "prior_h1": 94.71491241455078,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.31,
+      "reasoning": "High Brent prices and elevated EPU suggest energy pass-through will push CPI above the baseline forecast."
+    }
+  },
+  "2023-05": {
+    "prior_h1": 94.71397399902344,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.414,
+      "reasoning": "High Brent prices and rising ECB rates are expected to push CPI higher despite moderate uncertainty."
+    }
+  },
+  "2023-06": {
+    "prior_h1": 94.73423767089844,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.15,
+      "reasoning": "Recent Spain CPI and high Brent prices suggest upward pressure, despite ECB tightening and uncertainty."
+    }
+  },
+  "2023-07": {
+    "prior_h1": 95.4177474975586,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.38,
+      "reasoning": "High Brent prices and hawkish BCE signals suggest upward pressure despite stable ECB rates and elevated uncertainty."
+    }
+  },
+  "2023-08": {
+    "prior_h1": 95.68135070800781,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.13,
+      "reasoning": "Recent Spain CPI and high Brent prices suggest upward pressure, though ECB tightening and uncertainty may temper the effect."
+    }
+  },
+  "2023-09": {
+    "prior_h1": 96.01285552978516,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.3,
+      "reasoning": "High energy prices and rising ECB rates are expected to push CPI above the baseline forecast."
+    }
+  },
+  "2023-10": {
+    "prior_h1": 96.24919128417969,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.25,
+      "reasoning": "High Brent prices and hawkish BCE signals suggest upward pressure on CPI despite stable ECB rates and elevated uncertainty."
+    }
+  },
+  "2023-11": {
+    "prior_h1": 96.03605651855469,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.4,
+      "reasoning": "High Brent prices and elevated energy pass-through are likely to push CPI above the baseline forecast."
+    }
+  },
+  "2023-12": {
+    "prior_h1": 95.3504409790039,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.33,
+      "reasoning": "High Brent prices and elevated EPU suggest upward pressure on energy costs, offsetting stable ECB rates and neutral BCE shock tone."
+    }
+  },
+  "2024-01": {
+    "prior_h1": 96.08531188964844,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.32,
+      "reasoning": "High Brent prices and elevated EPU suggest upward pressure on energy costs, offsetting stable ECB rates and moderate BCE shock."
+    }
+  },
+  "2024-02": {
+    "prior_h1": 96.39927673339844,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.3,
+      "reasoning": "High Brent prices and very high EPU Europe percentile suggest upward pressure on energy costs, offsetting stable ECB rates and neutral BCE shock tone."
+    }
+  },
+  "2024-03": {
+    "prior_h1": 97.4927978515625,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.65,
+      "reasoning": "High Brent prices and elevated energy pass-through are likely to push CPI above the baseline forecast."
+    }
+  },
+  "2024-04": {
+    "prior_h1": 98.03924560546875,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.55,
+      "reasoning": "High Brent prices and elevated energy pass-through are likely to push CPI above the baseline forecast."
+    }
+  },
+  "2024-05": {
+    "prior_h1": 98.16488647460938,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.45,
+      "reasoning": "High Brent prices and elevated EPU suggest upward pressure on energy costs, offsetting stable ECB rates and dovish BCE signals."
+    }
+  },
+  "2024-06": {
+    "prior_h1": 97.98179626464844,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.15,
+      "reasoning": "Spain's CPI is above the baseline, energy prices are high, and uncertainty remains elevated, pushing CPI higher."
+    }
+  },
+  "2024-07": {
+    "prior_h1": 97.66914367675781,
+    "answer": {
+      "direction": "DOWN",
+      "confidence": "MEDIUM",
+      "magnitude_pp": -0.004,
+      "reasoning": "High Brent prices and elevated EPU suggest upward pressure, but recent Spain CPI decline and dovish BCE shock indicate downward bias."
+    }
+  },
+  "2024-08": {
+    "prior_h1": 97.94830322265625,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.25,
+      "reasoning": "High Brent prices and elevated EPU suggest upward pressure on energy costs, offsetting stable ECB rates and moderate BCE shock."
+    }
+  },
+  "2024-09": {
+    "prior_h1": 97.80599975585938,
+    "answer": {
+      "direction": "DOWN",
+      "confidence": "MEDIUM",
+      "magnitude_pp": -0.71,
+      "reasoning": "High energy prices and elevated uncertainty are expected to push CPI above forecast, but ECB rate cuts and weak Spanish CPI suggest downward pressure."
+    }
+  },
+  "2024-10": {
+    "prior_h1": 98.16437530517578,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.46,
+      "reasoning": "High Brent prices and elevated energy pass-through are likely to push CPI above the baseline forecast."
+    }
+  },
+  "2024-11": {
+    "prior_h1": 98.49240112304688,
+    "answer": {
+      "direction": "UP",
+      "confidence": "MEDIUM",
+      "magnitude_pp": 0.5,
+      "reasoning": "High EPU and positive BCE shock score suggest upward pressure despite stable ECB rates."
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "model": "qwen3:8b",
+  "directional_accuracy_pct": 51.3,
+  "n_decisive": 39,
+  "sign_bug": 0,
+  "mae": {
+    "h1": {
+      "revised": 0.5242,
+      "prior": 0.4364
+    },
+    "h3": {
+      "revised": 0.7165,
+      "prior": 0.732
+    },
+    "h6": {
+      "revised": 1.0742,
+      "prior": 1.0866
+    },
+    "h12": {
+      "revised": 1.8618,
+      "prior": 1.8635
+    }
+  }
+}
