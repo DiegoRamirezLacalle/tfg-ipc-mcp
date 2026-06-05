@@ -1,0 +1,36 @@
+{
+  "nexus_reviser_dry": {
+    "h1": {
+      "MAE": 0.44,
+      "RMSE": 0.6166,
+      "MASE": 0.3131,
+      "MAE_prior": 0.4364,
+      "delta_vs_prior_pct": 0.81,
+      "n_evals": 47
+    },
+    "h3": {
+      "MAE": 0.7284,
+      "RMSE": 0.9517,
+      "MASE": 0.5184,
+      "MAE_prior": 0.732,
+      "delta_vs_prior_pct": -0.49,
+      "n_evals": 45
+    },
+    "h6": {
+      "MAE": 1.0849,
+      "RMSE": 1.4241,
+      "MASE": 0.7721,
+      "MAE_prior": 1.0866,
+      "delta_vs_prior_pct": -0.16,
+      "n_evals": 42
+    },
+    "h12": {
+      "MAE": 1.8634,
+      "RMSE": 2.5901,
+      "MASE": 1.3261,
+      "MAE_prior": 1.8635,
+      "delta_vs_prior_pct": -0.01,
+      "n_evals": 36
+    }
+  }
+}
