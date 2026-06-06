@@ -5,6 +5,7 @@ import { SlidersHorizontal, RotateCcw, Cpu, TrendingUp, TrendingDown, Minus } fr
 import { useDatasets, useSeries, useWhatifSetup } from "@/lib/queries";
 import type { WhatifSignal } from "@/lib/types";
 import { WhatifChart } from "@/components/charts/WhatifChart";
+import { SimulatorChat, type SimulatorChatContext } from "@/components/chat/SimulatorChat";
 
 const HORIZONS = [3, 6, 12];
 
@@ -84,6 +85,27 @@ export default function Simulator() {
     }
     return { dH1, dHn, topKey, topContrib, lastIdx };
   }, [setup.data, counterfactual, overrides]);
+
+  const chatContext = useMemo<SimulatorChatContext | null>(() => {
+    if (!setup.data) return null;
+    const lastIdx = Math.max(0, setup.data.baseline.length - 1);
+    return {
+      series_name: setup.data.series_name,
+      series_unit: setup.data.unit,
+      horizon: setup.data.horizon,
+      signals: setup.data.signals.map((s) => ({
+        key: s.key,
+        label: s.label,
+        baseline_value: s.baseline_value,
+        current_value: overrides[s.key] ?? s.baseline_value,
+        final_effect: s.effect_per_step[lastIdx] ?? null,
+      })),
+      baseline: setup.data.baseline.map((p) => p.value),
+      counterfactual,
+      top_driver_label: summary?.topKey ?? null,
+      top_driver_contribution: summary?.topContrib ?? null,
+    };
+  }, [setup.data, overrides, counterfactual, summary]);
 
   const anyChange = useMemo(() => {
     if (!setup.data) return false;
@@ -180,7 +202,8 @@ export default function Simulator() {
         <p className="font-mono text-data-sm text-destructive">{(setup.error as Error).message}</p>
       )}
 
-      {setup.data && (
+      {setup.data && chatContext && (
+        <div className="flex flex-col gap-6">
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
           {/* Sliders */}
           <div className="card-tech flex flex-col">
@@ -263,6 +286,10 @@ export default function Simulator() {
               {setup.data.unit ?? "target"} units.
             </p>
           </div>
+        </div>
+
+        {/* Chat tutor — knows the live simulator state and the thesis concepts */}
+        <SimulatorChat context={chatContext} />
         </div>
       )}
     </div>

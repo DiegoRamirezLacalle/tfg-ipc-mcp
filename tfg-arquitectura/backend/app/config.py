@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     # Ollama narration (desktop Ollama reachable via Docker host gateway)
     OLLAMA_URL: str = "http://host.docker.internal:11434"
     OLLAMA_MODEL: str = "llama3.2:3b"
+    # Separate model for the in-app chat tutor. Default = llama3.2:3b because
+    # qwen3:4b on this Ollama runtime ignores both `think:false` and `/no_think`
+    # and streams its chain-of-thought as visible content (bad UX). Override via
+    # OLLAMA_CHAT_MODEL=qwen3:8b in .env once a non-thinking qwen3 is installed.
+    OLLAMA_CHAT_MODEL: str = "llama3.2:3b"
 
     # MLflow tracking
     MLFLOW_TRACKING_URI: str = "http://mlflow:5000"
