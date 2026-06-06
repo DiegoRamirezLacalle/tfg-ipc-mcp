@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.v1.assistant import router as assistant_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.datasets import router as datasets_router
 from app.api.v1.drift import router as drift_router
@@ -22,3 +23,4 @@ v1_router.include_router(metrics_router)
 v1_router.include_router(drift_router)
 v1_router.include_router(whatif_router)
 v1_router.include_router(news_router)
+v1_router.include_router(assistant_router)
