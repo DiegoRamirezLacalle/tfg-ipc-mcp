@@ -20,7 +20,7 @@ interface ParetoScatterProps {
   onHoverModel: (slug: string | null) => void;
 }
 
-const TICK_STYLE = { fontFamily: "'Geist Mono', monospace", fontSize: 11, fill: "#71717A" };
+const TICK_STYLE = { fontFamily: "'Geist Mono', monospace", fontSize: 11, fill: "hsl(var(--foreground-subtle))" };
 
 export function ParetoScatter({ runs, hoveredModel, onHoverModel }: ParetoScatterProps) {
   const points = useMemo(
@@ -53,7 +53,7 @@ export function ParetoScatter({ runs, hoveredModel, onHoverModel }: ParetoScatte
           margin={{ top: 16, right: 28, bottom: 24, left: 4 }}
           onMouseLeave={() => onHoverModel(null)}
         >
-          <CartesianGrid stroke="#27272A" strokeDasharray="3 3" />
+          <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" />
           <XAxis
             type="number"
             dataKey="x"
@@ -62,7 +62,7 @@ export function ParetoScatter({ runs, hoveredModel, onHoverModel }: ParetoScatte
             tick={TICK_STYLE}
             axisLine={{ stroke: "#3F3F46" }}
             tickLine={false}
-            label={{ value: "runtime (s)", position: "insideBottom", offset: -8, fill: "#71717A", fontSize: 10, fontFamily: "Geist Mono" }}
+            label={{ value: "runtime (s)", position: "insideBottom", offset: -8, fill: "hsl(var(--foreground-subtle))", fontSize: 10, fontFamily: "Geist Mono" }}
           />
           <YAxis
             type="number"
@@ -73,19 +73,19 @@ export function ParetoScatter({ runs, hoveredModel, onHoverModel }: ParetoScatte
             tickLine={false}
             width={52}
             tickFormatter={(v) => Number(v).toFixed(2)}
-            label={{ value: "MAE", angle: -90, position: "insideLeft", fill: "#71717A", fontSize: 10, fontFamily: "Geist Mono" }}
+            label={{ value: "MAE", angle: -90, position: "insideLeft", fill: "hsl(var(--foreground-subtle))", fontSize: 10, fontFamily: "Geist Mono" }}
           />
           <ZAxis type="number" dataKey="z" range={[60, 280]} name="MAPE" />
           <Tooltip
             cursor={{ strokeDasharray: "3 3" }}
             contentStyle={{
-              background: "#11111A",
-              border: "1px solid #27272A",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
               borderRadius: 4,
               fontFamily: "Geist Mono",
               fontSize: 12,
             }}
-            labelStyle={{ color: "#A1A1AA" }}
+            labelStyle={{ color: "hsl(var(--foreground-muted))" }}
             content={({ active, payload }) => {
               if (!active || !payload?.length) return null;
               const p = payload[0].payload as { slug: string; x: number; y: number; z: number };

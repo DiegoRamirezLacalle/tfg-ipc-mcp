@@ -72,27 +72,27 @@ export function MetricRadar({ runs, hoveredModel, onHoverModel }: MetricRadarPro
     <div className="w-full">
       <ResponsiveContainer width="100%" height={340}>
         <RadarChart data={rows} outerRadius="75%">
-          <PolarGrid stroke="#27272A" />
+          <PolarGrid stroke="hsl(var(--border))" />
           <PolarAngleAxis
             dataKey="axis"
-            tick={{ fontFamily: "Geist Mono", fontSize: 11, fill: "#A1A1AA" }}
+            tick={{ fontFamily: "Geist Mono", fontSize: 11, fill: "hsl(var(--foreground-muted))" }}
           />
           <PolarRadiusAxis
             angle={90}
             domain={[0, 100]}
-            tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "#71717A" }}
+            tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "hsl(var(--foreground-subtle))" }}
             tickFormatter={(v) => `${v}`}
-            stroke="#27272A"
+            stroke="hsl(var(--border))"
           />
           <Tooltip
             contentStyle={{
-              background: "#11111A",
-              border: "1px solid #27272A",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
               borderRadius: 4,
               fontFamily: "Geist Mono",
               fontSize: 12,
             }}
-            labelStyle={{ color: "#A1A1AA" }}
+            labelStyle={{ color: "hsl(var(--foreground-muted))" }}
             formatter={(v: number) => [`${v.toFixed(0)} / 100`, ""]}
           />
           {slugs.map((slug, i) => {
@@ -128,7 +128,7 @@ export function MetricRadar({ runs, hoveredModel, onHoverModel }: MetricRadarPro
               className={`flex items-center gap-1.5 font-mono text-data-sm transition-opacity ${isDimmed ? "opacity-30" : ""}`}
             >
               <span className="inline-block w-2 h-2 rounded-full" style={{ background: c }} />
-              <span style={{ color: isHovered ? c : "#A1A1AA" }}>{slug}</span>
+              <span style={{ color: isHovered ? c : "hsl(var(--foreground-muted))" }}>{slug}</span>
             </button>
           );
         })}

@@ -5,9 +5,18 @@
 /* ────────────────────────────────────────────────────────────
  * Design tokens — from Stitch DESIGN.md (prose, not YAML)
  * Bloomberg Terminal × Academic Journal × Signal-in-Noise
+ *
+ * Three themes, switched by a class on <html> (see src/lib/theme.ts):
+ *   :root / .theme-dark   → zinc near-black (default)
+ *   .theme-violet         → violet-tinted dark (branded)
+ *   .theme-light          → white / near-white
+ *
+ * Brand accents (--mcp, --gold) and chart --series-* are identity/data
+ * colours — kept constant across themes (a few nudged on light for contrast).
  * ──────────────────────────────────────────────────────────── */
 @layer base {
-  :root {
+  :root,
+  .theme-dark {
     /* Surfaces — zinc-tinted near-black, never pure */
     --background:        240   5%   4%;  /* #0A0A0C */
     --card:              240   5%   7%;  /* #11111A-ish */
@@ -39,6 +48,69 @@
     --series-timesfm: 262 83%  72%;  /* violet (distinct from --mcp) */
     --series-chronos: 158 64%  52%;  /* emerald */
     --series-timegpt: 351 95%  71%;  /* rose */
+  }
+
+  /* ── Violet — violet-tinted dark (branded), spirit of #15121b ─────── */
+  .theme-violet {
+    --background:        264  28%   9%;  /* #15121b */
+    --card:              264  22%  13%;  /* #1d1a23 */
+    --muted:             264  18%  17%;  /* #2c2832 */
+    --border:            264  15%  24%;  /* #3a3447 */
+    --border-strong:     264  14%  33%;  /* #4f4860 */
+    --input:             264  15%  24%;
+    --ring:              262  90%  76%;
+
+    --foreground:        276  35%  92%;  /* #e7e0ed */
+    --foreground-muted:  276  22%  74%;  /* #cbc3d7 */
+    --foreground-subtle: 276  12%  56%;  /* #958ea0 */
+
+    --success:      160  74%  52%;
+    --info:         189  90%  60%;
+    --warning:       38  95%  62%;
+    --destructive:    6 100%  71%;
+
+    --mcp:          262  90%  78%;  /* #d0bcff — brighter on violet base */
+    --gold:          39  70%  68%;
+
+    /* series stay constant (data identity) */
+    --series-naive:  276  20%  85%;
+    --series-sarima: 189  94%  60%;
+    --series-ridge:   38  92%  58%;
+    --series-timesfm: 262 90%  80%;
+    --series-chronos: 158 64%  58%;
+    --series-timegpt: 351 95%  74%;
+  }
+
+  /* ── Light — white / near-white, dark text ───────────────────────── */
+  .theme-light {
+    --background:        264  30%  98%;  /* #f7f5fb — faint lavender white */
+    --card:                0   0% 100%;  /* #ffffff */
+    --muted:             264  24%  95%;  /* #efecf5 */
+    --border:            264  16%  88%;  /* #e0dbeb */
+    --border-strong:     264  12%  78%;  /* #c4bcd4 */
+    --input:             264  16%  88%;
+    --ring:              262  83%  58%;
+
+    --foreground:        264  30%  12%;  /* near-black, faint violet */
+    --foreground-muted:  264  10%  38%;  /* #5a5566 */
+    --foreground-subtle: 264   8%  52%;  /* #7e7a8a */
+
+    --success:      160  84%  32%;
+    --info:         189  94%  36%;
+    --warning:       33  95%  44%;
+    --destructive:    0  74%  50%;
+
+    /* darker so accents read on white */
+    --mcp:          262  72%  56%;  /* deeper violet */
+    --gold:          36  62%  44%;  /* bronze-gold (E0B96A is invisible on white) */
+
+    /* series darkened for contrast on white */
+    --series-naive:  264  10%  55%;
+    --series-sarima: 189  90%  38%;
+    --series-ridge:   33  92%  44%;
+    --series-timesfm: 262 72%  56%;
+    --series-chronos: 158 64%  38%;
+    --series-timegpt: 351 80%  56%;
   }
 }
 
@@ -101,6 +173,12 @@
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   }
+
+  /* On light, overlay-blend grain dirties white surfaces — soften it. */
+  .theme-light body::before {
+    opacity: 0.02;
+    mix-blend-mode: multiply;
+  }
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -154,6 +232,104 @@
       hsl(var(--gold) / 0.7) 70%,
       transparent 100%
     );
+  }
+
+  /* ── Landing-hero treatments ───────────────────────────────────────
+   * Glassy panels + soft accent glows that sit over the FlowField shader.
+   * Token-driven (no new palette values) — used only on the public home.
+   * ────────────────────────────────────────────────────────────────── */
+
+  /* Frosted panel — for hero RQ cards and the "doors" over the shader */
+  .card-glass {
+    background: hsl(var(--card) / 0.45);
+    border: 1px solid hsl(0 0% 100% / 0.06);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .card-glass:hover {
+    border-color: hsl(var(--mcp) / 0.45);
+  }
+  /* On light: white-on-white border is invisible, frosted-dark look wrong */
+  .theme-light .card-glass {
+    background: hsl(var(--card) / 0.7);
+    border-color: hsl(var(--border));
+    box-shadow: 0 1px 3px hsl(264 30% 12% / 0.06);
+  }
+
+  /* Soft violet edge-glow on hover — replaces the flat card border lift */
+  .glow-mcp {
+    transition: box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.3s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .glow-mcp:hover {
+    box-shadow: 0 0 0 1px hsl(var(--mcp) / 0.35),
+      0 8px 40px -12px hsl(var(--mcp) / 0.55),
+      0 0 60px -20px hsl(var(--gold) / 0.35);
+    transform: translateY(-2px);
+  }
+
+  /* Champagne-gold halo behind the display headline */
+  .text-glow-gold {
+    text-shadow: 0 0 40px hsl(var(--gold) / 0.35),
+      0 0 80px hsl(var(--gold) / 0.15);
+  }
+
+  /* Violet → gold gradient headline fill (bold-sans hero identity).
+   * Uses background-clip so the gradient paints the glyphs themselves. */
+  .text-gradient-hero {
+    background-image: linear-gradient(
+      105deg,
+      #c4b5fd 0%,
+      hsl(var(--mcp)) 32%,
+      #f5f5f7 52%,
+      hsl(var(--gold)) 78%,
+      #f3dca0 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  /* On light: the white midpoint disappears on a white page — use a deep
+     violet→bronze ramp through a dark neutral so the glyphs stay readable. */
+  .theme-light .text-gradient-hero {
+    background-image: linear-gradient(
+      105deg,
+      #6d28d9 0%,
+      #7c3aed 30%,
+      #3b3550 50%,
+      #a8741f 75%,
+      #8a5a12 100%
+    );
+  }
+
+  /* ── Lower-section connective tissue (calm, static, cheap) ──────────
+   * Soft violet→gold glow that bleeds up behind a section header, so the
+   * body sections feel related to the hero without repeating the nebula. */
+  .section-glow {
+    position: relative;
+    isolation: isolate;
+  }
+  .section-glow::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: -10%;
+    top: -40%;
+    width: 60%;
+    height: 220%;
+    pointer-events: none;
+    background: radial-gradient(
+        50% 50% at 30% 40%,
+        hsl(var(--mcp) / 0.16) 0%,
+        transparent 70%
+      ),
+      radial-gradient(
+        45% 45% at 60% 55%,
+        hsl(var(--gold) / 0.10) 0%,
+        transparent 72%
+      );
+    filter: blur(8px);
   }
 }
 

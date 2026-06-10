@@ -50,6 +50,32 @@ MODEL_NAME = "timegpt_C0"
 TEST_END_TS = pd.Timestamp(DATE_TEST_END)
 SERIES_ID = "ipc_spain"
 
+SPAIN_TARGET_FILE = ROOT / "data" / "processed" / "ipc_spain_index.parquet"
+SPAIN_TARGET_COL = "indice_general"
+
+
+def assert_target_integrity(df_preds: pd.DataFrame) -> None:
+    """Guard: every prediction row's y_true must equal Spain indice_general at its
+    fc_date. Refuses to write if Global (or any other) values slipped in."""
+    if df_preds.empty:
+        raise ValueError(f"[{MODEL_NAME}] No predictions to verify.")
+    ref = pd.read_parquet(SPAIN_TARGET_FILE)
+    ref.index = pd.to_datetime(ref.index)
+    y_ref = ref[SPAIN_TARGET_COL]
+    expected = y_ref.reindex(pd.to_datetime(df_preds["fc_date"]).values).values
+    actual = df_preds["y_true"].values
+    if np.isnan(expected).any():
+        bad = df_preds.loc[np.isnan(expected), "fc_date"].tolist()[:5]
+        raise ValueError(f"[{MODEL_NAME}] fc_date(s) not in Spain target: {bad}")
+    if not np.allclose(actual, expected, atol=1e-6):
+        n_bad = int(np.sum(~np.isclose(actual, expected, atol=1e-6)))
+        raise ValueError(
+            f"[{MODEL_NAME}] TARGET-INTEGRITY FAILURE: {n_bad} rows where y_true != "
+            f"Spain {SPAIN_TARGET_COL}. Predictions NOT written."
+        )
+    logger.info(f"[{MODEL_NAME}] target-integrity OK: y_true matches Spain "
+                f"{SPAIN_TARGET_COL} (n={len(df_preds)})")
+
 
 # API client
 
@@ -241,6 +267,8 @@ def main():
     if args.test_run:
         logger.info("\n[test-run] Test results. Run without --test-run for full backtesting.")
         return
+
+    assert_target_integrity(df_preds)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 

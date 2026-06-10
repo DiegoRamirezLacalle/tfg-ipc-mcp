@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
+import { ThemeToggle } from "@/components/app/ThemeToggle";
 
 const NAV = [
   { to: "/experiments",     label: "Experiments", end: true },
@@ -54,6 +55,7 @@ export function TopNav() {
             <div className="w-px h-4 bg-border mx-1" />
           </>
         )}
+        <ThemeToggle />
         <button
           onClick={logout}
           className="flex items-center gap-1.5 font-mono text-data-sm text-foreground-muted hover:text-foreground transition-colors"

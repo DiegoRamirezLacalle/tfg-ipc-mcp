@@ -19,7 +19,7 @@ interface SkillScoreChartProps {
   onHoverModel: (slug: string | null) => void;
 }
 
-const TICK_STYLE = { fontFamily: "'Geist Mono', monospace", fontSize: 11, fill: "#71717A" };
+const TICK_STYLE = { fontFamily: "'Geist Mono', monospace", fontSize: 11, fill: "hsl(var(--foreground-subtle))" };
 
 export function SkillScoreChart({ runs, hoveredModel, onHoverModel }: SkillScoreChartProps) {
   const rows = useMemo(() => {
@@ -49,7 +49,7 @@ export function SkillScoreChart({ runs, hoveredModel, onHoverModel }: SkillScore
           margin={{ top: 8, right: 32, bottom: 8, left: 8 }}
           onMouseLeave={() => onHoverModel(null)}
         >
-          <CartesianGrid stroke="#27272A" strokeDasharray="3 3" horizontal={false} />
+          <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" horizontal={false} />
           <XAxis
             type="number"
             domain={[-domainEdge, domainEdge]}
@@ -69,13 +69,13 @@ export function SkillScoreChart({ runs, hoveredModel, onHoverModel }: SkillScore
           <ReferenceLine x={0} stroke="#3F3F46" strokeWidth={1} />
           <Tooltip
             contentStyle={{
-              background: "#11111A",
-              border: "1px solid #27272A",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
               borderRadius: 4,
               fontFamily: "Geist Mono",
               fontSize: 12,
             }}
-            labelStyle={{ color: "#A1A1AA" }}
+            labelStyle={{ color: "hsl(var(--foreground-muted))" }}
             cursor={{ fill: "rgba(255,255,255,0.04)" }}
             formatter={(value: number) => [`${value.toFixed(1)}% vs seasonal naive`, "Skill"]}
           />

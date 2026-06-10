@@ -52,9 +52,11 @@ MODELS = [
     ("Global", "C0", "-",             "LSTM",            "deep_rolling_metrics_global.json",     "lstm"),
     ("Global", "C0", "-",             "N-BEATS",         "deep_rolling_metrics_global.json",     "nbeats"),
     ("Global", "C0", "-",             "N-HiTS",          "deep_rolling_metrics_global.json",     "nhits"),
-    ("Global", "C0", "-",             "Chronos-2",       "chronos2_C0_metrics.json",             "chronos2_C0"),
-    ("Global", "C0", "-",             "TimesFM",         "timesfm_C0_metrics.json",              "timesfm_C0"),
-    ("Global", "C0", "-",             "TimeGPT",         "timegpt_C0_metrics.json",              "timegpt_C0"),
+    # Global foundation C0 — MUST use the dedicated Global C0 files (scripts 30/31/32).
+    # The plain *_C0_metrics.json files are Spain artifacts; do NOT use them here.
+    ("Global", "C0", "-",             "Chronos-2",       "chronos2_C0_global_metrics.json",      "chronos2_C0_global"),
+    ("Global", "C0", "-",             "TimesFM",         "timesfm_C0_global_metrics.json",       "timesfm_C0_global"),
+    ("Global", "C0", "-",             "TimeGPT",         "timegpt_C0_global_metrics.json",       "timegpt_C0_global"),
     ("Global", "C1", "institutional", "ARIMAX C1_inst",  "rolling_metrics_C1_inst_global.json",  "arimax_C1_inst"),
     ("Global", "C1", "institutional", "Chronos-2",       "chronos2_C1_inst_global_metrics.json", "chronos2_C1_inst_global"),
     ("Global", "C1", "institutional", "TimesFM",         "timesfm_C1_inst_global_metrics.json",  "timesfm_C1_inst_global"),
@@ -118,6 +120,13 @@ def _best_c0(country: str) -> dict[str, float]:
     return best
 
 
+# Global foundation C0 rows that must NEVER silently fall back to Spain files.
+# If their dedicated file is missing, the row is omitted with a loud warning.
+_GLOBAL_C0_FOUNDATION = {
+    "chronos2_C0_global", "timesfm_C0_global", "timegpt_C0_global",
+}
+
+
 def build_rows() -> list[dict]:
     rows = []
     for country, tier, signal_type, model_name, fname, key in MODELS:
@@ -135,6 +144,13 @@ def build_rows() -> list[dict]:
                 ok = True
         if ok:
             rows.append(row)
+        elif key in _GLOBAL_C0_FOUNDATION:
+            logger.warning(
+                "[!] Global C0 foundation metrics missing: %s (key=%s). "
+                "Row OMITTED — NOT falling back to Spain C0. "
+                "Run 06_models_foundation/30-32_*_C0_global.py to generate it.",
+                fname, key,
+            )
     return rows
 
 

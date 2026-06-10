@@ -24,7 +24,7 @@ interface SentimentChartProps {
 const TICK_STYLE = {
   fontFamily: "'Geist Mono', monospace",
   fontSize: 11,
-  fill: "#71717A",
+  fill: "hsl(var(--foreground-subtle))",
 };
 
 function CustomTooltip({ active, payload, label }: {
@@ -69,7 +69,7 @@ export function SentimentChart({ signals }: SentimentChartProps) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <LineChart data={data} margin={{ top: 8, right: 24, bottom: 0, left: 0 }}>
-        <CartesianGrid stroke="#27272A" strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
         <XAxis
           dataKey="month"
           tick={TICK_STYLE}
@@ -97,7 +97,7 @@ export function SentimentChart({ signals }: SentimentChartProps) {
         />
         <Tooltip content={<CustomTooltip />} />
         <Legend
-          wrapperStyle={{ fontFamily: "'Geist Mono', monospace", fontSize: 11, color: "#A1A1AA" }}
+          wrapperStyle={{ fontFamily: "'Geist Mono', monospace", fontSize: 11, color: "hsl(var(--foreground-muted))" }}
         />
         <ReferenceLine
           yAxisId="sent"

@@ -18,7 +18,7 @@ interface ForecastChartProps {
 const TICK_STYLE = {
   fontFamily: "'Geist Mono', monospace",
   fontSize: 11,
-  fill: "#71717A",
+  fill: "hsl(var(--foreground-subtle))",
 };
 
 function CustomTooltip({ active, payload, label }: {
@@ -64,7 +64,7 @@ export function ForecastChart({ predictions, splitDate }: ForecastChartProps) {
   return (
     <ResponsiveContainer width="100%" height={320}>
       <LineChart data={data} margin={{ top: 8, right: 24, bottom: 0, left: 0 }}>
-        <CartesianGrid stroke="#27272A" strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
         <XAxis
           dataKey="date"
           ticks={ticks}
@@ -85,7 +85,7 @@ export function ForecastChart({ predictions, splitDate }: ForecastChartProps) {
             x={splitDate}
             stroke="#3F3F46"
             strokeDasharray="4 4"
-            label={{ value: "split", fill: "#71717A", fontSize: 10, fontFamily: "Geist Mono" }}
+            label={{ value: "split", fill: "hsl(var(--foreground-subtle))", fontSize: 10, fontFamily: "Geist Mono" }}
           />
         )}
         {/* Confidence interval as thin lines */}
