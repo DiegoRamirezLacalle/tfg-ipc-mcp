@@ -281,9 +281,16 @@ Logs in `lightning_logs/` (~263 versions).
 
 | Model key | Script | Condition |
 |-----------|--------|-----------|
+| `chronos2_C0_global` | `30_chronos2_C0_global.py` | C0 |
+| `timesfm_C0_global` | `31_timesfm_C0_global.py` | C0 |
+| `timegpt_C0_global` | `32_timegpt_C0_global.py` | C0 (pending — Nixtla API unavailable) |
 | `chronos2_C1_inst_global` | `15_chronos2_C1_inst_global.py` | C1_inst ★★ |
 | `timesfm_C1_inst_global` | `16_timesfm_C1_inst_global.py` | C1_inst |
 | `timegpt_C1_inst_global` | `17_timegpt_C1_inst_global.py` | C1_inst |
+
+> ⚠️ Global foundation **C0** uses its own dedicated scripts/files (`30–32`,
+> `*_C0_global_metrics.json`). The plain `*_C0` keys above are **Spain** artifacts
+> and must never be reused as Global C0 (see `07_evaluation/audit_foundation_targets.py`).
 
 #### Europe (metrics in `rolling_metrics_europe.json` + `*_europe_metrics.json`)
 

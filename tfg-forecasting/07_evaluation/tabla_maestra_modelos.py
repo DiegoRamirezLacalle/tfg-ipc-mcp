@@ -36,6 +36,7 @@ logger = get_logger(__name__)
 RESULTS = ROOT / "08_results"
 OUT_HTML = RESULTS / "tabla_maestra.html"
 OUT_CSV = RESULTS / "tabla_maestra.csv"
+OUT_MD = RESULTS / "tabla_maestra.md"
 
 HORIZONS = ["h1", "h3", "h6", "h12"]
 
@@ -463,6 +464,77 @@ def save_csv(rows: list[dict]) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Markdown
+# ---------------------------------------------------------------------------
+
+_MD_SIGNAL_LABELS = {
+    "-": "-",
+    "energy": "energy",
+    "energy only": "energy_only",
+    "macro": "macro",
+    "institutional": "institutional",
+    "energy+macro": "energy+macro",
+}
+
+_MD_COUNTRY_LABELS = {"Global": "Global", "Spain": "Espana"}
+
+
+def _md_cell(v: float | None) -> str:
+    return f"{v:.4f}" if v is not None else "-"
+
+
+def _md_delta(v: float | None) -> str:
+    if v is None:
+        return "-"
+    sign = "+" if v > 0 else ""
+    return f"{sign}{v:.1f}%"
+
+
+def save_md(rows: list[dict]) -> None:
+    """Markdown twin of the master table.
+
+    Driven by the same `rows` as the CSV/HTML, so it inherits the corrected
+    Global C0 foundation values and the same omissions (e.g. TimeGPT Global C0
+    is dropped, never silently replaced by the Spain C0 file).
+    """
+    lines: list[str] = [
+        "# Tabla Maestra de Modelos - TFG IPC/MCP",
+        "",
+        "> delta% = (MAE_modelo - mejor_MAE_C0_pais) / mejor_MAE_C0_pais × 100",
+        "",
+    ]
+    header = ("| Modelo | h1 MAE | d% | h3 MAE | d% | h6 MAE | d% | "
+              "h12 MAE | d% |")
+    sep = "|--------|-------:|---:|-------:|---:|-------:|---:|--------:|---:|"
+
+    for country in ("Global", "Spain"):
+        country_rows = [r for r in rows if r["Country"] == country]
+        if not country_rows:
+            continue
+        lines += ["", f"## {_MD_COUNTRY_LABELS.get(country, country)}", ""]
+
+        prev_tier = prev_tipo = None
+        for row in country_rows:
+            tier, tipo = row["Tier"], row["Signals"]
+            if (tier, tipo) != (prev_tier, prev_tipo):
+                if tipo == "-":
+                    title = f"### {tier}"
+                else:
+                    sig = _MD_SIGNAL_LABELS.get(tipo, tipo)
+                    title = f"### {tier} - Senales: {sig}"
+                lines += ["", title, "", header, sep]
+                prev_tier, prev_tipo = tier, tipo
+
+            cells = []
+            for h in HORIZONS:
+                cells.append(_md_cell(row.get(f"MAE_{h}")))
+                cells.append(_md_delta(row.get(f"d%_{h}")))
+            lines.append(f"| {row['Model']} | " + " | ".join(cells) + " |")
+
+    OUT_MD.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -478,9 +550,11 @@ def main():
     html = build_html(rows)
     OUT_HTML.write_text(html, encoding="utf-8")
     save_csv(rows)
+    save_md(rows)
 
     logger.info(f"HTML saved: {OUT_HTML}")
     logger.info(f"CSV  saved: {OUT_CSV}")
+    logger.info(f"MD   saved: {OUT_MD}")
 
     if not args.no_open:
         webbrowser.open(OUT_HTML.as_uri())
