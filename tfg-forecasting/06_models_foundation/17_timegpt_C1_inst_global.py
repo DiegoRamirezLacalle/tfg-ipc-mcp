@@ -184,12 +184,15 @@ def main():
             logger.info(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
                         f"{m['MASE']:8.4f} {m['n_evals']:5d}")
 
-    # Comparison vs C0
-    c0p = RESULTS_DIR / "timegpt_C0_metrics.json"
-    if c0p.exists():
+    # Comparison vs GLOBAL C0 (script 32) — NOT the Spain C0 file.
+    c0p = RESULTS_DIR / "timegpt_C0_global_metrics.json"
+    if not c0p.exists():
+        logger.warning("[!] Global C0 metrics missing (%s) — skipping C0 vs C1 "
+                       "comparison. Run 32_timegpt_C0_global.py first.", c0p.name)
+    else:
         with open(c0p) as f:
-            c0 = json.load(f).get("timegpt_C0", {})
-        logger.info(f"\n--- C0 vs {MODEL_NAME} ---")
+            c0 = json.load(f).get("timegpt_C0_global", {})
+        logger.info(f"\n--- C0_global vs {MODEL_NAME} ---")
         for h in HORIZONS:
             c0m = c0.get(f"h{h}", {}).get("MAE")
             c1m = metrics.get(f"h{h}", {}).get("MAE")

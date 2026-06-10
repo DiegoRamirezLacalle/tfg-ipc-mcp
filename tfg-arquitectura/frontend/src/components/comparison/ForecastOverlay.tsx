@@ -20,7 +20,7 @@ interface ForecastOverlayProps {
   historyMonths?: number;
 }
 
-const TICK_STYLE = { fontFamily: "'Geist Mono', monospace", fontSize: 11, fill: "#71717A" };
+const TICK_STYLE = { fontFamily: "'Geist Mono', monospace", fontSize: 11, fill: "hsl(var(--foreground-subtle))" };
 
 interface ChartRow {
   date: string;
@@ -120,7 +120,7 @@ export function ForecastOverlay({ data, hoveredModel, onHoverModel, historyMonth
           margin={{ top: 10, right: 28, bottom: 4, left: 0 }}
           onMouseLeave={() => onHoverModel(null)}
         >
-          <CartesianGrid stroke="#27272A" strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="date"
             ticks={xTicks}
@@ -213,7 +213,7 @@ export function ForecastOverlay({ data, hoveredModel, onHoverModel, historyMonth
               className={`flex items-center gap-1.5 font-mono text-data-sm transition-opacity ${isDimmed ? "opacity-30" : "opacity-100"}`}
             >
               <span className="inline-block w-3 h-px" style={{ background: modelColor(slug, i) }} />
-              <span style={{ color: isHovered ? modelColor(slug, i) : "#A1A1AA" }}>{slug}</span>
+              <span style={{ color: isHovered ? modelColor(slug, i) : "hsl(var(--foreground-muted))" }}>{slug}</span>
             </button>
           );
         })}

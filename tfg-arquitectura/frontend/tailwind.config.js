@@ -49,6 +49,8 @@ export default {
         sans:    ["Geist", "ui-sans-serif", "system-ui", "sans-serif"],
         mono:    ["Geist Mono", "ui-monospace", "monospace"],
         display: ['"Instrument Serif"', "ui-serif", "Georgia", "serif"],
+        // bold modern geometric sans — landing headline identity
+        grotesk: ['"Space Grotesk"', "Geist", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       fontSize: {
         // Stitch typography scale
@@ -87,6 +89,15 @@ export default {
           "0%":   { transform: "translateX(0)" },
           "100%": { transform: "translateX(-33.333%)" },
         },
+        "float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%":      { transform: "translateY(-6px)" },
+        },
+        "scroll-cue": {
+          "0%":        { transform: "translateY(0)",   opacity: "0" },
+          "30%":       { opacity: "1" },
+          "100%":      { transform: "translateY(8px)", opacity: "0" },
+        },
       },
       animation: {
         "fade-up":    "fade-up 600ms cubic-bezier(0.16, 1, 0.3, 1) both",
@@ -94,6 +105,8 @@ export default {
         "blink":      "blink 1.1s steps(1) infinite",
         "pulse-soft": "pulse-soft 2.4s ease-in-out infinite",
         "marquee":    "marquee 32s linear infinite",
+        "float":      "float 6s ease-in-out infinite",
+        "scroll-cue": "scroll-cue 1.8s ease-in-out infinite",
       },
     },
   },

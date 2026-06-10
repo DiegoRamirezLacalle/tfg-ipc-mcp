@@ -20,7 +20,7 @@ interface MetricBarsProps {
   onHoverModel: (slug: string | null) => void;
 }
 
-const TICK_STYLE = { fontFamily: "'Geist Mono', monospace", fontSize: 11, fill: "#71717A" };
+const TICK_STYLE = { fontFamily: "'Geist Mono', monospace", fontSize: 11, fill: "hsl(var(--foreground-subtle))" };
 
 export function MetricBars({ runs, hoveredModel, onHoverModel }: MetricBarsProps) {
   const rows = useMemo(
@@ -46,7 +46,7 @@ export function MetricBars({ runs, hoveredModel, onHoverModel }: MetricBarsProps
           barGap={4}
           onMouseLeave={() => onHoverModel(null)}
         >
-          <CartesianGrid stroke="#27272A" strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="slug" tick={TICK_STYLE} axisLine={{ stroke: "#3F3F46" }} tickLine={false} />
           <YAxis
             yAxisId="abs"
@@ -67,13 +67,13 @@ export function MetricBars({ runs, hoveredModel, onHoverModel }: MetricBarsProps
           />
           <Tooltip
             contentStyle={{
-              background: "#11111A",
-              border: "1px solid #27272A",
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
               borderRadius: 4,
               fontFamily: "Geist Mono",
               fontSize: 12,
             }}
-            labelStyle={{ color: "#A1A1AA", fontFamily: "Geist Mono" }}
+            labelStyle={{ color: "hsl(var(--foreground-muted))", fontFamily: "Geist Mono" }}
             cursor={{ fill: "rgba(255,255,255,0.04)" }}
             formatter={(value: number, name: string) =>
               name === "MAPE"
@@ -82,7 +82,7 @@ export function MetricBars({ runs, hoveredModel, onHoverModel }: MetricBarsProps
             }
           />
           <Legend
-            wrapperStyle={{ fontFamily: "Geist Mono", fontSize: 11, color: "#A1A1AA" }}
+            wrapperStyle={{ fontFamily: "Geist Mono", fontSize: 11, color: "hsl(var(--foreground-muted))" }}
             iconType="square"
           />
           <Bar

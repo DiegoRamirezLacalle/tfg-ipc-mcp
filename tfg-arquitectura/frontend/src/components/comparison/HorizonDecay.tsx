@@ -18,7 +18,7 @@ interface HorizonDecayProps {
   onHoverModel: (slug: string | null) => void;
 }
 
-const TICK_STYLE = { fontFamily: "'Geist Mono', monospace", fontSize: 11, fill: "#71717A" };
+const TICK_STYLE = { fontFamily: "'Geist Mono', monospace", fontSize: 11, fill: "hsl(var(--foreground-subtle))" };
 
 function isoMonth(iso: string): string {
   return iso.slice(0, 7);
@@ -75,13 +75,13 @@ export function HorizonDecay({ data, hoveredModel, onHoverModel }: HorizonDecayP
         margin={{ top: 8, right: 24, bottom: 0, left: 0 }}
         onMouseLeave={() => onHoverModel(null)}
       >
-        <CartesianGrid stroke="#27272A" strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
         <XAxis
           dataKey="step"
           tick={TICK_STYLE}
           axisLine={{ stroke: "#3F3F46" }}
           tickLine={false}
-          label={{ value: "step ahead", position: "insideBottom", offset: -2, fill: "#71717A", fontSize: 10, fontFamily: "Geist Mono" }}
+          label={{ value: "step ahead", position: "insideBottom", offset: -2, fill: "hsl(var(--foreground-subtle))", fontSize: 10, fontFamily: "Geist Mono" }}
         />
         <YAxis
           tick={TICK_STYLE}
@@ -92,13 +92,13 @@ export function HorizonDecay({ data, hoveredModel, onHoverModel }: HorizonDecayP
         />
         <Tooltip
           contentStyle={{
-            background: "#11111A",
-            border: "1px solid #27272A",
+            background: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
             borderRadius: 4,
             fontFamily: "Geist Mono",
             fontSize: 12,
           }}
-          labelStyle={{ color: "#A1A1AA" }}
+          labelStyle={{ color: "hsl(var(--foreground-muted))" }}
           cursor={{ stroke: "#3F3F46", strokeDasharray: "3 3" }}
           formatter={(v: number) => v.toFixed(4)}
           labelFormatter={(label) => `step ${label}`}

@@ -12,6 +12,12 @@ export default defineConfig({
     server: {
         host: "0.0.0.0",
         port: 3000,
+        // Bind mounts from a Windows/OneDrive host don't emit inotify events into the
+        // Linux container, so Vite's HMR never fires. Polling makes file changes visible.
+        watch: {
+            usePolling: true,
+            interval: 300,
+        },
         proxy: {
             "/api": {
                 target: (_a = process.env.VITE_API_URL) !== null && _a !== void 0 ? _a : "http://localhost:8000",

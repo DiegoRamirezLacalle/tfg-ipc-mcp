@@ -21,7 +21,7 @@ interface WhatifChartProps {
 const TICK_STYLE = {
   fontFamily: "'Geist Mono', monospace",
   fontSize: 11,
-  fill: "#71717A",
+  fill: "hsl(var(--foreground-subtle))",
 };
 
 function CustomTooltip({ active, payload, label }: {
@@ -86,7 +86,7 @@ export function WhatifChart({ history, baseline, counterfactual, unit }: WhatifC
   return (
     <ResponsiveContainer width="100%" height={360}>
       <LineChart data={data} margin={{ top: 8, right: 24, bottom: 0, left: 0 }}>
-        <CartesianGrid stroke="#27272A" strokeDasharray="3 3" vertical={false} />
+        <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
         <XAxis
           dataKey="date"
           ticks={ticks}
@@ -102,23 +102,23 @@ export function WhatifChart({ history, baseline, counterfactual, unit }: WhatifC
           tickFormatter={(v: number) => v.toFixed(1)}
           label={
             unit
-              ? { value: unit, angle: -90, position: "insideLeft", fill: "#71717A", fontSize: 10, fontFamily: "Geist Mono" }
+              ? { value: unit, angle: -90, position: "insideLeft", fill: "hsl(var(--foreground-subtle))", fontSize: 10, fontFamily: "Geist Mono" }
               : undefined
           }
         />
         <Tooltip content={<CustomTooltip />} />
-        <Legend wrapperStyle={{ fontFamily: "'Geist Mono', monospace", fontSize: 11, color: "#A1A1AA" }} />
+        <Legend wrapperStyle={{ fontFamily: "'Geist Mono', monospace", fontSize: 11, color: "hsl(var(--foreground-muted))" }} />
         {splitDate && (
           <ReferenceLine
             x={splitDate}
             stroke="#3F3F46"
             strokeDasharray="4 4"
-            label={{ value: "forecast →", fill: "#71717A", fontSize: 10, fontFamily: "Geist Mono", position: "insideTopRight" }}
+            label={{ value: "forecast →", fill: "hsl(var(--foreground-subtle))", fontSize: 10, fontFamily: "Geist Mono", position: "insideTopRight" }}
           />
         )}
         <Line
           dataKey="actual"
-          stroke="#71717A"
+          stroke="hsl(var(--foreground-subtle))"
           strokeWidth={1.5}
           dot={false}
           name="History"
