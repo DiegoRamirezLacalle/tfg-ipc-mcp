@@ -1,5 +1,5 @@
 // TypeScript mirrors of the FastAPI Pydantic schemas (app/schemas/*.py).
-// Keep in sync manually — they are small and stable.
+// Keep in sync manually - they are small and stable.
 
 export type UserRole = "admin" | "researcher" | "viewer";
 

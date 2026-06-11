@@ -20,7 +20,7 @@ import type {
   WhatifSetup,
 } from "./types";
 
-// ── auth ─────────────────────────────────────────────────────────────────────
+// -- auth ---------------------------------------------------------------------
 
 export function useLogin() {
   return useMutation({
@@ -44,7 +44,7 @@ export function useSignup() {
   });
 }
 
-// ── datasets / catalog ───────────────────────────────────────────────────────
+// -- datasets / catalog -------------------------------------------------------
 
 export function useDatasets() {
   return useQuery({
@@ -111,7 +111,7 @@ export function useAllSeries(): { map: Map<number, SeriesInfo>; isLoading: boole
   return { map, isLoading };
 }
 
-// ── experiments ──────────────────────────────────────────────────────────────
+// -- experiments --------------------------------------------------------------
 
 export function useExperiments() {
   return useQuery({
@@ -145,7 +145,7 @@ export function useDeleteExperiment() {
   });
 }
 
-// ── runs ─────────────────────────────────────────────────────────────────────
+// -- runs ---------------------------------------------------------------------
 
 export function useExperimentRuns(experimentId: number | undefined) {
   return useQuery({
@@ -218,7 +218,7 @@ export function useNarration(runId: number | undefined) {
   });
 }
 
-// ── drift detection ──────────────────────────────────────────────────────────
+// -- drift detection ----------------------------------------------------------
 
 export interface DriftResult {
   experiment_id: number;
@@ -241,7 +241,7 @@ export function useDrift(experimentId: number | undefined) {
   });
 }
 
-// ── what-if simulator ────────────────────────────────────────────────────────
+// -- what-if simulator --------------------------------------------------------
 
 export function useWhatifSetup(seriesId: number | undefined, horizon: number) {
   return useQuery({
@@ -254,7 +254,7 @@ export function useWhatifSetup(seriesId: number | undefined, horizon: number) {
   });
 }
 
-// ── live news pulse (GDELT + FinBERT via MCP) ────────────────────────────────
+// -- live news pulse (GDELT + FinBERT via MCP) --------------------------------
 
 export interface NewsArticle {
   title: string;
@@ -313,7 +313,7 @@ export function useRefreshNews() {
   });
 }
 
-// ── Diebold-Mariano significance ─────────────────────────────────────────────
+// -- Diebold-Mariano significance ---------------------------------------------
 
 export interface DmRunMeta {
   run_id: number;
@@ -357,7 +357,7 @@ export function useDmMatrix(runIds: number[]) {
   });
 }
 
-// ── metrics comparison ───────────────────────────────────────────────────────
+// -- metrics comparison -------------------------------------------------------
 
 export function useComparison(experimentIds: number[]) {
   return useQuery({

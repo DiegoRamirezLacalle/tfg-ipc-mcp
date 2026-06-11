@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
 import { Renderer, Program, Mesh, Triangle, Vec2, Vec3 } from "ogl";
 
-/* ────────────────────────────────────────────────────────────────────────
- * FlowField — living WebGL background for the landing hero.
+/* ------------------------------------------------------------------------
+ * FlowField - living WebGL background for the landing hero.
  *
  * A single full-screen triangle runs a hand-written GLSL shader: layered,
  * horizontally-drifting luminous bands (fbm domain-warp) that breathe and
- * never repeat — read as forecast trajectories / market flow, on-theme for
+ * never repeat - read as forecast trajectories / market flow, on-theme for
  * an inflation time-series thesis. Tinted to the project tokens:
  *   violet  #8B5CF6  (--mcp,  dominant)
  *   gold    #E0B96A  (--gold, reserved for the brightest crests)
@@ -20,7 +20,7 @@ import { Renderer, Program, Mesh, Triangle, Vec2, Vec3 } from "ogl";
  *
  * Inspired by the ogl-based shaders on 21st.dev (AuroraWaves / Plasma),
  * rewritten for this palette and concept rather than copied.
- * ──────────────────────────────────────────────────────────────────────── */
+ * ------------------------------------------------------------------------ */
 
 type FlowTheme = "dark" | "light" | "violet";
 
@@ -57,7 +57,7 @@ const FRAGMENT = /* glsl */ `
   uniform vec3  uIndigo;       // deep indigo (cloud mid-tone)
   uniform float uLight;        // 1.0 → light theme (subtractive pastel fog)
 
-  // ── value noise + fbm ──────────────────────────────────────────────
+  // -- value noise + fbm ----------------------------------------------
   float hash(vec2 p) {
     p = fract(p * vec2(123.34, 456.21));
     p += dot(p, p + 45.32);
@@ -87,7 +87,7 @@ const FRAGMENT = /* glsl */ `
     return v;
   }
 
-  // ── volumetric cloud density via domain-warped fbm ──────────────────
+  // -- volumetric cloud density via domain-warped fbm ------------------
   // Two layers of warping → billowing, organic fog that never repeats.
   float clouds(vec2 p) {
     float t = uTime * 0.06;
@@ -123,7 +123,7 @@ const FRAGMENT = /* glsl */ `
 
     vec3 col;
     if (uLight > 0.5) {
-      // ── LIGHT: soft pastel mist that gently TINTS a light base ───────
+      // -- LIGHT: soft pastel mist that gently TINTS a light base -------
       // build a tint colour, then blend it onto white by density so the
       // page stays bright (no glowing-on-white).
       vec3 tint = mix(uIndigo, uMcp, smoothstep(0.2, 0.85, density));
@@ -135,7 +135,7 @@ const FRAGMENT = /* glsl */ `
       col = mix(uBase, tint, amt);
       col *= clamp(vig + 0.45, 0.85, 1.0);   // very gentle edge fade on light
     } else {
-      // ── DARK / VIOLET: luminous nebula on a near-black base ──────────
+      // -- DARK / VIOLET: luminous nebula on a near-black base ----------
       col = uBase;
       col = mix(col, uIndigo, smoothstep(0.05, 0.55, density));
       col = mix(col, uMcp,    smoothstep(0.40, 0.92, density) * 0.85);
@@ -157,7 +157,7 @@ function hexToVec3(hex: string): [number, number, number] {
   return [parseInt(m[1], 16) / 255, parseInt(m[2], 16) / 255, parseInt(m[3], 16) / 255];
 }
 
-// Per-theme palettes — literal hex mirroring the CSS vars in index.css.
+// Per-theme palettes - literal hex mirroring the CSS vars in index.css.
 // dark/violet are luminous-on-black; light is a pastel-mist palette.
 const PALETTES: Record<FlowTheme, {
   base: string; mcp: string; gold: string; info: string; indigo: string; light: boolean;

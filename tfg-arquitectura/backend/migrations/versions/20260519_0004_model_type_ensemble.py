@@ -20,6 +20,6 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     # Postgres does not support removing enum values without dropping/recreating the type.
-    # Leave downgrade as a no-op — removing this enum value would require dropping
+    # Leave downgrade as a no-op - removing this enum value would require dropping
     # all rows that use it first.
     pass

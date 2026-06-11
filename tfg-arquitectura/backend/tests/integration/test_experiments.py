@@ -1,7 +1,7 @@
 import pytest
 
 
-# ── helpers ──────────────────────────────────────────────────────────────────
+# -- helpers ------------------------------------------------------------------
 
 def _exp_payload(catalog, **overrides):
     return {
@@ -14,7 +14,7 @@ def _exp_payload(catalog, **overrides):
     }
 
 
-# ── create ───────────────────────────────────────────────────────────────────
+# -- create -------------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_create_experiment_researcher(client, researcher, catalog):
@@ -87,7 +87,7 @@ async def test_create_experiment_horizon_out_of_range(client, researcher, catalo
     assert resp.status_code == 422
 
 
-# ── list ─────────────────────────────────────────────────────────────────────
+# -- list ---------------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_list_experiments_empty(client, researcher):
@@ -132,7 +132,7 @@ async def test_list_experiments_requires_auth(client):
     assert resp.status_code == 401
 
 
-# ── detail ───────────────────────────────────────────────────────────────────
+# -- detail -------------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_get_experiment_detail(client, researcher, catalog):
@@ -182,7 +182,7 @@ async def test_get_experiment_detail_other_user_forbidden(client, researcher, ad
     assert resp2.status_code == 403
 
 
-# ── delete ───────────────────────────────────────────────────────────────────
+# -- delete -------------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_delete_experiment(client, researcher, catalog):
@@ -214,7 +214,7 @@ async def test_delete_experiment_other_user_forbidden(client, researcher, admin,
     assert resp.status_code == 204
 
 
-# ── list runs ────────────────────────────────────────────────────────────────
+# -- list runs ----------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_list_runs_empty(client, researcher, catalog):

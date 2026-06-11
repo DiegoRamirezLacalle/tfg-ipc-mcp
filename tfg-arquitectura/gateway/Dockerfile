@@ -1,4 +1,4 @@
-# Stage 1 — build the React app
+# Stage 1 - build the React app
 FROM node:20-alpine AS builder
 
 WORKDIR /build
@@ -12,7 +12,7 @@ COPY tfg-arquitectura/frontend ./
 ENV VITE_API_URL=""
 RUN npm run build
 
-# Stage 2 — nginx serving static files + reverse proxy
+# Stage 2 - nginx serving static files + reverse proxy
 FROM nginx:1.27-alpine
 
 COPY tfg-arquitectura/gateway/nginx.conf /etc/nginx/nginx.conf
