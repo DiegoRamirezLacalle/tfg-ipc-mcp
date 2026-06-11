@@ -148,7 +148,7 @@ async def _stream_ollama(messages: list[dict]) -> AsyncIterator[bytes]:
         "model": settings.OLLAMA_CHAT_MODEL,
         "messages": messages,
         "stream": True,
-        # Disable chain-of-thought on thinking models (Qwen 3) — we want fast,
+        # Disable chain-of-thought on thinking models (Qwen 3) - we want fast,
         # streamed tokens, not minutes of hidden reasoning. The system prompt
         # also carries the /no_think directive as a fallback for older runtimes.
         "think": False,

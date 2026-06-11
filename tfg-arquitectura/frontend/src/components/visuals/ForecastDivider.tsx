@@ -1,14 +1,14 @@
 import { useId } from "react";
 import { motion } from "motion/react";
 
-/* ────────────────────────────────────────────────────────────────────────
- * ForecastDivider — a quiet callback to the hero's forecast-line motif.
+/* ------------------------------------------------------------------------
+ * ForecastDivider - a quiet callback to the hero's forecast-line motif.
  *
  * A single thin trajectory that gently undulates across a full-width strip,
- * with the gold convergence dot on the right. Far calmer than the hero —
+ * with the gold convergence dot on the right. Far calmer than the hero -
  * it's connective tissue between sections, not a second spectacle. Used in
  * place of the plain gold rule on the home page.
- * ──────────────────────────────────────────────────────────────────────── */
+ * ------------------------------------------------------------------------ */
 
 export function ForecastDivider({
   className = "",

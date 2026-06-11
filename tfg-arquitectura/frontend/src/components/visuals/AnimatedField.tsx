@@ -1,17 +1,17 @@
 import { useId } from "react";
 import { motion } from "motion/react";
 
-/* ────────────────────────────────────────────────────────────────────────
- * AnimatedField — dramatic, looping "forecast being computed" lines.
+/* ------------------------------------------------------------------------
+ * AnimatedField - dramatic, looping "forecast being computed" lines.
  *
  * Each trajectory DRAWS itself left→right (Framer `pathLength` 0→1) with a
  * glowing leading dot that races along the curve (CSS `offset-path`), holds
- * lit for a beat, fades out, then redraws — forever, staggered across lines.
+ * lit for a beat, fades out, then redraws - forever, staggered across lines.
  * Reads as a live prediction being generated. Pure SVG/CSS + Framer Motion,
  * so it can never silently fail; the WebGL nebula glows behind it.
  *
  * A faint terminal grid (the motif from the original landing) sits underneath.
- * ──────────────────────────────────────────────────────────────────────── */
+ * ------------------------------------------------------------------------ */
 
 type FieldTheme = "dark" | "light" | "violet";
 
@@ -26,7 +26,7 @@ interface Trace {
   delay: number;
 }
 
-// Paths span x: 0..1200, y around the 250 mid-line — rising/converging curves
+// Paths span x: 0..1200, y around the 250 mid-line - rising/converging curves
 // that read like forecast fans homing toward a target on the right.
 // Light colours are darker/saturated so they read on a white page.
 const TRACES: Trace[] = [

@@ -30,12 +30,12 @@ import pandas as pd
 from mcp.server.fastmcp import FastMCP
 from pymongo import MongoClient
 
-# ── paths ─────────────────────────────────────────────────────────────────────
+# -- paths ---------------------------------------------------------------------
 
 _DATA_DIR = Path(__file__).resolve().parents[2] / "tfg-forecasting" / "data" / "processed"
 _SIGNALS_PATH = _DATA_DIR / "mcp_signals_global.parquet"
 
-# ── lazy parquet load ─────────────────────────────────────────────────────────
+# -- lazy parquet load ---------------------------------------------------------
 
 _signals_df: pd.DataFrame | None = None
 
@@ -48,7 +48,7 @@ def _get_signals() -> pd.DataFrame:
     return _signals_df
 
 
-# ── FinBERT lazy load (double-checked locking) ────────────────────────────────
+# -- FinBERT lazy load (double-checked locking) --------------------------------
 
 _FINBERT_MODEL = "ProsusAI/finbert"
 _FINBERT_LOCK = threading.Lock()
@@ -80,7 +80,7 @@ _HAWKISH_KEYWORDS = frozenset({
     "interest rate rise", "monetary tightening", "hike rates",
 })
 
-# ── MongoDB helper ────────────────────────────────────────────────────────────
+# -- MongoDB helper ------------------------------------------------------------
 
 
 def _news_collection():
@@ -89,7 +89,7 @@ def _news_collection():
     return client["tfg_news"]["news_raw"]
 
 
-# ── FastMCP server ────────────────────────────────────────────────────────────
+# -- FastMCP server ------------------------------------------------------------
 
 _port = int(os.getenv("MCP_SERVER_PORT", "8080"))
 mcp = FastMCP(name="tfg-ipc-macro-context", host="0.0.0.0", port=_port)
@@ -239,7 +239,7 @@ def get_news_sentiment(country: str, year_month: str) -> str:
         return json.dumps({"error": str(exc), "year_month": year_month, "country": country})
 
 
-# ── entry point ───────────────────────────────────────────────────────────────
+# -- entry point ---------------------------------------------------------------
 
 if __name__ == "__main__":
     mcp.run(transport="sse")

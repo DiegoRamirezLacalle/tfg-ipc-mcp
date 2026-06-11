@@ -241,7 +241,7 @@ async def _execute_forecast(run_id: int) -> None:
             for name, val in metrics_dict.items():
                 db.add(Metric(run_id=run.id, name=name, value=val))
 
-            # ── MLflow tracking ───────────────────────────────────────────────
+            # -- MLflow tracking -----------------------------------------------
             try:
                 import mlflow  # noqa: PLC0415
                 mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)

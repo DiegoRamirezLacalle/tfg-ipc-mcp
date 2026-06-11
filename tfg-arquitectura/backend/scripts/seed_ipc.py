@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 
-# ── config ───────────────────────────────────────────────────────────────────
+# -- config -------------------------------------------------------------------
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     f"postgresql+asyncpg://"
@@ -34,7 +34,7 @@ _DATA_DIR = os.path.join(
     "../../../tfg-forecasting/data/processed"
 )
 
-# ── dataset definitions ───────────────────────────────────────────────────────
+# -- dataset definitions -------------------------------------------------------
 
 DATASETS = [
     {

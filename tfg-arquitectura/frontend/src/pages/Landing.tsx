@@ -68,7 +68,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* ── NAV ─────────────────────────────────────────── */}
+      {/* -- NAV ------------------------------------------- */}
       <nav
         className={
           "fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 h-14 transition-colors duration-500 " +
@@ -91,7 +91,7 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* ── HERO ────────────────────────────────────────── */}
+      {/* -- HERO ------------------------------------------ */}
       <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
         {/* Layered living background (z-0, content sits at z-10 above):
             1. WebGL volumetric nebula — cinematic violet/gold/indigo fog
@@ -168,7 +168,7 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* ── MODELS STRIP ────────────────────────────────── */}
+      {/* -- MODELS STRIP ---------------------------------- */}
       <div className="relative border-y border-border bg-muted/30 backdrop-blur-sm py-3 px-6">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
           <span className="micro uppercase text-foreground-subtle">On the leaderboard</span>
@@ -181,7 +181,7 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* ── THREE DOORS ─────────────────────────────────── */}
+      {/* -- THREE DOORS ----------------------------------- */}
       <section className="max-w-5xl mx-auto px-6 py-24 flex flex-col gap-12">
         <motion.div className="section-glow flex flex-col gap-3" {...reveal()}>
           <p className="micro text-foreground-subtle uppercase">Explore the thesis</p>
@@ -216,10 +216,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── DIVIDER — faint forecast-line callback ──────── */}
+      {/* -- DIVIDER — faint forecast-line callback -------- */}
       <ForecastDivider className="max-w-5xl mx-auto px-6" theme={theme} />
 
-      {/* ── LIVE PULSE ──────────────────────────────────── */}
+      {/* -- LIVE PULSE ------------------------------------ */}
       <section className="max-w-5xl mx-auto px-6 py-24 flex flex-col gap-8">
         <motion.div className="flex items-end justify-between gap-4 flex-wrap" {...reveal()}>
           <div className="section-glow flex flex-col gap-3">
@@ -243,7 +243,7 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* ── FINAL CTA ───────────────────────────────────── */}
+      {/* -- FINAL CTA ------------------------------------- */}
       <section className="relative max-w-5xl mx-auto px-6 py-28 flex flex-col items-center text-center gap-8">
         <motion.div className="section-glow flex flex-col gap-4 items-center" {...reveal()}>
           <h2 className="font-grotesk font-semibold text-display-lg leading-tight tracking-[-0.02em]">
@@ -265,7 +265,7 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* ── FOOTER ──────────────────────────────────────── */}
+      {/* -- FOOTER ---------------------------------------- */}
       <footer className="border-t border-border px-6 py-5 flex items-center justify-between">
         <span className="font-mono text-data-sm text-foreground-subtle">tfg-ipc-mcp · 2026</span>
         <span className="font-mono text-data-sm text-foreground-subtle">Diego Ramírez · TFG</span>

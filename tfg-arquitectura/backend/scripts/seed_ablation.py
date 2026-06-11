@@ -133,7 +133,7 @@ def wait(client: httpx.Client, h: dict, run_ids: list[tuple]):
         print("\nAll runs completed.")
 
     # Print final metrics
-    print("\n── Metrics ────────────────────────────────────────────────────────")
+    print("\n-- Metrics --------------------------------------------------------")
     print(f"{'slug':<14} {'cond':<8} {'run':>4}  {'MAE':>8} {'RMSE':>8} {'MAPE':>7}")
     for slug, label, exp_id, run_id in run_ids:
         r = client.get(f"{BASE_URL}/runs/{run_id}/metrics", headers=h)

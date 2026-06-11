@@ -1,6 +1,6 @@
 # TFG Frontend
 
-React + Vite + Tailwind + shadcn/ui interface for the inflation-forecasting platform.
+React + Vite + Tailwind interface for the inflation-forecasting platform.
 
 ## Local dev
 
@@ -17,22 +17,12 @@ docker compose up frontend
 # → http://localhost:3000
 ```
 
-## Stitch integration
+## Structure
 
-1. Generate the design at https://stitch.withgoogle.com — describe the platform
-   (experiments list, run detail, comparison table, dark mode).
-2. Export `design.md` and the React components.
-3. Drop `design.md` in this folder.
-4. Ask Claude Code to read `CLAUDE.md` and translate tokens + screens.
+- `src/styles/` — design tokens (three themes), base styles, component classes
+- `src/pages/` — routed pages; `src/components/` — charts, comparison views, visuals
+- `src/lib/queries.ts` — all TanStack Query hooks; `src/lib/types.ts` mirrors the
+  backend Pydantic schemas
 
-## shadcn components
-
-The shadcn MCP server is configured in `.mcp.json`. From a Claude Code session
-inside this folder:
-
-```
-/mcp
-# then: "install the shadcn button, card, table, badge, and dialog components"
-```
-
-Components land in `src/components/ui/` and use the tokens from `src/index.css`.
+Design mockups and the exported design system live in `docs/design/stitch/`
+at the repository root.
