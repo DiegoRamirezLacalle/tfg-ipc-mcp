@@ -10,13 +10,13 @@ Datasets seeded:
 Run inside the backend container:
   docker compose exec backend python scripts/seed_ipc.py
 """
-import os
 import asyncio
+import os
 
 import pandas as pd
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 # -- config -------------------------------------------------------------------
 DATABASE_URL = os.getenv(

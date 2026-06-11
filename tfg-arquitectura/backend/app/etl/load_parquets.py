@@ -77,7 +77,7 @@ MODEL_CATALOG_SEED = [
         "slug": "chronos-2",
         "name": "Amazon Chronos-2",
         "model_type": "chronos",
-        "description": "Amazon Chronos-2 pretrained transformer; zero-shot probabilistic forecasting.",
+        "description": "Amazon Chronos-2 pretrained transformer; zero-shot forecasting.",
         "supports_mcp": True,
     },
     {

@@ -1,6 +1,5 @@
 import pytest
 
-
 # -- helpers ------------------------------------------------------------------
 
 def _exp_payload(catalog, **overrides):

@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import text
 
 from app.db.postgres import AsyncSessionLocal
 from app.models.dataset import Dataset, Observation, Series
