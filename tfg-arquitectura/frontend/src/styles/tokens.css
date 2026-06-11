@@ -1,0 +1,109 @@
+/* Design tokens.
+ *
+ * Three themes, switched by a class on <html> (see src/lib/theme.ts):
+ *   :root / .theme-dark   -> zinc near-black (default)
+ *   .theme-violet         -> violet-tinted dark (branded)
+ *   .theme-light          -> white / near-white
+ *
+ * Brand accents (--mcp, --gold) and chart --series-* are identity/data
+ * colours - kept constant across themes (a few nudged on light for contrast).
+ */
+@layer base {
+  :root,
+  .theme-dark {
+    /* Surfaces - zinc-tinted near-black, never pure */
+    --background:        240   5%   4%;  /* #0A0A0C */
+    --card:              240   5%   7%;  /* #11111A-ish */
+    --muted:             240   4%  10%;  /* #18181B */
+    --border:            240   4%  16%;  /* #27272A */
+    --border-strong:     240   4%  24%;  /* #3F3F46 */
+    --input:             240   4%  16%;
+    --ring:              262  83%  68%;  /* matches --mcp on focus */
+
+    /* Text */
+    --foreground:           0   0%  98%;  /* #FAFAFA */
+    --foreground-muted:   240   5%  65%;  /* #A1A1AA */
+    --foreground-subtle:  240   4%  46%;  /* #71717A */
+
+    /* Status - semantic colors used everywhere */
+    --success:      160  84%  39%;  /* #10B981 */
+    --info:         189  94%  43%;  /* #06B6D4 */
+    --warning:       38  92%  50%;  /* #F59E0B */
+    --destructive:    0  84%  60%;  /* #EF4444 */
+
+    /* Brand accents - used sparingly */
+    --mcp:          262  83%  68%;  /* #8B5CF6 - MCP only */
+    --gold:          39  60%  65%;  /* #E0B96A - thesis identity */
+
+    /* Chart series - one per model slug, colour-blind safe ish */
+    --series-naive:    0   0%  88%;  /* #E4E4E7 - baseline reference (off-white) */
+    --series-sarima: 189  94%  53%;  /* cyan */
+    --series-ridge:   38  92%  50%;  /* amber */
+    --series-timesfm: 262 83%  72%;  /* violet (distinct from --mcp) */
+    --series-chronos: 158 64%  52%;  /* emerald */
+    --series-timegpt: 351 95%  71%;  /* rose */
+  }
+
+  /* Violet - violet-tinted dark (branded), spirit of #15121b */
+  .theme-violet {
+    --background:        264  28%   9%;  /* #15121b */
+    --card:              264  22%  13%;  /* #1d1a23 */
+    --muted:             264  18%  17%;  /* #2c2832 */
+    --border:            264  15%  24%;  /* #3a3447 */
+    --border-strong:     264  14%  33%;  /* #4f4860 */
+    --input:             264  15%  24%;
+    --ring:              262  90%  76%;
+
+    --foreground:        276  35%  92%;  /* #e7e0ed */
+    --foreground-muted:  276  22%  74%;  /* #cbc3d7 */
+    --foreground-subtle: 276  12%  56%;  /* #958ea0 */
+
+    --success:      160  74%  52%;
+    --info:         189  90%  60%;
+    --warning:       38  95%  62%;
+    --destructive:    6 100%  71%;
+
+    --mcp:          262  90%  78%;  /* #d0bcff - brighter on violet base */
+    --gold:          39  70%  68%;
+
+    /* series stay constant (data identity) */
+    --series-naive:  276  20%  85%;
+    --series-sarima: 189  94%  60%;
+    --series-ridge:   38  92%  58%;
+    --series-timesfm: 262 90%  80%;
+    --series-chronos: 158 64%  58%;
+    --series-timegpt: 351 95%  74%;
+  }
+
+  /* Light - white / near-white, dark text */
+  .theme-light {
+    --background:        264  30%  98%;  /* #f7f5fb - faint lavender white */
+    --card:                0   0% 100%;  /* #ffffff */
+    --muted:             264  24%  95%;  /* #efecf5 */
+    --border:            264  16%  88%;  /* #e0dbeb */
+    --border-strong:     264  12%  78%;  /* #c4bcd4 */
+    --input:             264  16%  88%;
+    --ring:              262  83%  58%;
+
+    --foreground:        264  30%  12%;  /* near-black, faint violet */
+    --foreground-muted:  264  10%  38%;  /* #5a5566 */
+    --foreground-subtle: 264   8%  52%;  /* #7e7a8a */
+
+    --success:      160  84%  32%;
+    --info:         189  94%  36%;
+    --warning:       33  95%  44%;
+    --destructive:    0  74%  50%;
+
+    /* darker so accents read on white */
+    --mcp:          262  72%  56%;  /* deeper violet */
+    --gold:          36  62%  44%;  /* bronze-gold (E0B96A is invisible on white) */
+
+    /* series darkened for contrast on white */
+    --series-naive:  264  10%  55%;
+    --series-sarima: 189  90%  38%;
+    --series-ridge:   33  92%  44%;
+    --series-timesfm: 262 72%  56%;
+    --series-chronos: 158 64%  38%;
+    --series-timegpt: 351 80%  56%;
+  }
+}

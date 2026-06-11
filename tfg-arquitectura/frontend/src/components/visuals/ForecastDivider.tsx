@@ -1,14 +1,14 @@
 import { useId } from "react";
 import { motion } from "motion/react";
 
-/* ────────────────────────────────────────────────────────────────────────
- * ForecastDivider — a quiet callback to the hero's forecast-line motif.
+/* ------------------------------------------------------------------------
+ * ForecastDivider - a quiet callback to the hero's forecast-line motif.
  *
  * A single thin trajectory that gently undulates across a full-width strip,
- * with the gold convergence dot on the right. Far calmer than the hero —
+ * with the gold convergence dot on the right. Far calmer than the hero -
  * it's connective tissue between sections, not a second spectacle. Used in
  * place of the plain gold rule on the home page.
- * ──────────────────────────────────────────────────────────────────────── */
+ * ------------------------------------------------------------------------ */
 
 export function ForecastDivider({
   className = "",
@@ -52,8 +52,7 @@ export function ForecastDivider({
       </svg>
       {/* gold convergence dot, pulsing softly */}
       <motion.span
-        className="absolute top-1/2 right-[3%] h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-gold"
-        style={{ boxShadow: "0 0 10px hsl(var(--gold) / 0.8)" }}
+        className="absolute top-1/2 right-[3%] h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-gold shadow-[0_0_10px_hsl(var(--gold)/0.8)]"
         animate={{ opacity: [0.3, 1, 0.3] }}
         transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
       />

@@ -164,7 +164,7 @@ export default function Comparison() {
 
         {hasEnough && data && (
           <div className="flex flex-col">
-            {/* ── Core thesis evidence ─────────────────────────────── */}
+            {/* -- Core thesis evidence ------------------------------- */}
             <SectionCard number="01" title="Forecast Overlay" subtitle="Actuals vs every selected forecast — the visual story">
               <ForecastOverlay
                 data={data}
@@ -189,7 +189,7 @@ export default function Comparison() {
               <DMMatrix runs={runs} hoveredModel={hoveredModel} onHoverModel={setHoveredModel} />
             </SectionCard>
 
-            {/* ── Deep dive (secondary views) ──────────────────────── */}
+            {/* -- Deep dive (secondary views) ------------------------ */}
             <button
               onClick={() => setShowDeepDive((v) => !v)}
               className="flex items-center gap-2 px-4 py-3 border-t border-border bg-card/40 hover:bg-muted/50 transition-colors font-mono text-data-sm text-foreground-muted"

@@ -6,7 +6,7 @@ ENV PYTHONPATH=/app \
     UV_SYSTEM_PYTHON=1 \
     TRANSFORMERS_CACHE=/root/.cache/huggingface
 
-# Base deps (fast layer — no ML weights)
+# Base deps (fast layer - no ML weights)
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install --system \
     "mcp[cli]>=1.0" \
@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     "feedparser>=6.0" \
     "httpx>=0.27"
 
-# Heavy ML layer — CPU PyTorch + FinBERT for news sentiment scoring
+# Heavy ML layer - CPU PyTorch + FinBERT for news sentiment scoring
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install --system \
     --extra-index-url https://download.pytorch.org/whl/cpu \

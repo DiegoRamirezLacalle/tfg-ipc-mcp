@@ -2,33 +2,27 @@
 
 GET /api/v1/whatif/setup?series_id=<id>&horizon=<h>
 
-Returns everything the frontend needs to run an *instant*, client-side
+Returns everything the frontend needs for an instant, client-side
 signal-sensitivity simulation:
 
-  - history     : last 36 observed points (chart context)
-  - baseline    : a pure time-series base forecast (ARIMA) for `horizon` steps
-  - signals     : the macro / monetary-policy levers, each with a per-horizon
-                  *marginal effect* — the change in the target (in its own units)
-                  caused by a +1 unit move in that signal at the forecast origin.
+  - history  : last 36 observed points (chart context)
+  - baseline : pure time-series base forecast (ARIMA) for `horizon` steps
+  - signals  : macro / monetary-policy levers, each with a per-horizon
+               marginal effect (change in the target per +1 unit move in
+               the signal at the forecast origin)
 
-Methodology — why this is honest, not a spurious-correlation trap:
+Each effect comes from a direct multi-step Ridge fit on the h-step change
+y[t+d] - y[t], not the raw level: fitting on changes isolates the signal's
+contribution to future movements instead of recovering shared level trends.
+Signals are standardised before the fit, matching the C1 conditions.
 
-  Each per-step effect comes from a direct multi-step Ridge fit where the target
-  is the *h-step change* y[t+d] - y[t], NOT the raw level. Fitting on the level
-  would recover the spurious level correlation the thesis warns about (e.g. EPU
-  ↔ CPI both rising in 2022). Fitting on the change isolates the genuine
-  predictive contribution of each signal to future *movements*. Signals are
-  standardised (StandardScaler) before Ridge, matching the C1 conditions.
+Ridge is linear, so the frontend reconstructs any counterfactual exactly
+(no server round-trip per slider move):
 
-Because Ridge is linear, the frontend reconstructs any counterfactual exactly:
+    counterfactual[d] = baseline[d] + sum_i (slider_i - baseline_i) * effect_i[d]
 
-    counterfactual[d] = baseline[d] + Σ_i (slider_i - baseline_i) * effect_i[d]
-
-so dragging a slider needs no server round-trip.
-
-Lever data sources:
-  - ECB deposit rate (`dfr`)  ← Postgres `features-exog` dataset
-  - FOMC / US CPI signals     ← mcp_signals_global.parquet (only varying columns)
+Lever sources: ECB deposit rate (dfr) from the features-exog dataset;
+FOMC / US CPI signals from mcp_signals_global.parquet (varying columns only).
 """
 
 from __future__ import annotations
@@ -226,7 +220,7 @@ async def whatif_setup(
         for ts, v in zip(y.index[-_HISTORY_POINTS:], y.values[-_HISTORY_POINTS:])
     ]
 
-    # ── Assemble lever matrix from both sources, aligned to the target index ──
+    # -- Assemble lever matrix from both sources, aligned to the target index --
     combo = pd.DataFrame(index=y.index)
     combo = combo.join(await _load_ecb_levers(db, y.index))
 

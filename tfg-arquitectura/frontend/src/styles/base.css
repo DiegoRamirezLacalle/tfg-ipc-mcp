@@ -1,0 +1,58 @@
+/* Global element styles: typography, selection, scrollbar, grain overlay. */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "cv11" 1;
+  }
+
+  /* Tabular numerals for all monospace - keeps columns aligned */
+  .font-mono,
+  .tabular {
+    font-feature-settings: "tnum" 1, "calt" 0;
+  }
+
+  ::selection {
+    background: hsl(var(--mcp) / 0.35);
+    color: hsl(var(--foreground));
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--border-strong)); }
+}
+
+/* Page-wide grain overlay: fixed, low-opacity SVG noise on top of the app.
+ * The grain makes the dark surfaces feel like paper / a CRT terminal rather
+ * than pure-black digital flatness. */
+@layer base {
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* On light, overlay-blend grain dirties white surfaces - soften it. */
+  .theme-light body::before {
+    opacity: 0.02;
+    mix-blend-mode: multiply;
+  }
+}

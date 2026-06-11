@@ -1,10 +1,10 @@
 """Metrics aggregation — cross-experiment comparison table + DM significance."""
 
 import numpy as np
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from scipy import stats
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.api.deps import get_db
 from app.core.permissions import get_current_user

@@ -28,7 +28,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_db
 from app.core.permissions import get_current_user
 from app.models.dataset import Observation
-from app.models.experiment import Experiment, Metric, Prediction, Run, RunStatus
+from app.models.experiment import Experiment, Prediction, Run, RunStatus
 from app.models.user import User, UserRole
 
 router = APIRouter(tags=["drift"])

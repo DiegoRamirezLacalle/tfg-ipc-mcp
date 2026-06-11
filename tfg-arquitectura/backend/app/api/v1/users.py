@@ -24,7 +24,7 @@ async def update_role(
     if not target:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
 
-    # prevent admin from demoting themselves — avoids lockout
+    # prevent admin from demoting themselves - avoids lockout
     if target.id == current_user.id and payload.role != UserRole.admin:
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,

@@ -262,7 +262,7 @@ export default function Simulator() {
                 <span className="micro uppercase">{setup.data.series_name} · forecast</span>
                 <div className="flex items-center gap-4 font-mono text-data-sm">
                   <span className="flex items-center gap-1.5 text-foreground-muted">
-                    <span className="w-4 h-0.5 bg-mcp rounded" style={{ borderTop: "2px dashed #8B5CF6" }} /> Baseline
+                    <span className="w-4 border-t-2 border-dashed border-mcp" /> Baseline
                   </span>
                   <span className="flex items-center gap-1.5 text-foreground-muted">
                     <span className="w-4 h-0.5 bg-gold rounded" /> Counterfactual
