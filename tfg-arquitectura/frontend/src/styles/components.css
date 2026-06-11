@@ -116,6 +116,22 @@
     );
   }
 
+  /* Readability scrim under the hero headline, over the shader background */
+  .hero-scrim {
+    background: radial-gradient(
+      85% 60% at 50% 34%,
+      hsl(var(--background) / 0.45) 0%,
+      hsl(var(--background) / 0) 72%
+    );
+  }
+  .theme-light .hero-scrim {
+    background: radial-gradient(
+      85% 60% at 50% 34%,
+      hsl(var(--background) / 0.55) 0%,
+      hsl(var(--background) / 0) 72%
+    );
+  }
+
   /* Soft violet->gold glow behind a section header, so body sections feel
    * related to the hero without repeating the nebula. */
   .section-glow {
