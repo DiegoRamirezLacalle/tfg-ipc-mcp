@@ -1,6 +1,5 @@
 import pytest
 
-
 # -- helpers ------------------------------------------------------------------
 
 async def _make_experiment(client, headers, series_id, model_id, horizon=6, use_mcp=False):

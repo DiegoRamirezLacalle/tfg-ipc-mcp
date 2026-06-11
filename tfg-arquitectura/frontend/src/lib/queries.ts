@@ -87,7 +87,7 @@ export interface SeriesInfo {
 /** Resolve every series across all datasets into a single id → info map. */
 export function useAllSeries(): { map: Map<number, SeriesInfo>; isLoading: boolean } {
   const datasets = useDatasets();
-  const dsList = datasets.data ?? [];
+  const dsList = useMemo(() => datasets.data ?? [], [datasets.data]);
 
   const results = useQueries({
     queries: dsList.map((d) => ({

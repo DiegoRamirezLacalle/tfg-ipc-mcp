@@ -36,9 +36,9 @@ class Chronos2Adapter:
 
     def run(self, inp: ForecastInput) -> ForecastResult:
         try:
+            import chronos as chronos_mod  # noqa: PLC0415
             import torch  # noqa: PLC0415
             from chronos import Chronos2Pipeline as _  # noqa: F401, PLC0415
-            import chronos as chronos_mod  # noqa: PLC0415
         except ImportError as exc:
             raise ImportError(
                 "chronos-forecasting and torch are required. "

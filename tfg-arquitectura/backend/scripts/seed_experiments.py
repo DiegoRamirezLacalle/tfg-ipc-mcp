@@ -5,7 +5,6 @@ Creates one experiment per model, both with and without MCP, then waits for
 all runs to complete. Run inside the backend container:
   docker compose exec backend python scripts/seed_experiments.py
 """
-import asyncio
 import os
 import time
 

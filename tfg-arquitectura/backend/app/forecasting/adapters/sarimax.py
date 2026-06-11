@@ -7,7 +7,6 @@ missing these columns, falls back to pure SARIMA behaviour.
 import warnings
 
 import numpy as np
-import pandas as pd
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 from app.forecasting.base import ForecastAdapter, ForecastInput, ForecastResult

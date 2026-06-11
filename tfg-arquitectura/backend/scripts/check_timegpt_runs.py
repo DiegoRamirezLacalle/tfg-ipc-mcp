@@ -1,4 +1,6 @@
-import httpx, time
+import time
+
+import httpx
 
 BASE = "http://localhost:8000/api/v1"
 client = httpx.Client(timeout=60)

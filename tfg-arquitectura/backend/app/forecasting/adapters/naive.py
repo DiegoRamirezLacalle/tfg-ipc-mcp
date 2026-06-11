@@ -1,6 +1,5 @@
 """Seasonal naïve baseline: y_hat[t+s] = y[t+s-12]."""
 import numpy as np
-import pandas as pd
 
 from app.forecasting.base import ForecastInput, ForecastResult
 
