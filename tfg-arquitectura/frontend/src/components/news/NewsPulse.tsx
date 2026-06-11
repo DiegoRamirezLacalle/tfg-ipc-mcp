@@ -197,7 +197,7 @@ function Gauge({
       <div className="relative h-1.5 rounded-full bg-muted overflow-hidden">
         {/* zero marker for symmetric gauges */}
         {min < 0 && (
-          <span className="absolute top-0 bottom-0 w-px bg-border-strong" style={{ left: "50%" }} />
+          <span className="absolute top-0 bottom-0 left-1/2 w-px bg-border-strong" />
         )}
         <span
           className={"absolute top-0 bottom-0 left-0 rounded-full transition-all duration-500 " + tone}

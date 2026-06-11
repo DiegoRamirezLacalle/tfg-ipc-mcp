@@ -104,15 +104,7 @@ export default function Landing() {
             theme={theme}
           />
           {/* scrim under the headline so it always reads (light vs dark) */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                theme === "light"
-                  ? "radial-gradient(85% 60% at 50% 34%, rgba(247,245,251,0.55) 0%, rgba(247,245,251,0) 72%)"
-                  : "radial-gradient(85% 60% at 50% 34%, rgba(10,10,12,0.45) 0%, rgba(10,10,12,0) 72%)",
-            }}
-          />
+          <div className="hero-scrim absolute inset-0" />
           <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-background via-background/70 to-transparent" />
         </div>
 

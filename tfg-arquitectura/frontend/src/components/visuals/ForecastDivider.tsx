@@ -52,8 +52,7 @@ export function ForecastDivider({
       </svg>
       {/* gold convergence dot, pulsing softly */}
       <motion.span
-        className="absolute top-1/2 right-[3%] h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-gold"
-        style={{ boxShadow: "0 0 10px hsl(var(--gold) / 0.8)" }}
+        className="absolute top-1/2 right-[3%] h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-gold shadow-[0_0_10px_hsl(var(--gold)/0.8)]"
         animate={{ opacity: [0.3, 1, 0.3] }}
         transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
       />
