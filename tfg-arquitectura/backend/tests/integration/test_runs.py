@@ -1,7 +1,6 @@
 import pytest
 
-
-# ── helpers ──────────────────────────────────────────────────────────────────
+# -- helpers ------------------------------------------------------------------
 
 async def _make_experiment(client, headers, series_id, model_id, horizon=6, use_mcp=False):
     resp = await client.post(
@@ -27,7 +26,7 @@ async def _trigger_and_get(client, headers, exp_id):
     return run_id, detail.json()
 
 
-# ── trigger run ───────────────────────────────────────────────────────────────
+# -- trigger run ---------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_trigger_run_returns_202_pending(client, researcher, run_catalog):
@@ -142,7 +141,7 @@ async def test_trigger_run_experiment_not_found(client, researcher):
     assert resp.status_code == 404
 
 
-# ── get run ───────────────────────────────────────────────────────────────────
+# -- get run -------------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_get_run_not_found(client, researcher):
@@ -150,7 +149,7 @@ async def test_get_run_not_found(client, researcher):
     assert resp.status_code == 404
 
 
-# ── predictions ───────────────────────────────────────────────────────────────
+# -- predictions ---------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_get_predictions(client, researcher, run_catalog):
@@ -187,7 +186,7 @@ async def test_get_predictions_paginated(client, researcher, run_catalog):
     assert len(resp.json()) == 3
 
 
-# ── metrics ───────────────────────────────────────────────────────────────────
+# -- metrics -------------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_get_metrics(client, researcher, run_catalog):
@@ -211,7 +210,7 @@ async def test_get_metrics_not_found(client, researcher):
     assert resp.status_code == 404
 
 
-# ── ridge-exog adapter ────────────────────────────────────────────────────────
+# -- ridge-exog adapter --------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_trigger_run_ridge_exog_completes(client, researcher, run_catalog):
@@ -241,7 +240,7 @@ async def test_trigger_run_ridge_exog_has_metrics(client, researcher, run_catalo
     assert names == {"mae", "rmse", "mape"}
 
 
-# ── F7: foundation model adapters (graceful failure) ──────────────────────────
+# -- F7: foundation model adapters (graceful failure) --------------------------
 
 @pytest.mark.asyncio
 async def test_trigger_run_timesfm_missing_lib(client, researcher, run_catalog):
@@ -279,7 +278,7 @@ async def test_trigger_run_timegpt_no_api_key(client, researcher, run_catalog):
     assert detail["error_message"] is not None
 
 
-# ── F8: MCP context endpoint ──────────────────────────────────────────────────
+# -- F8: MCP context endpoint --------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_get_mcp_context_not_found(client, researcher, run_catalog):

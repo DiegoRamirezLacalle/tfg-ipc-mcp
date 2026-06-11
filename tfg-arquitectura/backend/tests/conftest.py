@@ -1,9 +1,9 @@
-import pytest_asyncio
 import httpx
+import pytest_asyncio
 from sqlalchemy import text
 
-from app.main import app
 from app.db.postgres import AsyncSessionLocal
+from app.main import app
 
 
 @pytest_asyncio.fixture(scope="session")

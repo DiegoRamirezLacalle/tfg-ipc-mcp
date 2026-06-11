@@ -11,7 +11,8 @@ class ForecastInput:
     horizon: int                             # steps ahead to forecast
     config: dict[str, Any] = field(default_factory=dict)
     exog: pd.DataFrame | None = None         # optional exogenous features, same DatetimeIndex
-    stack_preds: pd.DataFrame | None = None  # for ensemble-stack: cols=run_ids, index=test timestamps
+    # for ensemble-stack: cols=run_ids, index=test timestamps
+    stack_preds: pd.DataFrame | None = None
     stack_weights: np.ndarray | None = None  # per-model weights (inverse MAE); None = equal weights
 
 

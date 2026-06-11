@@ -7,7 +7,7 @@ WORKDIR /app
 ENV PYTHONPATH=/app/tfg-arquitectura/backend:/app \
     UV_SYSTEM_PYTHON=1
 
-# Install backend deps (cached layer — only re-runs if this list changes)
+# Install backend deps (cached layer - only re-runs if this list changes)
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install --system \
     "fastapi>=0.111" \
@@ -35,7 +35,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     "nixtla>=0.5" \
     "mlflow>=2.16"
 
-# ── Heavy ML layer — CPU PyTorch + foundation-model packages ────────────────
+# -- Heavy ML layer - CPU PyTorch + foundation-model packages ----------------
 # Separate layer so the base deps cache is not invalidated on ML changes.
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install --system \

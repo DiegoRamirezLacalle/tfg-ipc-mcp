@@ -111,7 +111,9 @@ def _format_context(ctx: SimChatContext | None) -> str:
         lines.append("- Signal levers:")
         for s in ctx.signals:
             delta = s.current_value - s.baseline_value
-            eff = f" · per-unit effect at last h ≈ {s.final_effect:+.3f}" if s.final_effect is not None else ""
+            eff = ""
+            if s.final_effect is not None:
+                eff = f" · per-unit effect at last h ≈ {s.final_effect:+.3f}"
             lines.append(
                 f"    · {s.label} (key={s.key}): baseline={s.baseline_value:.3f}, "
                 f"current={s.current_value:.3f}, Δ={delta:+.3f}{eff}"
@@ -148,7 +150,7 @@ async def _stream_ollama(messages: list[dict]) -> AsyncIterator[bytes]:
         "model": settings.OLLAMA_CHAT_MODEL,
         "messages": messages,
         "stream": True,
-        # Disable chain-of-thought on thinking models (Qwen 3) — we want fast,
+        # Disable chain-of-thought on thinking models (Qwen 3) - we want fast,
         # streamed tokens, not minutes of hidden reasoning. The system prompt
         # also carries the /no_think directive as a fallback for older runtimes.
         "think": False,
@@ -159,7 +161,8 @@ async def _stream_ollama(messages: list[dict]) -> AsyncIterator[bytes]:
             async with client.stream("POST", url, json=payload) as resp:
                 if resp.status_code != 200:
                     body = await resp.aread()
-                    yield f"[Ollama error {resp.status_code}: {body.decode('utf-8', 'ignore')[:200]}]".encode()
+                    detail = body.decode("utf-8", "ignore")[:200]
+                    yield f"[Ollama error {resp.status_code}: {detail}]".encode()
                     return
                 async for line in resp.aiter_lines():
                     if not line.strip():
@@ -175,7 +178,10 @@ async def _stream_ollama(messages: list[dict]) -> AsyncIterator[bytes]:
                     if chunk.get("done"):
                         break
     except httpx.ConnectError:
-        yield b"[Ollama unreachable. Make sure Ollama is running on the host (host.docker.internal:11434).]"
+        yield (
+            b"[Ollama unreachable. Make sure Ollama is running "
+            b"on the host (host.docker.internal:11434).]"
+        )
     except Exception as exc:  # noqa: BLE001
         log.warning("assistant_stream_failed", error=str(exc))
         yield f"[Assistant error: {str(exc)[:200]}]".encode()

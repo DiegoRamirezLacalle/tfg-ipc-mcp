@@ -179,7 +179,9 @@ async def _execute_forecast(run_id: int) -> None:
             adapter = get_adapter(model_cat.slug)
         except KeyError:
             run.status = RunStatus.failed
-            run.error_message = f"Model '{model_cat.slug}' not implemented. Supported: {supported_slugs()}"
+            run.error_message = (
+                f"Model '{model_cat.slug}' not implemented. Supported: {supported_slugs()}"
+            )
             run.finished_at = datetime.now(timezone.utc)
             await db.commit()
             log.error("run_failed_unsupported_model", run_id=run.id, model=model_cat.slug)
@@ -216,7 +218,8 @@ async def _execute_forecast(run_id: int) -> None:
             if run_ids:
                 stack_preds_df, stack_weights = await _load_stack_preds(db, run_ids)
                 if stack_preds_df is not None:
-                    log.info("ensemble_stack_loaded", run_id=run.id, n_models=len(stack_preds_df.columns))
+                    n_models = len(stack_preds_df.columns)
+                    log.info("ensemble_stack_loaded", run_id=run.id, n_models=n_models)
             else:
                 log.warning("ensemble_stack_no_run_ids", run_id=run.id)
 
@@ -241,7 +244,7 @@ async def _execute_forecast(run_id: int) -> None:
             for name, val in metrics_dict.items():
                 db.add(Metric(run_id=run.id, name=name, value=val))
 
-            # ── MLflow tracking ───────────────────────────────────────────────
+            # -- MLflow tracking -----------------------------------------------
             try:
                 import mlflow  # noqa: PLC0415
                 mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)

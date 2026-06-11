@@ -5,6 +5,7 @@ __pycache__/
 .venv/
 dist/
 build/
+.pytest_cache/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -38,3 +39,7 @@ tfg-forecasting/04_models_deep/results/*.parquet
 .vscode/
 .idea/
 .DS_Store
+
+# Claude Code local settings
+.claude/
+.mcp.json

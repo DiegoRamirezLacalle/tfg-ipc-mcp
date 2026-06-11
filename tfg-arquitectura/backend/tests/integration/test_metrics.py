@@ -1,7 +1,6 @@
 import pytest
 
-
-# ── helpers ──────────────────────────────────────────────────────────────────
+# -- helpers ------------------------------------------------------------------
 
 async def _full_run(client, headers, series_id, model_id, horizon=6, name="exp"):
     """Create an experiment, trigger a run, wait for it to finish. Returns (exp_id, run_id)."""
@@ -21,7 +20,7 @@ async def _full_run(client, headers, series_id, model_id, horizon=6, name="exp")
     return exp_id, detail.json()["id"]
 
 
-# ── compare ───────────────────────────────────────────────────────────────────
+# -- compare -------------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_compare_two_models(client, researcher, run_catalog):

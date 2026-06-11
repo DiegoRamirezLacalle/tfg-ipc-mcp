@@ -9,14 +9,12 @@ Creates and triggers:
   - timegpt      h=12  [MCP]      (C1_mcp — C0 already seeded)
 
 Run inside the backend container:
-  docker-compose exec backend python seed_ablation.py
+  docker compose exec backend python scripts/seed_ablation.py
 """
 
 import os
 import sys
 import time
-
-sys.path.insert(0, os.path.dirname(__file__))
 
 import httpx
 
@@ -135,7 +133,7 @@ def wait(client: httpx.Client, h: dict, run_ids: list[tuple]):
         print("\nAll runs completed.")
 
     # Print final metrics
-    print("\n── Metrics ────────────────────────────────────────────────────────")
+    print("\n-- Metrics --------------------------------------------------------")
     print(f"{'slug':<14} {'cond':<8} {'run':>4}  {'MAE':>8} {'RMSE':>8} {'MAPE':>7}")
     for slug, label, exp_id, run_id in run_ids:
         r = client.get(f"{BASE_URL}/runs/{run_id}/metrics", headers=h)

@@ -44,7 +44,7 @@ export default function ExperimentsList() {
     return true;
   });
 
-  // Divide experiments by the series they forecast — only same-series experiments
+  // Divide experiments by the series they forecast - only same-series experiments
   // are comparable (same target, same scale).
   const grouped = useMemo(() => {
     const groups = new Map<

@@ -27,7 +27,7 @@ export function NewsPulse({ limit = 10, showRefresh = true }: NewsPulseProps) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-px bg-border rounded overflow-hidden">
-      {/* ── Sentiment panel ─────────────────────────────────────────── */}
+      {/* -- Sentiment panel ------------------------------------------- */}
       <div className="bg-card p-5 flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <Cpu size={13} className="text-mcp" />
@@ -94,7 +94,7 @@ export function NewsPulse({ limit = 10, showRefresh = true }: NewsPulseProps) {
         </p>
       </div>
 
-      {/* ── Article feed ────────────────────────────────────────────── */}
+      {/* -- Article feed ---------------------------------------------- */}
       <div className="bg-card flex flex-col">
         <div className="border-b border-border px-4 py-3 flex items-center gap-2 bg-muted/40">
           <Newspaper size={13} className="text-gold" />
@@ -197,7 +197,7 @@ function Gauge({
       <div className="relative h-1.5 rounded-full bg-muted overflow-hidden">
         {/* zero marker for symmetric gauges */}
         {min < 0 && (
-          <span className="absolute top-0 bottom-0 w-px bg-border-strong" style={{ left: "50%" }} />
+          <span className="absolute top-0 bottom-0 left-1/2 w-px bg-border-strong" />
         )}
         <span
           className={"absolute top-0 bottom-0 left-0 rounded-full transition-all duration-500 " + tone}

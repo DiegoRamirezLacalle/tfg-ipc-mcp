@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-/* ────────────────────────────────────────────────────────────────────────
- * Theme — three palettes switched by a class on <html>.
+/* ------------------------------------------------------------------------
+ * Theme - three palettes switched by a class on <html>.
  *   dark   → zinc near-black (default)
  *   light  → white / near-white
  *   violet → violet-tinted dark (branded)
@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
  * Mirrors the useAuth pattern (src/lib/auth.ts): a hook backed by
  * localStorage + a `storage` listener for cross-tab sync. No context.
  * Token values per theme live in src/index.css under .theme-* classes.
- * ──────────────────────────────────────────────────────────────────────── */
+ * ------------------------------------------------------------------------ */
 
 export type Theme = "dark" | "light" | "violet";
 

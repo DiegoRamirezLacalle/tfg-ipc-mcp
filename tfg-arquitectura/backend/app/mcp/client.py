@@ -55,7 +55,7 @@ async def fetch_signals_for_timestamps(
                     ym = ts.strftime("%Y-%m") if isinstance(ts, datetime) else str(ts)[:7]
                     row: dict = {"year_month": ym}
 
-                    # ── macro signals ──────────────────────────────────────────
+                    # -- macro signals ------------------------------------------
                     try:
                         raw = await session.call_tool(
                             "get_macro_signals", {"year_month": ym}
@@ -69,7 +69,7 @@ async def fetch_signals_for_timestamps(
                         log.warning("mcp_macro_error", year_month=ym, error=str(tool_err))
                         row["macro_error"] = str(tool_err)
 
-                    # ── news sentiment (FinBERT) ───────────────────────────────
+                    # -- news sentiment (FinBERT) -------------------------------
                     try:
                         raw_sent = await session.call_tool(
                             "get_news_sentiment",

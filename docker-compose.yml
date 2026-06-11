@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -18,7 +16,6 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
-      - ./tfg-arquitectura/db/init_mongo.js:/docker-entrypoint-initdb.d/init_mongo.js
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.16.0
@@ -59,7 +56,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: tfg-arquitectura/infra/Dockerfile.frontend
+      dockerfile: tfg-arquitectura/frontend/Dockerfile
     ports:
       - "3000:3000"
     environment:

@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     # MLflow tracking
     MLFLOW_TRACKING_URI: str = "http://mlflow:5000"
 
-    # CORS — comma-separated origins (empty = allow all, dev default)
+    # CORS - comma-separated origins (empty = allow all, dev default)
     CORS_ORIGINS: str = ""
 
     @property
