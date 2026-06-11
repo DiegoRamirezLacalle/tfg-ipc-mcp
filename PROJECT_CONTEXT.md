@@ -53,11 +53,10 @@ tfg-ipc-mcp/
 │   └── lightning_logs/         ← PyTorch Lightning logs (~263 versions)
 │
 └── tfg-arquitectura/
-    ├── backend/                ← FastAPI (main.py, config.py, app/)
-    ├── frontend/               ← React (package.json, src/)
-    ├── gateway/                ← nginx / reverse proxy
-    ├── db/                     ← database schemas
-    └── infra/                  ← IaC (Terraform/Docker)
+    ├── backend/                ← FastAPI (app/, migrations/, scripts/, tests/)
+    ├── frontend/               ← React + Vite + Tailwind (src/)
+    ├── gateway/                ← nginx reverse proxy + static build
+    └── mcp_server/             ← MCP server (news signals via SSE)
 ```
 
 ### Module 01_etl — Ingestion scripts

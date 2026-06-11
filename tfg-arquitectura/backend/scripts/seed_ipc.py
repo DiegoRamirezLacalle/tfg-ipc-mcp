@@ -8,13 +8,10 @@ Datasets seeded:
   4. features-exog       — ECB rate features used by ridge-exog / sarimax
 
 Run inside the backend container:
-  docker-compose exec backend python seed_ipc.py
+  docker compose exec backend python scripts/seed_ipc.py
 """
 import os
-import sys
 import asyncio
-
-sys.path.insert(0, os.path.dirname(__file__))
 
 import pandas as pd
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -34,7 +31,7 @@ DATABASE_URL = os.getenv(
 
 _DATA_DIR = os.path.join(
     os.path.dirname(__file__),
-    "../../tfg-forecasting/data/processed"
+    "../../../tfg-forecasting/data/processed"
 )
 
 # ── dataset definitions ───────────────────────────────────────────────────────

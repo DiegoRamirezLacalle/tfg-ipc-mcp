@@ -9,14 +9,12 @@ Creates and triggers:
   - timegpt      h=12  [MCP]      (C1_mcp — C0 already seeded)
 
 Run inside the backend container:
-  docker-compose exec backend python seed_ablation.py
+  docker compose exec backend python scripts/seed_ablation.py
 """
 
 import os
 import sys
 import time
-
-sys.path.insert(0, os.path.dirname(__file__))
 
 import httpx
 

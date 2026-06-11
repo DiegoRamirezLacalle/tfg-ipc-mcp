@@ -3,14 +3,11 @@ Seed script: creates and triggers runs for all baseline models on indice_general
 
 Creates one experiment per model, both with and without MCP, then waits for
 all runs to complete. Run inside the backend container:
-  docker-compose exec backend python seed_experiments.py
+  docker compose exec backend python scripts/seed_experiments.py
 """
 import asyncio
 import os
-import sys
 import time
-
-sys.path.insert(0, os.path.dirname(__file__))
 
 import httpx
 
