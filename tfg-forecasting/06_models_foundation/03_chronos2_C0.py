@@ -1,5 +1,5 @@
 """
-03_chronos2_C0.py — Chronos-2 condition C0 (historical only)
+03_chronos2_C0.py - Chronos-2 condition C0 (historical only)
 
 Rolling-origin backtesting:
   - 48 origins: 2021-01 to 2024-12
@@ -47,6 +47,11 @@ TEST_END_TS = pd.Timestamp(DATE_TEST_END)
 # p10 = idx 2, p50 = idx 10, p90 = idx 18
 Q_IDX = {"p10": 2, "p50": 10, "p90": 18}
 
+# Canonical Spain target — used by the target-integrity guard (NOT for inference,
+# which keeps using features_exog.parquet; the two are identical for indice_general).
+SPAIN_TARGET_FILE = ROOT / "data" / "processed" / "ipc_spain_index.parquet"
+SPAIN_TARGET_COL = "indice_general"
+
 
 # Data
 
@@ -54,6 +59,29 @@ def load_data() -> pd.Series:
     df = pd.read_parquet(ROOT / "data" / "processed" / "features_exog.parquet")
     df.index = pd.DatetimeIndex(df.index, freq="MS")
     return df["indice_general"]
+
+
+def assert_target_integrity(df_preds: pd.DataFrame) -> None:
+    """Guard: every prediction row's y_true must equal Spain indice_general at its
+    fc_date. Refuses to write if Global (or any other) values slipped in."""
+    if df_preds.empty:
+        raise ValueError(f"[{MODEL_NAME}] No predictions to verify.")
+    ref = pd.read_parquet(SPAIN_TARGET_FILE)
+    ref.index = pd.to_datetime(ref.index)
+    y_ref = ref[SPAIN_TARGET_COL]
+    expected = y_ref.reindex(pd.to_datetime(df_preds["fc_date"]).values).values
+    actual = df_preds["y_true"].values
+    if np.isnan(expected).any():
+        bad = df_preds.loc[np.isnan(expected), "fc_date"].tolist()[:5]
+        raise ValueError(f"[{MODEL_NAME}] fc_date(s) not in Spain target: {bad}")
+    if not np.allclose(actual, expected, atol=1e-6):
+        n_bad = int(np.sum(~np.isclose(actual, expected, atol=1e-6)))
+        raise ValueError(
+            f"[{MODEL_NAME}] TARGET-INTEGRITY FAILURE: {n_bad} rows where y_true != "
+            f"Spain {SPAIN_TARGET_COL}. Predictions NOT written."
+        )
+    logger.info(f"[{MODEL_NAME}] target-integrity OK: y_true matches Spain "
+                f"{SPAIN_TARGET_COL} (n={len(df_preds)})")
 
 
 # Model
@@ -88,7 +116,7 @@ def run_rolling(y: pd.Series, model) -> tuple[pd.DataFrame, float]:
         preds = model.predict([context], prediction_length=MAX_H)
         # Shape: (n_variates, n_quantiles, pred_len) = (1, 21, 12) for univariate
         quantiles = preds[0].numpy()  # (1, 21, 12)
-        q = quantiles[0]  # (21, 12) — remove variates dimension
+        q = quantiles[0]  # (21, 12) - remove variates dimension
 
         p50 = q[Q_IDX["p50"]]
         p10 = q[Q_IDX["p10"]]
@@ -166,7 +194,7 @@ def log_table(metrics: dict) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"ROLLING BACKTESTING - {MODEL_NAME}")
     logger.info(f"Model: {CHRONOS_MODEL_ID}")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END}")
     logger.info(f"Horizons: {HORIZONS}")
@@ -179,6 +207,8 @@ def main():
 
     df_preds, mase_scale = run_rolling(y, model)
     logger.info(f"\nPredictions generated: {len(df_preds)}")
+
+    assert_target_integrity(df_preds)
 
     metrics = compute_metrics(df_preds, mase_scale)
 

@@ -1,4 +1,4 @@
-"""Deep models consolidation + baseline comparison — CPI Global.
+"""Deep models consolidation + baseline comparison - CPI Global.
 
 Loads rolling metrics from baseline (08_results/rolling_metrics_global.json)
 and deep (08_results/deep_rolling_metrics_global.json) and generates a
@@ -81,7 +81,7 @@ def write_report(metrics, ranking):
 
     lines += [
         sep,
-        "REPORTE DEEP MODELS + COMPARATIVA BASELINE — CPI Global",
+        "REPORTE DEEP MODELS + COMPARATIVA BASELINE - CPI Global",
         "Condicion C0: todos los modelos sin senales exogenas adicionales",
         "Nota: rolling baseline mensual (N~47), deep trimestral (N~16)",
         sep, "",
@@ -155,7 +155,7 @@ def plot_comparison(metrics):
     ax.set_xticks(x)
     ax.set_xticklabels([f"h={h}" for h in HORIZONS])
     ax.set_ylabel("MAE (pp YoY rate)")
-    ax.set_title("Rolling MAE — Baseline vs Deep C0 Global")
+    ax.set_title("Rolling MAE - Baseline vs Deep C0 Global")
     ax.legend(ncol=4, fontsize=8, loc="upper left")
     ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
     ax.grid(axis="y", alpha=0.3)
@@ -170,7 +170,7 @@ def plot_comparison(metrics):
 
 def main():
     logger.info("=" * 60)
-    logger.info("DEEP + BASELINE CONSOLIDATION — CPI Global")
+    logger.info("DEEP + BASELINE CONSOLIDATION - CPI Global")
     logger.info("=" * 60)
 
     metrics = load_metrics()

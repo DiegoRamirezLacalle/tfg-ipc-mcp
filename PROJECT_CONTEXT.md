@@ -1,6 +1,6 @@
 # PROJECT_CONTEXT.md
 > External memory for Claude Code sessions without prior context.
-> Last updated: 2026-05-04
+> Last updated: 2026-05-21
 
 ---
 
@@ -53,11 +53,10 @@ tfg-ipc-mcp/
 │   └── lightning_logs/         ← PyTorch Lightning logs (~263 versions)
 │
 └── tfg-arquitectura/
-    ├── backend/                ← FastAPI (main.py, config.py, app/)
-    ├── frontend/               ← React (package.json, src/)
-    ├── gateway/                ← nginx / reverse proxy
-    ├── db/                     ← database schemas
-    └── infra/                  ← IaC (Terraform/Docker)
+    ├── backend/                ← FastAPI (app/, migrations/, scripts/, tests/)
+    ├── frontend/               ← React + Vite + Tailwind (src/)
+    ├── gateway/                ← nginx reverse proxy + static build
+    └── mcp_server/             ← MCP server (news signals via SSE)
 ```
 
 ### Module 01_etl — Ingestion scripts
@@ -281,9 +280,16 @@ Logs in `lightning_logs/` (~263 versions).
 
 | Model key | Script | Condition |
 |-----------|--------|-----------|
+| `chronos2_C0_global` | `30_chronos2_C0_global.py` | C0 |
+| `timesfm_C0_global` | `31_timesfm_C0_global.py` | C0 |
+| `timegpt_C0_global` | `32_timegpt_C0_global.py` | C0 (pending — Nixtla API unavailable) |
 | `chronos2_C1_inst_global` | `15_chronos2_C1_inst_global.py` | C1_inst ★★ |
 | `timesfm_C1_inst_global` | `16_timesfm_C1_inst_global.py` | C1_inst |
 | `timegpt_C1_inst_global` | `17_timegpt_C1_inst_global.py` | C1_inst |
+
+> ⚠️ Global foundation **C0** uses its own dedicated scripts/files (`30–32`,
+> `*_C0_global_metrics.json`). The plain `*_C0` keys above are **Spain** artifacts
+> and must never be reused as Global C0 (see `07_evaluation/audit_foundation_targets.py`).
 
 #### Europe (metrics in `rolling_metrics_europe.json` + `*_europe_metrics.json`)
 
@@ -309,34 +315,36 @@ Each family has C0, C1_inst, C1_mcp, C1_full (scripts 18–29):
 | AutoARIMA | 0.456 | 0.761 | 1.138 | 1.866 | 0.325 | 1.328 |
 | N-BEATS | **0.359** | **0.670** | 1.195 | 1.895 | **0.255** | 1.348 |
 | TimesFM C0 | 0.436 | 0.785 | 1.129 | 1.864 | 0.311 | 1.326 |
-| TimesFM C1_inst ★ | **0.423** | 0.706 | 1.046 | 1.816 | **0.301** | 1.292 |
+| TimesFM C1_inst | 0.445 | 0.746 | 1.100 | 1.878 | 0.317 | 1.337 |
+| TimesFM C1_macro | 0.462 | 0.747 | 1.097 | 1.884 | 0.329 | 1.341 |
 | Chronos-2 C0 | 0.520 | — | — | 1.990 | 0.370 | 1.416 |
 | TimeGPT C0 | 0.549 | — | — | 2.010 | 0.391 | 1.430 |
 
 **Spain verdict**:
 - Fixed ARIMA is the best model at h≥3 and h=12. No foundation model beats ARIMA at long horizons.
 - N-BEATS wins at h=1 (MAE=0.359), but deteriorates badly at h=12 (MAE=1.895, worse than ARIMA).
-- `timesfm_C1_inst` improves over ARIMA at h=1 (−11.5%), but loses at h≥3 (+5–18%).
-- C1_mcp (GDELT) **systematically degrades** all models (+33% to +57%).
+- `timesfm_C1_inst` and `timesfm_C1_macro` are close to TimesFM C0 at h=12 (neutral C1 effect); neither beats ARIMA.
+- C1_mcp (GDELT) **systematically degrades** all models.
 - The most informative signal is EPU Europe (level correlation +0.737 with CPI), but this is spurious level correlation — it does not predict month-to-month changes.
 
 ### Global — World CPI (MASE scale: 1.1720 pp)
 
 | Model | MAE h=1 | MAE h=6 | MAE h=12 | MASE h=12 |
 |-------|---------|---------|----------|----------|
-| ARIMA | 0.191 | 0.682 | 1.544 | 1.317 |
+| ARIMA | 0.191 | 0.682 | 1.544 | 1.318 |
 | AutoARIMA | **0.179** | 0.567 | **1.329** | **1.134** |
 | Chronos-2 C1_inst ★★ | 0.200 | **0.591** | **1.143** | **0.976** |
-| TimesFM C1_inst | 0.269 | 0.712 | 1.284 | 1.096 |
+| TimesFM C1_inst | **0.214** | **0.607** | **1.191** | **1.016** |
 | TimeGPT C1_inst | 0.415 | 1.180 | 2.114 | 1.803 |
 
 **Global verdict**:
 - `chronos2_C1_inst_global` is the **only model with MASE < 1.0 at h=12** (0.976) — beats the seasonal naive.
 - Chronos-2 beats ARIMA from h=3 onwards (h=3: −4.2%, h=6: −13.3%, h=12: **−26.0%**).
-- At h=1 ARIMA is still better (+5.1% penalty for Chronos-2).
+- **After the StandardScaler fix**, TimesFM C1_inst improved significantly: h=1 −20.7%, h=12 −7.2% vs old unscaled result; now MASE=1.016 at h=12 (near-Chronos-2 territory).
+- At h=1 ARIMA is still better; both Chronos-2 and TimesFM C1_inst beat it from h=3 onward.
 - AutoARIMA also beats fixed ARIMA in Global (h=1: −6.3%, h=12: −13.9%) — the one case where dynamic order selection helps.
 - TimeGPT severely degrades with signals (+77% worse than ARIMA at h=12).
-- C1_inst signals used: GEPU, FEDFUNDS, GSCPI, Brent, DFR (ECB).
+- C1_inst signals used: IMF commodity index, Brent log MA3, GSCPI (NY Fed supply chain pressure).
 
 ### Europe — HICP Eurozone (MASE scale: 1.4558 pp)
 
@@ -361,8 +369,8 @@ Each family has C0, C1_inst, C1_mcp, C1_full (scripts 18–29):
 
 | Series | Best statistical | MASE h=12 | Best foundation | MASE h=12 | C1 effect |
 |--------|-----------------|-----------|-----------------|-----------|-----------|
-| Spain CPI | ARIMA | 1.097 | TimesFM C1_inst | 1.292 | ~0% (neutral / slightly worse) |
-| Global CPI | ARIMA | 1.317 | Chronos-2 C1_inst ★★ | **0.976** | −26% |
+| Spain CPI | ARIMA | **1.097** | TimesFM C0 | 1.326 | neutral (C1_inst = 1.337, +0.8%) |
+| Global CPI | AutoARIMA | 1.134 | Chronos-2 C1_inst ★★ | **0.976** | −14% vs AutoARIMA, −26% vs ARIMA |
 | Europe HICP | SARIMA | 1.656 | TimesFM C1_full ★★ | **1.370** | −17% |
 
 ### AutoARIMA — Cross-series methodological finding
@@ -498,7 +506,7 @@ Required environment variables:
 
 ## 9. Project Status (2026-05-04)
 
-### Completed ✅
+### Completed 
 
 **ETL and features**:
 - [x] Ingestion and cleaning of all 3 target series
@@ -556,10 +564,24 @@ Required environment variables:
 - [ ] Chapter 6: Conclusions
 
 **Web platform (`tfg-arquitectura/`)**:
-- [ ] FastAPI backend: real-time forecasting endpoints
-- [ ] React frontend: inflation dashboard with visualizations
-- [ ] MCP pipeline integration in production
-- [ ] Deployment (Docker Compose + nginx)
+- [x] FastAPI backend: real-time forecasting endpoints (all 9 adapters wired)
+- [x] React frontend: inflation dashboard with visualizations (full UI + comparison dashboard)
+- [x] MCP pipeline integration in production (SSE transport, signals stored in MongoDB)
+- [x] Deployment (Docker Compose + nginx gateway on port 80, production build)
+- [x] All 4 datasets seeded: ipc-spain-ine, cpi-global-monthly, hicp-europe-monthly, features-exog
+- [x] 11/13 baseline experiments run (TimeGPT blocked by free-tier rate limit)
+- [x] **Phase D — GDELT sentiment via MCP (FinBERT)**:
+  - `mcp_server/server.py`: new `get_news_sentiment(country, year_month)` tool; lazy-loads ProsusAI/finbert (440MB, CPU, double-checked locking), queries MongoDB `news_raw`, returns `{sentiment_mean, sentiment_std, n_articles, hawkish_score}`. `sentiment_mean = mean(pos_prob − neg_prob)` per article.
+  - `mcp_server/Dockerfile`: added `torch>=2.2 (CPU wheel)` + `transformers>=4.40`; `hf_cache` named Docker volume at `/root/.cache/huggingface` so model survives restarts
+  - `backend/app/mcp/client.py`: `fetch_signals_for_timestamps` now calls both `get_macro_signals` AND `get_news_sentiment` per timestamp; merges `sentiment_mean`, `sentiment_std`, `sentiment_n`, `sentiment_hawkish` into signal dict; graceful per-call error handling
+  - `frontend/src/components/charts/SentimentChart.tsx`: dual-axis Recharts `LineChart`; violet line = sentiment (yAxis −1 to +1), rose dashed = hawkish% (right yAxis 0–1)
+  - `frontend/src/pages/RunDetail.tsx`: renders `<SentimentChart>` when MCP context contains at least one `sentiment_mean` value
+- [x] **Phase E — Methodological rigor**:
+  - **Ensemble-stack**: `backend/app/forecasting/adapters/ensemble.py` — `EnsembleStackAdapter` (slug `ensemble-stack`); takes `config.stack_run_ids=[id1,id2,...]`; loads predictions+MAEs from N runs, combines with inverse-MAE weights (`w = 1/(mae + eps)`, normalized); `ForecastInput` extended with `stack_preds: pd.DataFrame | None` and `stack_weights: np.ndarray | None`. Registered in `registry.py` + seeded in `etl/load_parquets.py` (model_type `"ensemble"`).
+  - **Alembic migration 0004**: `migrations/versions/20260519_0004_model_type_ensemble.py` — `ALTER TYPE model_type ADD VALUE IF NOT EXISTS 'ensemble'`; `ModelType` enum in `models/model_catalog.py` updated.
+  - **MLflow tracking**: `docker-compose.yml` adds `mlflow` service (`ghcr.io/mlflow/mlflow:v2.16.0`), SQLite backend, port 5000; `backend` gets `MLFLOW_TRACKING_URI: http://mlflow:5000`; `backend/app/api/v1/runs.py` logs params+metrics after each run via `mlflow.start_run()`; gracefully skipped on failure.
+  - **KS drift detector**: `backend/app/api/v1/drift.py` — `GET /drift?experiment_id=N`; finds latest `done` run, loads predictions vs actuals, computes residuals, 60/40 split, `scipy.stats.ks_2samp`; returns `{drifted, p_value, ks_statistic, n_early, n_recent, message}`. Registered in `api/v1/__init__.py`.
+  - **Drift UI**: `frontend/src/lib/queries.ts` adds `DriftResult` interface + `useDrift(experimentId)` hook; `frontend/src/pages/ExperimentDetail.tsx` shows animated warning banner with KS stats when `drift.data.drifted === true`.
 
 **Possible experimental additions**:
 - [ ] Diebold-Mariano tests for Global (only exists for Spain and Europe)

@@ -1,13 +1,13 @@
 """
-16_timesfm_C1_inst_global.py — TimesFM C1_institutional CPI Global
+16_timesfm_C1_inst_global.py - TimesFM C1_institutional CPI Global
 
 Architecture: TimesFM base (full cpi_global_rate context 2002+) + Ridge correction.
 Ridge fitted over window 2002:origin with global institutional signals.
 
 Ridge covariates (top-3 by correlation):
-  imf_comm_ma3  (corr=0.586) — IMF All Commodity Index
-  brent_log_ma3 (corr=0.456) — Brent crude
-  gscpi_ma3     (corr=0.324) — NY Fed Supply Chain Pressure Index
+  imf_comm_ma3  (corr=0.586) - IMF All Commodity Index
+  brent_log_ma3 (corr=0.456) - Brent crude
+  gscpi_ma3     (corr=0.324) - NY Fed Supply Chain Pressure Index
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
+from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
@@ -71,12 +72,15 @@ def compute_xreg_correction(df: pd.DataFrame, origin: pd.Timestamp) -> float:
         return 0.0
     rate_mom = window["cpi_global_rate"].diff(1)
     valid = ~rate_mom.isna()
-    X = window.loc[valid, XREG_COVS].fillna(0.0).values.astype(np.float64)
+    X_raw = window.loc[valid, XREG_COVS].fillna(0.0).values.astype(np.float64)
     y = rate_mom[valid].values.astype(np.float64)
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X_raw)
     reg = Ridge(alpha=RIDGE_ALPHA, fit_intercept=True)
     reg.fit(X, y)
-    current = df.loc[origin:origin, XREG_COVS].fillna(0.0).values.astype(np.float64)
-    neutral = np.zeros_like(current)
+    current_raw = df.loc[origin:origin, XREG_COVS].fillna(0.0).values.astype(np.float64)
+    current = scaler.transform(current_raw)
+    neutral = np.zeros_like(current)  # scaled-space 0 = historical mean of each feature
     return float(reg.predict(current)[0] - reg.predict(neutral)[0])
 
 
@@ -132,7 +136,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Ridge covariates: {XREG_COVS}")
     logger.info("=" * 60)
 
@@ -155,12 +159,15 @@ def main():
             logger.info(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
                         f"{m['MASE']:8.4f} {m['n_evals']:5d}")
 
-    # Comparison vs C0
-    c0p = RESULTS_DIR / "timesfm_C0_metrics.json"
-    if c0p.exists():
+    # Comparison vs GLOBAL C0 (script 31) — NOT the Spain C0 file.
+    c0p = RESULTS_DIR / "timesfm_C0_global_metrics.json"
+    if not c0p.exists():
+        logger.warning("[!] Global C0 metrics missing (%s) — skipping C0 vs C1 "
+                       "comparison. Run 31_timesfm_C0_global.py first.", c0p.name)
+    else:
         with open(c0p) as f:
-            c0 = json.load(f).get("timesfm_C0", {})
-        logger.info(f"\n--- C0 vs {MODEL_NAME} ---")
+            c0 = json.load(f).get("timesfm_C0_global", {})
+        logger.info(f"\n--- C0_global vs {MODEL_NAME} ---")
         for h in HORIZONS:
             c0m = c0.get(f"h{h}", {}).get("MAE")
             c1m = metrics.get(f"h{h}", {}).get("MAE")

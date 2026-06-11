@@ -266,7 +266,7 @@ def plot_mae_by_horizon(rolling: dict) -> None:
     ax.set_xticks(x)
     ax.set_xticklabels([f"h={h}" for h in HORIZONS])
     ax.set_ylabel("MAE (pp YoY rate)")
-    ax.set_title("MAE rolling by horizon — Baseline C0 Global")
+    ax.set_title("MAE rolling by horizon - Baseline C0 Global")
     ax.legend(loc="upper left")
     ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2f"))
     ax.grid(axis="y", alpha=0.3)
@@ -307,11 +307,11 @@ def plot_error_by_period(period_metrics: dict) -> None:
         ax.set_xticklabels(["Pre-crisis\n01/21-06/22", "Shock Fed\n07/22-06/23",
                              "Normaliz.\n07/23-12/24"], fontsize=8)
         ax.set_ylabel("MAE (pp YoY rate)")
-        ax.set_title(f"MAE by period — h={h} month{'s' if h > 1 else ''}")
+        ax.set_title(f"MAE by period - h={h} month{'s' if h > 1 else ''}")
         ax.legend(fontsize=8)
         ax.grid(axis="y", alpha=0.3)
 
-    fig.suptitle("Performance by economic period — Baseline C0 Global", fontsize=11)
+    fig.suptitle("Performance by economic period - Baseline C0 Global", fontsize=11)
     fig.tight_layout()
     path = FIGURES_DIR / "error_by_period_global.png"
     fig.savefig(path, dpi=150)
@@ -339,11 +339,11 @@ def plot_rolling_errors_over_time(preds: pd.DataFrame) -> None:
         ax.axvspan(pd.Timestamp("2022-07-01"), pd.Timestamp("2023-06-01"),
                    alpha=0.08, color="red", label="_Shock Fed")
         ax.set_ylabel("Absolute error (pp)")
-        ax.set_title(f"Rolling absolute error — h={h} month{'s' if h > 1 else ''}")
+        ax.set_title(f"Rolling absolute error - h={h} month{'s' if h > 1 else ''}")
         ax.legend(ncol=5, fontsize=8)
         ax.grid(alpha=0.3)
 
-    fig.suptitle("Rolling error over time — Baseline C0 Global", fontsize=11)
+    fig.suptitle("Rolling error over time - Baseline C0 Global", fontsize=11)
     fig.tight_layout()
     path = FIGURES_DIR / "rolling_errors_h1_h12_global.png"
     fig.savefig(path, dpi=150)
@@ -360,7 +360,7 @@ def plot_fedfunds_benefit(ff_benefit: list) -> None:
     ax.bar([f"h={h}" for h in hs], deltas, color=colors, alpha=0.85, edgecolor="white")
     ax.axhline(0, color="black", linewidth=0.8)
     ax.set_ylabel("MAE improvement ARIMAX vs ARIMA (%)")
-    ax.set_title("FEDFUNDS benefit in rolling — CPI Global")
+    ax.set_title("FEDFUNDS benefit in rolling - CPI Global")
     ax.grid(axis="y", alpha=0.3)
     for i, (h, d) in enumerate(zip(hs, deltas)):
         ax.text(i, d + 0.05 * (1 if d >= 0 else -1), f"{d:+.1f}%",
@@ -374,7 +374,7 @@ def plot_fedfunds_benefit(ff_benefit: list) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info("BASELINE CONSOLIDATION — CPI Global")
+    logger.info("BASELINE CONSOLIDATION - CPI Global")
     logger.info("=" * 60)
 
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)

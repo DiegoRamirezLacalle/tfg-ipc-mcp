@@ -6,7 +6,7 @@ Generates the master table of all TFG models in HTML format.
 Structure:
   Country (Global / Spain)
     Tier (C0 no signals | C1 with signals)
-      Signal type (— / energy / energy_only / macro / institutional / energy+macro)
+      Signal type (- / energy / energy_only / macro / institutional / energy+macro)
         Model
 
 Metrics: MAE h=1,3,6,12 + delta% vs best C0 baseline per country.
@@ -36,6 +36,7 @@ logger = get_logger(__name__)
 RESULTS = ROOT / "08_results"
 OUT_HTML = RESULTS / "tabla_maestra.html"
 OUT_CSV = RESULTS / "tabla_maestra.csv"
+OUT_MD = RESULTS / "tabla_maestra.md"
 
 HORIZONS = ["h1", "h3", "h6", "h12"]
 
@@ -45,32 +46,34 @@ HORIZONS = ["h1", "h3", "h6", "h12"]
 
 MODELS = [
     # ===== GLOBAL =====
-    ("Global", "C0", "—",             "Naive (lag-12)",  "rolling_metrics_global.json",          "naive"),
-    ("Global", "C0", "—",             "ARIMA(3,1,0)",    "rolling_metrics_global.json",          "arima"),
-    ("Global", "C0", "—",             "ARIMA(1,1,1)",    "rolling_metrics_global.json",          "arima111"),
-    ("Global", "C0", "—",             "ARIMAX C0",       "rolling_metrics_global.json",          "arimax"),
-    ("Global", "C0", "—",             "LSTM",            "deep_rolling_metrics_global.json",     "lstm"),
-    ("Global", "C0", "—",             "N-BEATS",         "deep_rolling_metrics_global.json",     "nbeats"),
-    ("Global", "C0", "—",             "N-HiTS",          "deep_rolling_metrics_global.json",     "nhits"),
-    ("Global", "C0", "—",             "Chronos-2",       "chronos2_C0_metrics.json",             "chronos2_C0"),
-    ("Global", "C0", "—",             "TimesFM",         "timesfm_C0_metrics.json",              "timesfm_C0"),
-    ("Global", "C0", "—",             "TimeGPT",         "timegpt_C0_metrics.json",              "timegpt_C0"),
+    ("Global", "C0", "-",             "Naive (lag-12)",  "rolling_metrics_global.json",          "naive"),
+    ("Global", "C0", "-",             "ARIMA(3,1,0)",    "rolling_metrics_global.json",          "arima"),
+    ("Global", "C0", "-",             "ARIMA(1,1,1)",    "rolling_metrics_global.json",          "arima111"),
+    ("Global", "C0", "-",             "ARIMAX C0",       "rolling_metrics_global.json",          "arimax"),
+    ("Global", "C0", "-",             "LSTM",            "deep_rolling_metrics_global.json",     "lstm"),
+    ("Global", "C0", "-",             "N-BEATS",         "deep_rolling_metrics_global.json",     "nbeats"),
+    ("Global", "C0", "-",             "N-HiTS",          "deep_rolling_metrics_global.json",     "nhits"),
+    # Global foundation C0 — MUST use the dedicated Global C0 files (scripts 30/31/32).
+    # The plain *_C0_metrics.json files are Spain artifacts; do NOT use them here.
+    ("Global", "C0", "-",             "Chronos-2",       "chronos2_C0_global_metrics.json",      "chronos2_C0_global"),
+    ("Global", "C0", "-",             "TimesFM",         "timesfm_C0_global_metrics.json",       "timesfm_C0_global"),
+    ("Global", "C0", "-",             "TimeGPT",         "timegpt_C0_global_metrics.json",       "timegpt_C0_global"),
     ("Global", "C1", "institutional", "ARIMAX C1_inst",  "rolling_metrics_C1_inst_global.json",  "arimax_C1_inst"),
     ("Global", "C1", "institutional", "Chronos-2",       "chronos2_C1_inst_global_metrics.json", "chronos2_C1_inst_global"),
     ("Global", "C1", "institutional", "TimesFM",         "timesfm_C1_inst_global_metrics.json",  "timesfm_C1_inst_global"),
     ("Global", "C1", "institutional", "TimeGPT",         "timegpt_C1_inst_global_metrics.json",  "timegpt_C1_inst_global"),
 
     # ===== SPAIN =====
-    ("Spain", "C0", "—",             "Naive (lag-12)",  "metrics_summary_final.json",           "naive"),
-    ("Spain", "C0", "—",             "ARIMA",           "metrics_summary_final.json",           "arima"),
-    ("Spain", "C0", "—",             "SARIMA",          "metrics_summary_final.json",           "sarima"),
-    ("Spain", "C0", "—",             "SARIMAX C0",      "metrics_summary_final.json",           "sarimax"),
-    ("Spain", "C0", "—",             "LSTM",            "metrics_summary_final.json",           "lstm"),
-    ("Spain", "C0", "—",             "N-BEATS",         "metrics_summary_final.json",           "nbeats"),
-    ("Spain", "C0", "—",             "N-HiTS",          "metrics_summary_final.json",           "nhits"),
-    ("Spain", "C0", "—",             "Chronos-2",       "metrics_summary_final.json",           "chronos2_C0"),
-    ("Spain", "C0", "—",             "TimesFM",         "metrics_summary_final.json",           "timesfm_C0"),
-    ("Spain", "C0", "—",             "TimeGPT",         "metrics_summary_final.json",           "timegpt_C0"),
+    ("Spain", "C0", "-",             "Naive (lag-12)",  "metrics_summary_final.json",           "naive"),
+    ("Spain", "C0", "-",             "ARIMA",           "metrics_summary_final.json",           "arima"),
+    ("Spain", "C0", "-",             "SARIMA",          "metrics_summary_final.json",           "sarima"),
+    ("Spain", "C0", "-",             "SARIMAX C0",      "metrics_summary_final.json",           "sarimax"),
+    ("Spain", "C0", "-",             "LSTM",            "metrics_summary_final.json",           "lstm"),
+    ("Spain", "C0", "-",             "N-BEATS",         "metrics_summary_final.json",           "nbeats"),
+    ("Spain", "C0", "-",             "N-HiTS",          "metrics_summary_final.json",           "nhits"),
+    ("Spain", "C0", "-",             "Chronos-2",       "metrics_summary_final.json",           "chronos2_C0"),
+    ("Spain", "C0", "-",             "TimesFM",         "metrics_summary_final.json",           "timesfm_C0"),
+    ("Spain", "C0", "-",             "TimeGPT",         "metrics_summary_final.json",           "timegpt_C0"),
     ("Spain", "C1", "energy",        "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1_energy"),
     ("Spain", "C1", "energy",        "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1_energy"),
     ("Spain", "C1", "energy only",   "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1_energy_only"),
@@ -118,6 +121,13 @@ def _best_c0(country: str) -> dict[str, float]:
     return best
 
 
+# Global foundation C0 rows that must NEVER silently fall back to Spain files.
+# If their dedicated file is missing, the row is omitted with a loud warning.
+_GLOBAL_C0_FOUNDATION = {
+    "chronos2_C0_global", "timesfm_C0_global", "timegpt_C0_global",
+}
+
+
 def build_rows() -> list[dict]:
     rows = []
     for country, tier, signal_type, model_name, fname, key in MODELS:
@@ -135,6 +145,13 @@ def build_rows() -> list[dict]:
                 ok = True
         if ok:
             rows.append(row)
+        elif key in _GLOBAL_C0_FOUNDATION:
+            logger.warning(
+                "[!] Global C0 foundation metrics missing: %s (key=%s). "
+                "Row OMITTED — NOT falling back to Spain C0. "
+                "Run 06_models_foundation/30-32_*_C0_global.py to generate it.",
+                fname, key,
+            )
     return rows
 
 
@@ -281,12 +298,12 @@ tr.tier-separator td {
 """
 
 TIER_LABELS = {
-    "C0": "C0 — No exogenous signals",
-    "C1": "C1 — With exogenous signals",
+    "C0": "C0 - No exogenous signals",
+    "C1": "C1 - With exogenous signals",
 }
 
 SIGNAL_LABELS = {
-    "—": "—",
+    "-": "-",
     "energy": "Energy (Brent, gas)",
     "energy only": "Energy only",
     "macro": "Macro (PPI, rates, USD)",
@@ -308,12 +325,12 @@ def _delta_class(v: float | None) -> str:
 
 
 def _fmt_mae(v: float | None) -> str:
-    return f"{v:.4f}" if v is not None else "—"
+    return f"{v:.4f}" if v is not None else "-"
 
 
 def _fmt_delta(v: float | None) -> str:
     if v is None:
-        return "—"
+        return "-"
     sign = "+" if v > 0 else ""
     return f"{sign}{v:.1f}%"
 
@@ -377,7 +394,7 @@ def build_html(rows: list[dict]) -> str:
             # Separator when tier/signal group changes
             if tier != prev_tier or tipo != prev_tipo:
                 label = TIER_LABELS.get(tier, tier)
-                if tipo != "—":
+                if tipo != "-":
                     sig_label = SIGNAL_LABELS.get(tipo, tipo)
                     label = f"{label} &nbsp;›&nbsp; {sig_label}"
                 sections_html += (
@@ -408,11 +425,11 @@ def build_html(rows: list[dict]) -> str:
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Master Model Table — TFG IPC/MCP</title>
+<title>Master Model Table - TFG IPC/MCP</title>
 <style>{CSS}</style>
 </head>
 <body>
-<h1>Master Model Table — TFG IPC/MCP</h1>
+<h1>Master Model Table - TFG IPC/MCP</h1>
 <p class="subtitle">
   Backtesting rolling expanding-window (2021-01 → 2024-12) &nbsp;|&nbsp;
   Metric: MAE &nbsp;|&nbsp;
@@ -447,6 +464,77 @@ def save_csv(rows: list[dict]) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Markdown
+# ---------------------------------------------------------------------------
+
+_MD_SIGNAL_LABELS = {
+    "-": "-",
+    "energy": "energy",
+    "energy only": "energy_only",
+    "macro": "macro",
+    "institutional": "institutional",
+    "energy+macro": "energy+macro",
+}
+
+_MD_COUNTRY_LABELS = {"Global": "Global", "Spain": "Espana"}
+
+
+def _md_cell(v: float | None) -> str:
+    return f"{v:.4f}" if v is not None else "-"
+
+
+def _md_delta(v: float | None) -> str:
+    if v is None:
+        return "-"
+    sign = "+" if v > 0 else ""
+    return f"{sign}{v:.1f}%"
+
+
+def save_md(rows: list[dict]) -> None:
+    """Markdown twin of the master table.
+
+    Driven by the same `rows` as the CSV/HTML, so it inherits the corrected
+    Global C0 foundation values and the same omissions (e.g. TimeGPT Global C0
+    is dropped, never silently replaced by the Spain C0 file).
+    """
+    lines: list[str] = [
+        "# Tabla Maestra de Modelos - TFG IPC/MCP",
+        "",
+        "> delta% = (MAE_modelo - mejor_MAE_C0_pais) / mejor_MAE_C0_pais × 100",
+        "",
+    ]
+    header = ("| Modelo | h1 MAE | d% | h3 MAE | d% | h6 MAE | d% | "
+              "h12 MAE | d% |")
+    sep = "|--------|-------:|---:|-------:|---:|-------:|---:|--------:|---:|"
+
+    for country in ("Global", "Spain"):
+        country_rows = [r for r in rows if r["Country"] == country]
+        if not country_rows:
+            continue
+        lines += ["", f"## {_MD_COUNTRY_LABELS.get(country, country)}", ""]
+
+        prev_tier = prev_tipo = None
+        for row in country_rows:
+            tier, tipo = row["Tier"], row["Signals"]
+            if (tier, tipo) != (prev_tier, prev_tipo):
+                if tipo == "-":
+                    title = f"### {tier}"
+                else:
+                    sig = _MD_SIGNAL_LABELS.get(tipo, tipo)
+                    title = f"### {tier} - Senales: {sig}"
+                lines += ["", title, "", header, sep]
+                prev_tier, prev_tipo = tier, tipo
+
+            cells = []
+            for h in HORIZONS:
+                cells.append(_md_cell(row.get(f"MAE_{h}")))
+                cells.append(_md_delta(row.get(f"d%_{h}")))
+            lines.append(f"| {row['Model']} | " + " | ".join(cells) + " |")
+
+    OUT_MD.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -462,9 +550,11 @@ def main():
     html = build_html(rows)
     OUT_HTML.write_text(html, encoding="utf-8")
     save_csv(rows)
+    save_md(rows)
 
     logger.info(f"HTML saved: {OUT_HTML}")
     logger.info(f"CSV  saved: {OUT_CSV}")
+    logger.info(f"MD   saved: {OUT_MD}")
 
     if not args.no_open:
         webbrowser.open(OUT_HTML.as_uri())

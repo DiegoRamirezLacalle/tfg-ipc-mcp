@@ -1,10 +1,10 @@
 """
-15_chronos2_C1_inst_global.py — Chronos-2 C1_institutional CPI Global
+15_chronos2_C1_inst_global.py - Chronos-2 C1_institutional CPI Global
 
 Top-3 covariates by correlation with cpi_global_rate(t+1):
-  imf_comm_ma3  (corr=0.586) — IMF All Commodity Index
-  brent_log_ma3 (corr=0.456) — Brent crude
-  gscpi_ma3     (corr=0.324) — NY Fed Supply Chain Pressure Index
+  imf_comm_ma3  (corr=0.586) - IMF All Commodity Index
+  brent_log_ma3 (corr=0.456) - Brent crude
+  gscpi_ma3     (corr=0.324) - NY Fed Supply Chain Pressure Index
 
 Architecture identical to 09_chronos2_C1_inst.py (Spain) but using
 features_c1_global_institutional.parquet and target cpi_global_rate.
@@ -147,7 +147,7 @@ def compute_subperiod_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Covariates: {EXOG_COLS}")
     logger.info("=" * 60)
 
@@ -171,12 +171,15 @@ def main():
             logger.info(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
                         f"{m['MASE']:8.4f} {m['n_evals']:5d}")
 
-    # Comparison vs C0
-    c0p = RESULTS_DIR / "chronos2_C0_metrics.json"
-    if c0p.exists():
+    # Comparison vs GLOBAL C0 (script 30) — NOT the Spain C0 file.
+    c0p = RESULTS_DIR / "chronos2_C0_global_metrics.json"
+    if not c0p.exists():
+        logger.warning("[!] Global C0 metrics missing (%s) — skipping C0 vs C1 "
+                       "comparison. Run 30_chronos2_C0_global.py first.", c0p.name)
+    else:
         with open(c0p) as f:
-            c0 = json.load(f).get("chronos2_C0", {})
-        logger.info(f"\n--- C0 vs {MODEL_NAME} ---")
+            c0 = json.load(f).get("chronos2_C0_global", {})
+        logger.info(f"\n--- C0_global vs {MODEL_NAME} ---")
         for h in HORIZONS:
             c0m = c0.get(f"h{h}", {}).get("MAE")
             c1m = metrics.get(f"h{h}", {}).get("MAE")

@@ -1,0 +1,36 @@
+{
+  "nexus_multiagent": {
+    "h1": {
+      "MAE": 0.4398,
+      "RMSE": 0.6173,
+      "MASE": 0.313,
+      "MAE_prior": 0.4364,
+      "delta_vs_prior_pct": 0.76,
+      "n_evals": 47
+    },
+    "h3": {
+      "MAE": 0.7402,
+      "RMSE": 0.9681,
+      "MASE": 0.5268,
+      "MAE_prior": 0.732,
+      "delta_vs_prior_pct": 1.12,
+      "n_evals": 45
+    },
+    "h6": {
+      "MAE": 1.0895,
+      "RMSE": 1.4296,
+      "MASE": 0.7754,
+      "MAE_prior": 1.0866,
+      "delta_vs_prior_pct": 0.26,
+      "n_evals": 42
+    },
+    "h12": {
+      "MAE": 1.8639,
+      "RMSE": 2.5907,
+      "MASE": 1.3265,
+      "MAE_prior": 1.8635,
+      "delta_vs_prior_pct": 0.02,
+      "n_evals": 36
+    }
+  }
+}

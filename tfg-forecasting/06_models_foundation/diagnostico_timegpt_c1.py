@@ -1,5 +1,5 @@
 """
-diagnostico_timegpt_c1.py — Full diagnostic before applying fix to TimeGPT C1
+diagnostico_timegpt_c1.py - Full diagnostic before applying fix to TimeGPT C1
 
 4 diagnostics with a total budget of 20 API calls:
   D1: Zero regime (3 variants x 1 call = 3 calls)
@@ -210,7 +210,7 @@ def compute_mae_h1(
 
 def diag1_zero_regime(client, y, exog):
     logger.info("\n" + "=" * 60)
-    logger.info("DIAGNOSTIC 1 — Zero regime pre-2015")
+    logger.info("DIAGNOSTIC 1 - Zero regime pre-2015")
     logger.info("=" * 60)
 
     actuals = []
@@ -257,7 +257,7 @@ def diag1_zero_regime(client, y, exog):
 
 def diag2_subsets(client, y, exog):
     logger.info("\n" + "=" * 60)
-    logger.info("DIAGNOSTIC 2 — Signal subsets")
+    logger.info("DIAGNOSTIC 2 - Signal subsets")
     logger.info("=" * 60)
 
     actuals = []
@@ -289,7 +289,7 @@ def diag2_subsets(client, y, exog):
 
 def diag3_fill_strategy(client, y, exog):
     logger.info("\n" + "=" * 60)
-    logger.info("DIAGNOSTIC 3 — Future horizon fill strategy")
+    logger.info("DIAGNOSTIC 3 - Future horizon fill strategy")
     logger.info("=" * 60)
 
     actuals = []
@@ -316,7 +316,7 @@ def diag3_fill_strategy(client, y, exog):
 
 def diag4_c0_baseline(client, y):
     logger.info("\n" + "=" * 60)
-    logger.info("DIAGNOSTIC 4 — C0 baseline (no exogenous)")
+    logger.info("DIAGNOSTIC 4 - C0 baseline (no exogenous)")
     logger.info("=" * 60)
 
     actuals = []
@@ -339,7 +339,7 @@ def main():
     global api_calls
 
     logger.info("=" * 60)
-    logger.info("DIAGNOSTIC TIMEGPT C1 — Root cause identification")
+    logger.info("DIAGNOSTIC TIMEGPT C1 - Root cause identification")
     logger.info(f"Test origins: {[o.strftime('%Y-%m') for o in TEST_ORIGINS]}")
     logger.info(f"API budget: {MAX_API_CALLS} calls")
     logger.info("=" * 60)
@@ -375,7 +375,7 @@ def main():
     }
 
     logger.info("\n" + "=" * 60)
-    logger.info("DIAGNOSTIC 2 — Signal subsets (origin: 2022-09)")
+    logger.info("DIAGNOSTIC 2 - Signal subsets (origin: 2022-09)")
     logger.info("=" * 60)
 
     d2_results = {}
@@ -394,7 +394,7 @@ def main():
 
     # D3: fill strategy (3 strategies x 1 origin)
     logger.info("\n" + "=" * 60)
-    logger.info("DIAGNOSTIC 3 — Future horizon fill strategy (origin: 2022-09)")
+    logger.info("DIAGNOSTIC 3 - Future horizon fill strategy (origin: 2022-09)")
     logger.info("=" * 60)
 
     d3_results = {}

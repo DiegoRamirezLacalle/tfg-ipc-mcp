@@ -3,12 +3,12 @@
 Joins Spain IPC (INE) with ECB rates and generates lag/diff features.
 
 Features produced:
-  dfr       — Deposit Facility Rate level (main policy variable)
-  mrr       — Main Refinancing Rate level
-  dfr_diff  — Monthly DFR change (policy action)
-  dfr_lag3  — DFR lagged 3 months
-  dfr_lag6  — DFR lagged 6 months (typical transmission: 6-18m)
-  dfr_lag12 — DFR lagged 12 months
+  dfr       - Deposit Facility Rate level (main policy variable)
+  mrr       - Main Refinancing Rate level
+  dfr_diff  - Monthly DFR change (policy action)
+  dfr_lag3  - DFR lagged 3 months
+  dfr_lag6  - DFR lagged 6 months (typical transmission: 6-18m)
+  dfr_lag12 - DFR lagged 12 months
 
 Input:  data/processed/ipc_spain_index.parquet
         data/processed/ecb_rates_monthly.parquet
@@ -42,7 +42,7 @@ def main() -> None:
     df["dfr_lag6"]  = df["dfr"].shift(6)
     df["dfr_lag12"] = df["dfr"].shift(12)
 
-    # Lags introduce NaN at the start — kept intentionally; each model trims as needed
+    # Lags introduce NaN at the start - kept intentionally; each model trims as needed
     nan_counts = df.isna().sum()
     if nan_counts.any():
         logger.info(f"NaN per column (expected in initial lags):\n{nan_counts[nan_counts > 0].to_string()}")

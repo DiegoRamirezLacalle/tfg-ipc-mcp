@@ -1,4 +1,4 @@
-"""ARIMA non-seasonal baseline via auto_arima (pmdarima) — Global CPI.
+"""ARIMA non-seasonal baseline via auto_arima (pmdarima) - Global CPI.
 
 Target series: cpi_global_rate (YoY % rate, median of 186 countries)
 
@@ -133,7 +133,7 @@ def save_results(model, metrics: dict, resid: pd.Series, lb: pd.DataFrame):
 
 def main():
     logger.info("=" * 60)
-    logger.info("ARIMA AUTO GLOBAL — Baseline CPI Global (d=1, D=0)")
+    logger.info("ARIMA AUTO GLOBAL - Baseline CPI Global (d=1, D=0)")
     logger.info("=" * 60)
 
     y, train, val, test = load_data()

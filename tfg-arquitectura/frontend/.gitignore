@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.env.local
+*.log
+.vite
+.DS_Store
+
+# TypeScript build artifacts (vite.config.ts is the source of truth)
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts

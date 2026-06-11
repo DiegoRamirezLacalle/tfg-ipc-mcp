@@ -65,15 +65,15 @@ All exogenous signals use **shift+1** (value known at forecast time) and are nor
 
 | Series | Best statistical | MASE | Best foundation | MASE | C1 effect |
 |--------|-----------------|------|-----------------|------|-----------|
-| Spain CPI | ARIMA | 0.868 | TimesFM C1_inst | 0.862 | ~0% (neutral) |
-| Global CPI | ARIMA | 1.326 | Chronos-2 C1_inst ★★ | **0.976** | −26% |
+| Spain CPI | ARIMA | **1.097** | TimesFM C0 | 1.326 | −3% (C1_inst vs C0, neutral) |
+| Global CPI | AutoARIMA | 1.134 | Chronos-2 C1_inst ★★ | **0.976** | −14% vs AutoARIMA |
 | Europe HICP | SARIMA | 1.656 | TimesFM C1_full ★★ | **1.370** | −17% |
 
 ### Main findings
 
 1. **Foundation models are context-dependent**: they beat statistical baselines for Global and Europe at long horizons (h≥3–6), but not for Spain where ARIMA dominates at all horizons.
 
-2. **C1 signals are beneficial only for the right series**: they improve Global (−26% Chronos-2 h=12) and Europe (−17% TimesFM C1_full h=12), but *degrade* Spain (+55% TimesFM C1-MCP — signals only available from 2021, insufficient history).
+2. **C1 signals are beneficial only for the right series**: they improve Global (Chronos-2 C1_inst −26% vs fixed ARIMA, −14% vs AutoARIMA) and Europe (−17% TimesFM C1_full h=12), but are neutral-to-negative for Spain (short signal history since 2015, MCP signals only from 2021).
 
 3. **Family ranking**:
    - **Chronos-2**: most robust with global institutional signals. Only model with MASE < 1.0 (Global h=12 = 0.976).
@@ -82,7 +82,7 @@ All exogenous signals use **shift+1** (value known at forecast time) and are nor
 
 4. **Horizon matters**: statistical models (ARIMA/SARIMA) are nearly unbeatable at h=1; foundation models start competing at h=3–6 and win at h=12 for Global and Europe.
 
-5. **Dynamic AutoARIMA ≠ better**: reselecting ARIMA orders at each rolling origin consistently *worsens* performance versus a fixed model calibrated once on the full historical sample.
+5. **Dynamic AutoARIMA — it depends on the series and horizon**: reselecting ARIMA orders at each rolling origin *helps* for Global CPI (−6% at h=1, −14% at h=12 vs fixed ARIMA), *hurts* for Spain (≈−5% at h=1 but +21% at h=12), and is roughly neutral for Europe (competitive at short horizons, +4% at h=12 vs fixed SARIMA). A model whose orders are fixed once on the full historical sample is more robust for series with stable seasonal dynamics (Spain), whereas dynamic re-selection pays off for series with more structural change (Global).
 
 6. **Scaling is critical**: without StandardScaler, Ridge coefficients become spurious (EPU std~65 vs diff(HICP) std~0.44), inflating MAE by +534%. StandardScaler is mandatory before any exogenous correction.
 

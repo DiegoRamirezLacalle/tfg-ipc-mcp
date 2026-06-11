@@ -1,5 +1,5 @@
 """
-14_timegpt_C1_macro.py — TimeGPT C1 macro: brent + ttf + EPU Europe
+14_timegpt_C1_macro.py - TimeGPT C1 macro: brent + ttf + EPU Europe
 
 Covariates (3, best-of-domain):
   brent_ma3       # corr 0.715 energy
@@ -153,7 +153,7 @@ def main():
     args = parser.parse_args()
     n = 5 if args.test_run else 48
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME} ({'TEST' if args.test_run else 'FULL'})")
+    logger.info(f"BACKTESTING - {MODEL_NAME} ({'TEST' if args.test_run else 'FULL'})")
     logger.info(f"Covariates: {EXOG_COLS}")
     logger.info(f"Estimated cost: {n} API calls")
     logger.info("=" * 60)

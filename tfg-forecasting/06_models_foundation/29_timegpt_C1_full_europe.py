@@ -1,5 +1,5 @@
 """
-29_timegpt_C1_full_europe.py — TimeGPT C1_full HICP Eurozone
+29_timegpt_C1_full_europe.py - TimeGPT C1_full HICP Eurozone
 
 TimeGPT native with all covariates (institutional + MCP).
 Cost control: --test-run (5 origins) / default full.
@@ -80,7 +80,7 @@ def build_nixtla_dfs(df: pd.DataFrame, origin: pd.Timestamp) -> tuple[pd.DataFra
     for c in XREG_COVS:
         df_tgt[c] = hist_reset[c].values
 
-    # X_df: future rows — carry-forward for all covariates; bce_cumstance is
+    # X_df: future rows - carry-forward for all covariates; bce_cumstance is
     # an unbounded cumulative score so forcing to 0 creates a large discontinuity
     future_idx = pd.date_range(
         start=origin + pd.DateOffset(months=1), periods=MAX_H, freq="MS"
@@ -164,7 +164,7 @@ def main():
     args = parser.parse_args()
 
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Total covariates: {len(XREG_COVS)}")
     logger.info("=" * 60)
 

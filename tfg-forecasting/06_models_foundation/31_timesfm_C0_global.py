@@ -1,0 +1,183 @@
+"""
+31_timesfm_C0_global.py - TimesFM 2.5 condition C0, GLOBAL CPI (historical only)
+
+Global counterpart of 01_timesfm_C0.py (which is Spain CPI).
+
+Target : data/processed/cpi_global_monthly.parquet :: cpi_global_rate
+Model ID / outputs : timesfm_C0_global
+
+Same rolling-origin protocol and metrics as the other C0 scripts.
+A target-integrity guard verifies y_true == cpi_global_rate before writing.
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+import warnings
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+
+warnings.filterwarnings("ignore")
+
+ROOT = Path(__file__).resolve().parents[1]
+MONOREPO = ROOT.parent
+sys.path.insert(0, str(MONOREPO))
+
+from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
+
+RESULTS_DIR = ROOT / "08_results"
+HORIZONS = [1, 3, 6, 12]
+MAX_H = max(HORIZONS)
+ORIGINS_START = "2021-01-01"
+ORIGINS_END = DATE_TEST_END
+MODEL_NAME = "timesfm_C0_global"
+TEST_END_TS = pd.Timestamp(DATE_TEST_END)
+
+TARGET_FILE = ROOT / "data" / "processed" / "cpi_global_monthly.parquet"
+TARGET_COL = "cpi_global_rate"
+
+
+def load_data() -> pd.Series:
+    df = pd.read_parquet(TARGET_FILE)
+    df.index = pd.to_datetime(df.index)
+    df.index.freq = "MS"
+    return df[TARGET_COL]
+
+
+def load_model():
+    import timesfm
+    logger.info("[timesfm] Loading google/timesfm-2.5-200m-pytorch ...")
+    tfm = timesfm.TimesFM_2p5_200M_torch.from_pretrained("google/timesfm-2.5-200m-pytorch")
+    tfm.compile(forecast_config=timesfm.ForecastConfig(
+        max_context=512, max_horizon=MAX_H, per_core_batch_size=1,
+    ))
+    logger.info("[timesfm] Model loaded and compiled")
+    return tfm
+
+
+def run_rolling(y: pd.Series, model) -> tuple[pd.DataFrame, float]:
+    origins = pd.date_range(start=ORIGINS_START, end=ORIGINS_END, freq="MS")
+    y_train_init = y.loc[:DATE_TRAIN_END]
+    mase_scale = float(np.mean(np.abs(
+        y_train_init.values[12:] - y_train_init.values[:-12]
+    )))
+
+    records = []
+    for origin in tqdm(origins, desc="TimesFM C0 GLOBAL rolling"):
+        context = y.loc[:origin].values.astype(np.float32)
+        point_out, _ = model.forecast(horizon=MAX_H, inputs=[context])
+        full_pred = point_out[0]
+
+        for h in HORIZONS:
+            if origin + pd.DateOffset(months=h) > TEST_END_TS:
+                continue
+            fc_dates = pd.date_range(
+                start=origin + pd.DateOffset(months=1), periods=h, freq="MS"
+            )
+            y_actual = y.reindex(fc_dates)
+            if y_actual.isna().any():
+                continue
+            for i, (date, real, pred) in enumerate(
+                zip(fc_dates, y_actual.values, full_pred[:h]), start=1
+            ):
+                records.append({
+                    "origin": origin, "fc_date": date, "step": i, "horizon": h,
+                    "model": MODEL_NAME,
+                    "y_true": float(real), "y_pred": float(pred),
+                    "error": float(real - pred), "abs_error": float(abs(real - pred)),
+                })
+
+    return pd.DataFrame(records), mase_scale
+
+
+def assert_target_integrity(df_preds: pd.DataFrame, y: pd.Series) -> None:
+    if df_preds.empty:
+        raise ValueError(f"[{MODEL_NAME}] No predictions to verify.")
+    expected = y.reindex(pd.to_datetime(df_preds["fc_date"]).values).values
+    actual = df_preds["y_true"].values
+    if np.isnan(expected).any():
+        bad = df_preds.loc[np.isnan(expected), "fc_date"].tolist()[:5]
+        raise ValueError(f"[{MODEL_NAME}] fc_date(s) not in target series: {bad}")
+    if not np.allclose(actual, expected, atol=1e-6):
+        n_bad = int(np.sum(~np.isclose(actual, expected, atol=1e-6)))
+        raise ValueError(
+            f"[{MODEL_NAME}] TARGET-INTEGRITY FAILURE: {n_bad} rows where y_true "
+            f"!= {TARGET_COL}. Predictions NOT written (possible Spain/Global mix)."
+        )
+    lo, hi = float(np.nanmin(actual)), float(np.nanmax(actual))
+    if lo > 40:
+        raise ValueError(
+            f"[{MODEL_NAME}] y_true range [{lo:.2f},{hi:.2f}] looks like Spain index "
+            f"scale (80-100), not a CPI rate. Refusing to write."
+        )
+    logger.info(f"[{MODEL_NAME}] target-integrity OK: y_true matches {TARGET_COL} "
+                f"(range [{lo:.3f}, {hi:.3f}], n={len(df_preds)})")
+
+
+def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
+    results = {}
+    for h in HORIZONS:
+        h_df = df_preds[df_preds["horizon"] == h]
+        if h_df.empty:
+            continue
+        y_true = h_df["y_true"].values
+        y_pred = h_df["y_pred"].values
+        results[f"h{h}"] = {
+            "MAE": round(float(np.mean(np.abs(y_true - y_pred))), 4),
+            "RMSE": round(float(np.sqrt(np.mean((y_true - y_pred) ** 2))), 4),
+            "MASE": round(float(np.mean(np.abs(y_true - y_pred)) / mase_scale), 4),
+            "n_evals": int(len(h_df["origin"].unique())),
+        }
+    return results
+
+
+def log_table(metrics: dict) -> None:
+    logger.info(f"\n{'Horizon':<12} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'N':>5}")
+    logger.info("-" * 45)
+    for h in HORIZONS:
+        key = f"h{h}"
+        if key in metrics:
+            m = metrics[key]
+            logger.info(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
+                        f"{m['MASE']:8.4f} {m['n_evals']:5d}")
+
+
+def main():
+    logger.info("=" * 60)
+    logger.info(f"ROLLING BACKTESTING - {MODEL_NAME}")
+    logger.info(f"Target: {TARGET_FILE.name} :: {TARGET_COL}")
+    logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END} | Horizons: {HORIZONS}")
+    logger.info("=" * 60)
+
+    y = load_data()
+    logger.info(f"Data: {y.index.min().date()} - {y.index.max().date()} ({len(y)} obs)")
+
+    model = load_model()
+    df_preds, mase_scale = run_rolling(y, model)
+    logger.info(f"\nPredictions generated: {len(df_preds)}")
+
+    assert_target_integrity(df_preds, y)
+
+    metrics = compute_metrics(df_preds, mase_scale)
+    logger.info(f"\nRESULTS {MODEL_NAME}")
+    log_table(metrics)
+
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    preds_path = RESULTS_DIR / f"{MODEL_NAME}_predictions.parquet"
+    df_preds.to_parquet(preds_path, index=False)
+    metrics_path = RESULTS_DIR / f"{MODEL_NAME}_metrics.json"
+    with open(metrics_path, "w") as f:
+        json.dump({MODEL_NAME: metrics}, f, indent=2)
+    logger.info(f"\nPredictions: {preds_path.name}")
+    logger.info(f"Metrics:     {metrics_path.name}")
+
+
+if __name__ == "__main__":
+    main()

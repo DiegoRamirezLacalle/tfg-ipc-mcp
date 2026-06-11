@@ -1,7 +1,7 @@
 """
-02_timesfm_C1.py — TimesFM 2.5 condition C1 (historical + MCP signals)
+02_timesfm_C1.py - TimesFM 2.5 condition C1 (historical + MCP signals)
 
-Fix 1 — XReg restricted to the period with real signals (2015+):
+Fix 1 - XReg restricted to the period with real signals (2015+):
   The base TimesFM model receives the COMPLETE IPC context (282 obs,
   identical to C0). The MCP signal correction is computed via an
   external Ridge fitted ONLY on df.loc['2015':origin], where all
@@ -10,7 +10,7 @@ Fix 1 — XReg restricted to the period with real signals (2015+):
   signals (zeros). This correctly implements the base-TimesFM / XReg-MCP
   separation.
 
-Fix 2 — Covariate selection:
+Fix 2 - Covariate selection:
   Ridge input columns: gdelt_avg_tone, gdelt_tone_ma3,
   gdelt_tone_ma6, bce_shock_score, bce_tone_numeric, bce_cumstance,
   ine_surprise_score, ine_inflacion, signal_available.
@@ -29,6 +29,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
+from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
@@ -125,14 +126,17 @@ def compute_xreg_correction(
 
     ipc_mom = window["indice_general"].diff(1)
     valid = ~ipc_mom.isna()
-    X = window.loc[valid, XREG_COVS].values.astype(np.float64)
+    X_raw = window.loc[valid, XREG_COVS].values.astype(np.float64)
     y_diff = ipc_mom[valid].values.astype(np.float64)
 
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X_raw)
     reg = Ridge(alpha=RIDGE_ALPHA, fit_intercept=True)
     reg.fit(X, y_diff)
 
-    current = df.loc[origin:origin, XREG_COVS].values.astype(np.float64)
-    neutral = np.zeros_like(current)
+    current_raw = df.loc[origin:origin, XREG_COVS].values.astype(np.float64)
+    current = scaler.transform(current_raw)
+    neutral = np.zeros_like(current)  # scaled-space 0 = historical mean of each feature
 
     correction = float(reg.predict(current)[0] - reg.predict(neutral)[0])
     return correction
@@ -231,7 +235,7 @@ def log_table(metrics: dict) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"ROLLING BACKTESTING - {MODEL_NAME}")
     logger.info(f"Fix 1: base TimesFM C0 (282 obs) + external Ridge over 2015:origin")
     logger.info(f"Fix 2: XReg covariates = {XREG_COVS}")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END}")

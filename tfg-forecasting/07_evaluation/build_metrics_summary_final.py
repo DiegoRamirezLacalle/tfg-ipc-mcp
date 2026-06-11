@@ -1,5 +1,5 @@
 """
-build_metrics_summary_final.py — Full comparison table for all models
+build_metrics_summary_final.py - Full comparison table for all models
 
 Models included:
   Baseline:    naive, arima, sarima, sarimax
@@ -105,7 +105,7 @@ def main():
 
     # ── Print comparison table ──
     logger.info("\n" + "=" * 90)
-    logger.info("FINAL COMPARISON TABLE — MAE by horizon")
+    logger.info("FINAL COMPARISON TABLE - MAE by horizon")
     logger.info("=" * 90)
 
     header = f"{'Model':<18}"

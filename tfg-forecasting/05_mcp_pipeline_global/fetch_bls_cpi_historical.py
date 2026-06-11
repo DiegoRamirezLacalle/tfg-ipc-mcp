@@ -319,7 +319,7 @@ def fetch_bls_cpi(
         doc = _make_doc(
             cpi_month=ym,
             pub_date=pub_date,
-            title=f"US BLS CPI News Release — {ym}",
+            title=f"US BLS CPI News Release - {ym}",
             body=body,
             url=url,
         )

@@ -1,0 +1,25 @@
+.git
+.claude
+docs
+audit
+
+# Dependencies and build output (rebuilt inside the images)
+**/node_modules
+**/dist
+**/.vite
+
+# Python caches
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.venv
+**/.ruff_cache
+
+# Heavy data never copied into images (data/processed IS copied — keep it)
+tfg-forecasting/data/raw
+tfg-forecasting/data/snapshots
+tfg-forecasting/08_results
+
+# Local env and logs
+.env
+**/*.log

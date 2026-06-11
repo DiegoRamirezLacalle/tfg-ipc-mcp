@@ -1,10 +1,10 @@
 """MCP server (FastMCP, stdio transport) exposing 5 tools:
 
-  1. fetch_gdelt_spain   — GDELT v2 quantitative signals (no LLM)
-  2. fetch_rss_official  — RSS from ECB / INE / BdE
-  3. search_news         — Unified search across MongoDB
-  4. get_macro_news      — Macro news (GDELT + RSS)
-  5. get_entity_news     — News by entity (ECB, INE, BdE)
+  1. fetch_gdelt_spain   - GDELT v2 quantitative signals (no LLM)
+  2. fetch_rss_official  - RSS from ECB / INE / BdE
+  3. search_news         - Unified search across MongoDB
+  4. get_macro_news      - Macro news (GDELT + RSS)
+  5. get_entity_news     - News by entity (ECB, INE, BdE)
 
 Storage: MongoDB (collection news_raw) + versioned parquet.
 

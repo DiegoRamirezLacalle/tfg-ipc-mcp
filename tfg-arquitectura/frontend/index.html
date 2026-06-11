@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" class="theme-dark dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- No-flash theme: set the <html> class from localStorage before paint -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("tfg_theme");
+          if (t !== "light" && t !== "violet" && t !== "dark") t = "dark";
+          var el = document.documentElement;
+          el.classList.remove("theme-dark", "theme-light", "theme-violet", "dark", "light");
+          el.classList.add("theme-" + t);
+          el.classList.add(t === "light" ? "light" : "dark");
+        } catch (e) {}
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>tfg-ipc-mcp · inflation forecasting platform</title>
+    <meta
+      name="description"
+      content="A research platform for forecasting Spanish inflation (IPC) with foundation models and MCP semantic context."
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

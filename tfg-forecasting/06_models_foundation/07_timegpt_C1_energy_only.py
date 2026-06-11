@@ -1,5 +1,5 @@
 """
-07_timegpt_C1_energy_only.py — TimeGPT C1 with energy variables only
+07_timegpt_C1_energy_only.py - TimeGPT C1 with energy variables only
 
 Ablation experiment: isolate the predictive effect of energy without MCP signals.
 
@@ -218,7 +218,7 @@ def main():
 
     n_origins = 5 if args.test_run else 48
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Origins: {n_origins} ({'TEST' if args.test_run else 'FULL'})")
     logger.info(f"Covariates: {EXOG_COLS}")
     logger.info(f"Estimated cost: {n_origins} TimeGPT API calls")

@@ -50,7 +50,7 @@ def main() -> None:
 
     existing = [c for c in ENERGY_COLS if c in c1.columns]
     if existing:
-        logger.warning(f"Energy columns already exist in features_c1: {existing} — overwriting")
+        logger.warning(f"Energy columns already exist in features_c1: {existing} - overwriting")
         c1 = c1.drop(columns=existing)
 
     c1 = c1.merge(energy[["date"] + ENERGY_COLS], on="date", how="left")
@@ -130,7 +130,7 @@ def main() -> None:
     elif medium:
         logger.info(f"  >>> CONSIDER C1 models with energy: {medium}")
     else:
-        logger.info("  >>> DO NOT launch energy models — correlations too weak.")
+        logger.info("  >>> DO NOT launch energy models - correlations too weak.")
 
 
 if __name__ == "__main__":

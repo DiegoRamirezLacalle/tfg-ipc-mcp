@@ -1,5 +1,5 @@
 """
-09_chronos2_C1_inst.py — Chronos-2 C1 EPU Europe only (institutional)
+09_chronos2_C1_inst.py - Chronos-2 C1 EPU Europe only (institutional)
 
 Covariates (3): epu_europe_ma3 (corr 0.737), epu_europe_log (0.701), epu_europe_lag1 (0.682)
 Complete data from 2002, no NaN. Full IPC context.
@@ -126,7 +126,7 @@ def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"BACKTESTING — {MODEL_NAME}")
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
     logger.info(f"Covariates: {EXOG_COLS}")
     logger.info("=" * 60)
     df = load_data()

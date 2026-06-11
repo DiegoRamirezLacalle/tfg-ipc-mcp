@@ -1,5 +1,5 @@
 """
-05_chronos2_C1_energy.py — Chronos-2 C1 with energy variables + selected MCP signals
+05_chronos2_C1_energy.py - Chronos-2 C1 with energy variables + selected MCP signals
 
 Covariates (8 total, optimal subset):
   Energy (real data from 2002, no NaN):
@@ -299,7 +299,7 @@ def log_subperiod_table(sub_metrics: dict) -> None:
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"ROLLING BACKTESTING — {MODEL_NAME}")
+    logger.info(f"ROLLING BACKTESTING - {MODEL_NAME}")
     logger.info(f"Model: {CHRONOS_MODEL_ID}")
     logger.info(f"Origins: {ORIGINS_START} - {ORIGINS_END}")
     logger.info(f"Horizons: {HORIZONS}")
@@ -324,12 +324,12 @@ def main():
     sub_metrics = compute_subperiod_metrics(df_preds, mase_scale)
 
     logger.info("\n" + "=" * 60)
-    logger.info(f"GLOBAL RESULTS — {MODEL_NAME}")
+    logger.info(f"GLOBAL RESULTS - {MODEL_NAME}")
     logger.info("=" * 60)
     log_table(metrics)
 
     logger.info("\n" + "=" * 60)
-    logger.info(f"RESULTS BY SUBPERIOD — {MODEL_NAME}")
+    logger.info(f"RESULTS BY SUBPERIOD - {MODEL_NAME}")
     logger.info("=" * 60)
     log_subperiod_table(sub_metrics)
 

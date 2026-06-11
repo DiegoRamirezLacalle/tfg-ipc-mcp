@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -11,7 +9,6 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./tfg-arquitectura/db/init_postgres.sql:/docker-entrypoint-initdb.d/01_init.sql
 
   mongo:
     image: mongo:7
@@ -19,51 +16,85 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
-      - ./tfg-arquitectura/db/init_mongo.js:/docker-entrypoint-initdb.d/init_mongo.js
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.16.0
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:///mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+      --host 0.0.0.0
+      --port 5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
 
   backend:
     build:
       context: .
-      dockerfile: tfg-arquitectura/infra/Dockerfile.backend
+      dockerfile: tfg-arquitectura/backend/Dockerfile
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/tfg-arquitectura/backend
     ports:
       - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      PYTHONPATH: /app/tfg-arquitectura/backend:/app
+      MCP_SERVER_URL: http://mcp_server:8080/sse
+      MONGO_URI: mongodb://mongo:27017/tfg_news
+      MLFLOW_TRACKING_URI: http://mlflow:5000
     env_file: .env
     depends_on:
       - postgres
       - mongo
+      - mcp_server
+      - mlflow
     volumes:
+      - ./tfg-arquitectura/backend:/app/tfg-arquitectura/backend
       - ./tfg-forecasting:/app/tfg-forecasting
       - ./shared:/app/shared
 
-  gateway:
+  frontend:
     build:
-      context: tfg-arquitectura/gateway
-      dockerfile: ../infra/Dockerfile.gateway
+      context: .
+      dockerfile: tfg-arquitectura/frontend/Dockerfile
     ports:
-      - "${GATEWAY_PORT:-3001}:3001"
+      - "3000:3000"
+    environment:
+      VITE_API_URL: http://backend:8000
     env_file: .env
     depends_on:
       - backend
+    volumes:
+      - ./tfg-arquitectura/frontend/src:/app/src
+      - ./tfg-arquitectura/frontend/index.html:/app/index.html
 
-  frontend:
+  gateway:
     build:
-      context: tfg-arquitectura/frontend
-      dockerfile: ../infra/Dockerfile.frontend
+      context: .
+      dockerfile: tfg-arquitectura/gateway/Dockerfile
     ports:
-      - "3000:3000"
-    env_file: .env
+      - "80:80"
     depends_on:
-      - gateway
+      - backend
 
   mcp_server:
     build:
       context: .
-      dockerfile: tfg-arquitectura/infra/Dockerfile.backend
-    command: python tfg-forecasting/05_mcp_pipeline/mcp_server.py
+      dockerfile: tfg-arquitectura/mcp_server/Dockerfile
     ports:
       - "${MCP_SERVER_PORT:-8080}:8080"
+    environment:
+      MONGO_URI: mongodb://mongo:27017/tfg_news
     env_file: .env
+    depends_on:
+      - mongo
+    volumes:
+      - ./tfg-forecasting/data/processed:/app/tfg-forecasting/data/processed:ro
+      - ./tfg-arquitectura/mcp_server/server.py:/app/tfg-arquitectura/mcp_server/server.py
+      - hf_cache:/root/.cache/huggingface
 
 volumes:
   postgres_data:
   mongo_data:
+  mlflow_data:
+  hf_cache:

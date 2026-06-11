@@ -147,7 +147,7 @@ def save_results(model, metrics):
 
 def main():
     logger.info("=" * 60)
-    logger.info(f"SARIMAX — baseline with exogenous: {EXOG_COL}")
+    logger.info(f"SARIMAX - baseline with exogenous: {EXOG_COL}")
     logger.info("=" * 60)
 
     y, X, y_train, y_val, X_train, X_val = load_data()

@@ -64,7 +64,7 @@ def train_and_evaluate(horizon):
 
 def main():
     logger.info("=" * 60)
-    logger.info("LSTM UNIVARIATE — Historical deep reference")
+    logger.info("LSTM UNIVARIATE - Historical deep reference")
     logger.info("=" * 60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)

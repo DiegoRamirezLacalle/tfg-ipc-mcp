@@ -1,0 +1,338 @@
+{
+  "2021-01": {
+    "direction": "DOWN",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.50. Key drivers: ECB DFR -0.50% (stable), Brent -0.200 log-pp vs 2002-2021 mean, EPU above average (p73).",
+    "source": "heuristic"
+  },
+  "2021-02": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR -0.50% (stable), Brent -0.123 log-pp vs 2002-2021 mean, EPU very high (p84).",
+    "source": "heuristic"
+  },
+  "2021-03": {
+    "direction": "DOWN",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.20. Key drivers: ECB DFR -0.50% (stable), Brent +0.045 log-pp vs 2002-2021 mean, EPU above average (p63).",
+    "source": "heuristic"
+  },
+  "2021-04": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR -0.50% (stable), Brent +0.005 log-pp vs 2002-2021 mean, EPU above average (p78).",
+    "source": "heuristic"
+  },
+  "2021-05": {
+    "direction": "UP",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.15. Key drivers: ECB DFR -0.50% (stable), Brent +0.061 log-pp vs 2002-2021 mean, EPU above average (p61).",
+    "source": "heuristic"
+  },
+  "2021-06": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.00. Key drivers: ECB DFR -0.50% (stable), Brent +0.096 log-pp vs 2002-2021 mean, EPU below average (p40).",
+    "source": "heuristic"
+  },
+  "2021-07": {
+    "direction": "UP",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.20. Key drivers: ECB DFR -0.50% (stable), Brent +0.171 log-pp vs 2002-2021 mean, EPU around average (p46).",
+    "source": "heuristic"
+  },
+  "2021-08": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.35. Key drivers: ECB DFR -0.50% (stable), Brent +0.186 log-pp vs 2002-2021 mean, EPU above average (p67).",
+    "source": "heuristic"
+  },
+  "2021-09": {
+    "direction": "UP",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.20. Key drivers: ECB DFR -0.50% (stable), Brent +0.185 log-pp vs 2002-2021 mean, EPU above average (p64).",
+    "source": "heuristic"
+  },
+  "2021-10": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.35. Key drivers: ECB DFR -0.50% (stable), Brent +0.213 log-pp vs 2002-2021 mean, EPU above average (p72).",
+    "source": "heuristic"
+  },
+  "2021-11": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.35. Key drivers: ECB DFR -0.50% (stable), Brent +0.283 log-pp vs 2002-2021 mean, EPU above average (p68).",
+    "source": "heuristic"
+  },
+  "2021-12": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.15. Key drivers: ECB DFR -0.50% (stable), Brent +0.104 log-pp vs 2002-2021 mean, EPU very high (p90).",
+    "source": "heuristic"
+  },
+  "2022-01": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.50. Key drivers: ECB DFR -0.50% (stable), Brent +0.201 log-pp vs 2002-2022 mean, EPU very high (p96).",
+    "source": "heuristic"
+  },
+  "2022-02": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.35. Key drivers: ECB DFR -0.50% (stable), Brent +0.358 log-pp vs 2002-2022 mean, EPU very high (p92).",
+    "source": "heuristic"
+  },
+  "2022-03": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.35. Key drivers: ECB DFR -0.50% (stable), Brent +0.458 log-pp vs 2002-2022 mean, EPU above average (p78).",
+    "source": "heuristic"
+  },
+  "2022-04": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.50. Key drivers: ECB DFR -0.50% (stable), Brent +0.523 log-pp vs 2002-2022 mean, EPU very high (p98).",
+    "source": "heuristic"
+  },
+  "2022-05": {
+    "direction": "UP",
+    "confidence": "HIGH",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.55. Key drivers: ECB DFR -0.50% (stable), Brent +0.533 log-pp vs 2002-2022 mean, EPU very high (p98).",
+    "source": "heuristic"
+  },
+  "2022-06": {
+    "direction": "UP",
+    "confidence": "HIGH",
+    "magnitude": "LARGE",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.70. Key drivers: ECB DFR -0.50% (stable), Brent +0.531 log-pp vs 2002-2022 mean, EPU very high (p97).",
+    "source": "heuristic"
+  },
+  "2022-07": {
+    "direction": "UP",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.30. Key drivers: ECB DFR 0.00% (rising), Brent +0.578 log-pp vs 2002-2022 mean, EPU very high (p97).",
+    "source": "heuristic"
+  },
+  "2022-08": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.35. Key drivers: ECB DFR 0.00% (stable), Brent +0.533 log-pp vs 2002-2022 mean, EPU very high (p99).",
+    "source": "heuristic"
+  },
+  "2022-09": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.35. Key drivers: ECB DFR 0.75% (rising), Brent +0.400 log-pp vs 2002-2022 mean, EPU very high (p96).",
+    "source": "heuristic"
+  },
+  "2022-10": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.50. Key drivers: ECB DFR 0.75% (stable), Brent +0.306 log-pp vs 2002-2022 mean, EPU very high (p98).",
+    "source": "heuristic"
+  },
+  "2022-11": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.15. Key drivers: ECB DFR 1.50% (rising), Brent +0.380 log-pp vs 2002-2022 mean, EPU very high (p99).",
+    "source": "heuristic"
+  },
+  "2022-12": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 2.00% (rising), Brent +0.275 log-pp vs 2002-2022 mean, EPU very high (p96).",
+    "source": "heuristic"
+  },
+  "2023-01": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.35. Key drivers: ECB DFR 2.00% (stable), Brent +0.279 log-pp vs 2002-2023 mean, EPU very high (p91).",
+    "source": "heuristic"
+  },
+  "2023-02": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 2.50% (rising), Brent +0.278 log-pp vs 2002-2023 mean, EPU very high (p91).",
+    "source": "heuristic"
+  },
+  "2023-03": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.10. Key drivers: ECB DFR 3.00% (rising), Brent +0.253 log-pp vs 2002-2023 mean, EPU very high (p89).",
+    "source": "heuristic"
+  },
+  "2023-04": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.35. Key drivers: ECB DFR 3.00% (stable), Brent +0.202 log-pp vs 2002-2023 mean, EPU very high (p94).",
+    "source": "heuristic"
+  },
+  "2023-05": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 3.25% (rising), Brent +0.198 log-pp vs 2002-2023 mean, EPU very high (p83).",
+    "source": "heuristic"
+  },
+  "2023-06": {
+    "direction": "DOWN",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.25. Key drivers: ECB DFR 3.50% (rising), Brent +0.108 log-pp vs 2002-2023 mean, EPU very high (p88).",
+    "source": "heuristic"
+  },
+  "2023-07": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 3.50% (stable), Brent +0.137 log-pp vs 2002-2023 mean, EPU very high (p85).",
+    "source": "heuristic"
+  },
+  "2023-08": {
+    "direction": "DOWN",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.25. Key drivers: ECB DFR 3.75% (rising), Brent +0.269 log-pp vs 2002-2023 mean, EPU very high (p87).",
+    "source": "heuristic"
+  },
+  "2023-09": {
+    "direction": "DOWN",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.25. Key drivers: ECB DFR 4.00% (rising), Brent +0.283 log-pp vs 2002-2023 mean, EPU very high (p92).",
+    "source": "heuristic"
+  },
+  "2023-10": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 4.00% (stable), Brent +0.375 log-pp vs 2002-2023 mean, EPU very high (p94).",
+    "source": "heuristic"
+  },
+  "2023-11": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 4.00% (stable), Brent +0.373 log-pp vs 2002-2023 mean, EPU very high (p93).",
+    "source": "heuristic"
+  },
+  "2023-12": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 4.00% (stable), Brent +0.232 log-pp vs 2002-2023 mean, EPU very high (p93).",
+    "source": "heuristic"
+  },
+  "2024-01": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 4.00% (stable), Brent +0.159 log-pp vs 2002-2024 mean, EPU very high (p89).",
+    "source": "heuristic"
+  },
+  "2024-02": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 4.00% (stable), Brent +0.217 log-pp vs 2002-2024 mean, EPU very high (p94).",
+    "source": "heuristic"
+  },
+  "2024-03": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 4.00% (stable), Brent +0.239 log-pp vs 2002-2024 mean, EPU very high (p87).",
+    "source": "heuristic"
+  },
+  "2024-04": {
+    "direction": "DOWN",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.20. Key drivers: ECB DFR 4.00% (stable), Brent +0.283 log-pp vs 2002-2024 mean, EPU above average (p76).",
+    "source": "heuristic"
+  },
+  "2024-05": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 4.00% (stable), Brent +0.287 log-pp vs 2002-2024 mean, EPU very high (p86).",
+    "source": "heuristic"
+  },
+  "2024-06": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.10. Key drivers: ECB DFR 3.75% (falling), Brent +0.212 log-pp vs 2002-2024 mean, EPU very high (p91).",
+    "source": "heuristic"
+  },
+  "2024-07": {
+    "direction": "UP",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.15. Key drivers: ECB DFR 3.75% (stable), Brent +0.268 log-pp vs 2002-2024 mean, EPU very high (p94).",
+    "source": "heuristic"
+  },
+  "2024-08": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 3.75% (stable), Brent +0.199 log-pp vs 2002-2024 mean, EPU very high (p97).",
+    "source": "heuristic"
+  },
+  "2024-09": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.30. Key drivers: ECB DFR 3.50% (falling), Brent +0.175 log-pp vs 2002-2024 mean, EPU very high (p83).",
+    "source": "heuristic"
+  },
+  "2024-10": {
+    "direction": "UP",
+    "confidence": "MEDIUM",
+    "magnitude": "MEDIUM",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.45. Key drivers: ECB DFR 3.25% (falling), Brent +0.174 log-pp vs 2002-2024 mean, EPU very high (p96).",
+    "source": "heuristic"
+  },
+  "2024-11": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=-0.05. Key drivers: ECB DFR 3.25% (stable), Brent +0.099 log-pp vs 2002-2024 mean, EPU very high (p97).",
+    "source": "heuristic"
+  },
+  "2024-12": {
+    "direction": "NEUTRAL",
+    "confidence": "LOW",
+    "magnitude": "SMALL",
+    "reasoning": "[DRY RUN — heuristic] Score=+0.10. Key drivers: ECB DFR 3.00% (falling), Brent +0.096 log-pp vs 2002-2024 mean, EPU very high (p100).",
+    "source": "heuristic"
+  }
+}

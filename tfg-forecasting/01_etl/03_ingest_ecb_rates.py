@@ -24,7 +24,7 @@ DATE_END   = "2025-06-01"
 def load_rate(path: Path, col_name: str) -> pd.Series:
     """Read a BCE daily-change CSV and return a monthly series.
 
-    Uses last() + ffill() — correct for step-function policy rate series.
+    Uses last() + ffill() - correct for step-function policy rate series.
     """
     df = pd.read_csv(path, usecols=["TIME_PERIOD", "OBS_VALUE"])
     df["TIME_PERIOD"] = pd.to_datetime(df["TIME_PERIOD"])
@@ -45,7 +45,7 @@ def main() -> None:
     if gaps.any():
         logger.warning(f"NaN after ffill:\n{gaps[gaps > 0]}")
     else:
-        logger.info("No NaN after ffill — OK")
+        logger.info("No NaN after ffill - OK")
 
     logger.info(f"Range: {rates.index.min().date()} - {rates.index.max().date()}")
     logger.info(f"Observations: {len(rates)}")
