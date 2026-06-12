@@ -1,4 +1,4 @@
-.PHONY: up down build test seed lint lint-back lint-front
+.PHONY: up down build test seed lint lint-back lint-front lint-forecasting test-forecasting
 
 up:
 	docker compose up -d
@@ -15,7 +15,13 @@ test:
 seed:
 	docker compose exec backend python scripts/seed_ipc.py
 
-lint: lint-back lint-front
+lint: lint-back lint-front lint-forecasting
+
+lint-forecasting:
+	ruff check shared tfg-forecasting/tests
+
+test-forecasting:
+	pytest tfg-forecasting/tests/test_metrics.py -q
 
 lint-back:
 	cd tfg-arquitectura/backend && ruff check app scripts tests

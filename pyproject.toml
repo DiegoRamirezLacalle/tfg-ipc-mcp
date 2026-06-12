@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "tfg-ipc-mcp"
@@ -13,6 +13,7 @@ dependencies = [
     "numpy>=1.26",
     "requests>=2.31",
     "python-dotenv>=1.0",
+    "tqdm>=4.66",
 
     # Series temporales — baseline
     "statsmodels>=0.14",
@@ -23,7 +24,7 @@ dependencies = [
 
     # Foundation models
     "nixtla>=0.5",          # TimeGPT
-    # timesfm se instala aparte (ver tfg-forecasting/requirements.txt)
+    # timesfm y chronos-forecasting se instalan aparte (ver tfg-forecasting/requirements.txt)
 
     # MCP / agente
     "anthropic>=0.25",
@@ -39,7 +40,7 @@ members = ["tfg-arquitectura/backend"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["shared*", "tfg_forecasting*"]
+include = ["shared*"]
 
 [project.optional-dependencies]
 dev = [

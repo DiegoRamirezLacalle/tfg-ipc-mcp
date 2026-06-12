@@ -30,9 +30,9 @@ tfg-ipc-mcp/
 ├── pyproject.toml              ← monorepo Python dependencies
 ├── docker-compose.yml          ← web services orchestration
 ├── shared/                     ← utilities shared across scripts
-│   ├── constants.py            ← HORIZONS=[1,3,6,12], data paths, etc.
-│   ├── data_utils.py           ← parquet loading helpers
-│   ├── metrics.py              ← MAE, RMSE, MASE, naive_scale
+│   ├── constants.py            ← frozen date splits, FORECAST_HORIZON, FREQ
+│   ├── exog_policies.py        ← as-of-origin exogenous guards (assert_no_future)
+│   ├── metrics.py              ← MAE, RMSE, MASE, Diebold-Mariano
 │   └── logger.py               ← standard logger
 │
 ├── tfg-forecasting/
@@ -49,8 +49,9 @@ tfg-ipc-mcp/
 │   ├── 06_models_foundation/   ← 29 scripts — Chronos-2, TimesFM, TimeGPT (C0/C1, 3 series)
 │   ├── 07_evaluation/          ← evaluation notebooks + Diebold-Mariano tests
 │   ├── 08_results/             ← JSON metrics, Parquet predictions, PNG figures
-│   ├── configs/                ← YAML model configurations
-│   └── lightning_logs/         ← PyTorch Lightning logs (~263 versions)
+│   ├── 09_future_work/         ← exploratory extensions (MIDAS, multi-agent)
+│   ├── tests/                  ← pytest unit tests + artifact/leakage checks
+│   └── lightning_logs/         ← PyTorch Lightning logs (gitignored)
 │
 └── tfg-arquitectura/
     ├── backend/                ← FastAPI (app/, migrations/, scripts/, tests/)
