@@ -26,7 +26,7 @@ tfg-ipc-mcp/
 │   ├── 06_models_foundation/ # 29 scripts — Chronos-2, TimesFM, TimeGPT (C0/C1, 3 series)
 │   ├── 07_evaluation/        # Evaluation notebooks + Diebold-Mariano tests
 │   ├── 08_results/           # JSON metrics, Parquet predictions, figures
-│   └── configs/              # YAML model configurations
+│   └── tests/                # pytest unit tests + artifact integrity checks
 ├── tfg-arquitectura/         # TFG 2 — Web platform
 ├── shared/                   # Common metrics, utilities, constants
 ├── pyproject.toml            # Shared Python dependencies

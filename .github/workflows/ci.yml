@@ -17,6 +17,17 @@ jobs:
       - run: ruff check app scripts tests
         working-directory: tfg-arquitectura/backend
 
+  forecasting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff pytest numpy scipy
+      - run: ruff check shared tfg-forecasting/tests
+      - run: pytest tfg-forecasting/tests/test_metrics.py -q
+
   frontend:
     runs-on: ubuntu-latest
     defaults:

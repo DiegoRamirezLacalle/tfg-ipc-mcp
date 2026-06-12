@@ -1,0 +1,37 @@
+# tfg-forecasting — full dependency stack.
+# Core deps are also declared in the monorepo pyproject.toml; this file pins the
+# exact versions the experiments were run with, plus the forecasting-only extras.
+# Install:  pip install -r tfg-forecasting/requirements.txt
+
+# --- Data / ETL ---
+pandas==2.3.3
+numpy==2.2.1
+requests==2.33.1
+httpx==0.28.1
+python-dotenv==1.0.1
+tqdm==4.67.1
+beautifulsoup4==4.14.3
+feedparser==6.0.12
+pymongo==4.16.0
+
+# --- Statistical baselines ---
+statsmodels==0.14.6
+pmdarima==2.1.1
+
+# --- Metrics / evaluation ---
+scikit-learn==1.7.2
+scipy==1.15.3
+matplotlib==3.10.8
+
+# --- Deep learning (LSTM, N-BEATS, N-HiTS) ---
+torch==2.9.1
+neuralforecast==3.1.6
+
+# --- Foundation models ---
+nixtla==0.7.3              # TimeGPT (needs NIXTLA_API_KEY in .env)
+timesfm[torch]>=1.2        # Google TimesFM — heavy; pulls its own JAX/torch deps
+chronos-forecasting>=2.0   # Amazon Chronos-2 (Chronos2Pipeline, model amazon/chronos-2)
+
+# --- MCP pipeline (05_mcp_pipeline*) ---
+anthropic==0.86.0
+mcp==1.26.0
