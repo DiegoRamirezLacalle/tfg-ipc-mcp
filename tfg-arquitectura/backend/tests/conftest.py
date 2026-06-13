@@ -1,9 +1,66 @@
-import httpx
-import pytest_asyncio
-from sqlalchemy import text
+"""Test fixtures.
 
-from app.db.postgres import AsyncSessionLocal
-from app.main import app
+CRITICAL SAFETY: the integration tests TRUNCATE the whole schema between tests.
+To make that safe, every test run is redirected to a DEDICATED database whose
+name ends in ``_test`` — set in the environment *before* the app is imported, so
+the engine in ``app.db.postgres`` (and every module that imported
+``AsyncSessionLocal`` from it) binds to the test database, never production.
+
+A hard assertion guarantees we can never truncate a non-``_test`` database, even
+if the environment is misconfigured.
+"""
+
+import os
+
+# ── Redirect to a dedicated test database BEFORE importing the app ────────────
+_BASE_DB = os.environ.get("POSTGRES_DB", "tfg_experiments")
+if not _BASE_DB.endswith("_test"):
+    os.environ["POSTGRES_DB"] = f"{_BASE_DB}_test"
+
+# Belt-and-suspenders: refuse to run if we are not pointed at a *_test database.
+assert os.environ["POSTGRES_DB"].endswith("_test"), (
+    "Refusing to run tests: POSTGRES_DB is not a *_test database "
+    f"({os.environ['POSTGRES_DB']!r}). Tests TRUNCATE the schema and must never "
+    "touch production."
+)
+
+import asyncpg  # noqa: E402
+import httpx  # noqa: E402
+import pytest_asyncio  # noqa: E402
+from sqlalchemy import text  # noqa: E402
+
+from app.config import settings  # noqa: E402
+from app.db.postgres import AsyncSessionLocal, Base, engine  # noqa: E402
+from app.main import app  # noqa: E402
+
+
+async def _ensure_test_database() -> None:
+    """Create the dedicated test database if it does not exist yet."""
+    admin_dsn = (
+        f"postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}"
+        f"@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/postgres"
+    )
+    conn = await asyncpg.connect(admin_dsn)
+    try:
+        exists = await conn.fetchval(
+            "SELECT 1 FROM pg_database WHERE datname = $1", settings.POSTGRES_DB
+        )
+        if not exists:
+            # Identifier is derived from POSTGRES_DB (asserted *_test above).
+            await conn.execute(f'CREATE DATABASE "{settings.POSTGRES_DB}"')
+    finally:
+        await conn.close()
+
+
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def _setup_test_database():
+    """Create the test DB and all tables once per session."""
+    assert settings.POSTGRES_DB.endswith("_test")
+    await _ensure_test_database()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    await engine.dispose()
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -17,6 +74,8 @@ async def client():
 
 @pytest_asyncio.fixture(autouse=True)
 async def clean_db():
+    # Final guard right before the destructive statement.
+    assert settings.POSTGRES_DB.endswith("_test"), "TRUNCATE blocked: not a _test DB"
     async with AsyncSessionLocal() as db:
         await db.execute(
             text(

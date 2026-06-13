@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { useLogin } from "@/lib/queries";
 import { FlowField } from "@/components/visuals/FlowField";
@@ -128,6 +128,19 @@ export default function Login() {
           >
             {login.isPending ? "Authenticating…" : "Authenticate →"}
           </button>
+
+          <div className="flex items-center gap-3">
+            <span className="h-px flex-1 bg-border" />
+            <span className="font-mono text-[10px] text-foreground-subtle/50 uppercase tracking-widest">or</span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <p className="text-center font-mono text-data-sm text-foreground-muted">
+            No account yet?{" "}
+            <Link to="/signup" className="text-mcp hover:text-mcp/80 transition-colors">
+              Create one →
+            </Link>
+          </p>
 
           <p className="text-center font-mono text-label-caps text-foreground-subtle/40 uppercase tracking-widest">
             Confidential &amp; Proprietary

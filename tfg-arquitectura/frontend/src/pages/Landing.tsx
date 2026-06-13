@@ -85,6 +85,9 @@ export default function Landing() {
           <Link to="/login" className="font-mono text-data-sm text-foreground-muted hover:text-foreground transition-colors px-2 py-1">
             Log in
           </Link>
+          <Link to="/signup" className="font-mono text-data-sm text-foreground-muted hover:text-foreground transition-colors px-2 py-1">
+            Sign up
+          </Link>
           <Link to="/experiments" className="flex items-center gap-1.5 font-mono text-data-sm bg-mcp hover:bg-mcp/90 text-white px-4 py-1.5 rounded transition-colors">
             Enter platform <ArrowRight size={11} />
           </Link>

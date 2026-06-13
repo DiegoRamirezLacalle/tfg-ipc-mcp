@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
@@ -18,9 +18,13 @@ export function TopNav() {
   return (
     <header className="fixed top-0 w-full h-[56px] bg-background/95 backdrop-blur-sm border-b border-border z-50 flex items-center justify-between px-6">
       <div className="flex items-center gap-6 h-full">
-        <span className="font-mono text-data-lg lowercase tracking-tighter text-foreground select-none">
+        <Link
+          to="/"
+          className="font-mono text-data-lg lowercase tracking-tighter text-foreground hover:text-gold transition-colors"
+          title="Home"
+        >
           tfg-ipc-mcp<span className="cursor-block" />
-        </span>
+        </Link>
 
         <nav className="flex h-full">
           {NAV.map((item) => (

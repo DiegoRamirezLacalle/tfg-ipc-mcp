@@ -20,22 +20,42 @@ _REPO_ID  = "google/timesfm-1.0-200m-pytorch"
 _MIN_TRAIN = 24
 
 
+def _construct(timesfm_mod):
+    return timesfm_mod.TimesFm(
+        hparams=timesfm_mod.TimesFmHparams(
+            backend="pytorch",
+            per_core_batch_size=1,
+            horizon_len=12,
+            context_len=512,
+        ),
+        checkpoint=timesfm_mod.TimesFmCheckpoint(
+            huggingface_repo_id=_REPO_ID,
+        ),
+    )
+
+
 def _load_model(timesfm_mod):
+    """Load the TimesFM singleton, hardened against cold-start failures.
+
+    The whole load runs under a lock so two concurrent runs never initialise
+    the torch checkpoint at the same time — a race that can leave weights on
+    the ``meta`` device ("Cannot copy out of meta tensor"). If the first
+    construction still hits that transient error, we retry once: by then the
+    HuggingFace weights are cached locally and the load is clean.
+    """
     global _MODEL
-    if _MODEL is None:
-        with _MODEL_LOCK:
-            if _MODEL is None:
-                _MODEL = timesfm_mod.TimesFm(
-                    hparams=timesfm_mod.TimesFmHparams(
-                        backend="pytorch",
-                        per_core_batch_size=1,
-                        horizon_len=12,
-                        context_len=512,
-                    ),
-                    checkpoint=timesfm_mod.TimesFmCheckpoint(
-                        huggingface_repo_id=_REPO_ID,
-                    ),
-                )
+    if _MODEL is not None:
+        return _MODEL
+    with _MODEL_LOCK:
+        if _MODEL is not None:
+            return _MODEL
+        try:
+            _MODEL = _construct(timesfm_mod)
+        except (RuntimeError, NotImplementedError) as exc:
+            if "meta" not in str(exc).lower():
+                raise
+            # Transient cold-start meta-tensor issue — retry once, weights cached.
+            _MODEL = _construct(timesfm_mod)
     return _MODEL
 
 
