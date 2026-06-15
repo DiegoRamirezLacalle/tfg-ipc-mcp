@@ -43,3 +43,6 @@ tfg-forecasting/04_models_deep/results/*.parquet
 # Claude Code local settings
 .claude/
 .mcp.json
+
+# Internal session context (not for the public repo)
+PROJECT_CONTEXT.md
