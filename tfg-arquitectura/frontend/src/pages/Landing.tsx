@@ -16,14 +16,14 @@ const DOORS = [
     icon: FlaskConical,
     title: "The Contest",
     rq: "Classical vs foundation",
-    desc: "Run ARIMA, SARIMA and Ridge against TimesFM, Chronos-2 and TimeGPT — with or without MCP context — on a rolling backtest.",
+    desc: "Run ARIMA, SARIMA and Ridge against TimesFM, Chronos-2 and TimeGPT - with or without MCP context - on a rolling backtest.",
     to: "/experiments",
   },
   {
     n: "02",
     icon: BarChart3,
     title: "The Evidence",
-    rq: "RQ1 · who wins, and is it real?",
+    rq: "RQ1 | who wins, and is it real?",
     desc: "Leaderboard, skill score vs the seasonal naïve, horizon-wise error decay, and Diebold-Mariano significance tests.",
     to: "/compare",
   },
@@ -31,8 +31,8 @@ const DOORS = [
     n: "03",
     icon: SlidersHorizontal,
     title: "The Mechanism",
-    rq: "RQ2 · do signals add value?",
-    desc: "Perturb ECB rates and Fed/US-CPI signals and watch the forecast respond — the marginal effect of MCP context, made tangible.",
+    rq: "RQ2 | do signals add value?",
+    desc: "Perturb ECB rates and Fed/US-CPI signals and watch the forecast respond - the marginal effect of MCP context, made tangible.",
     to: "/simulator",
   },
 ];
@@ -97,7 +97,7 @@ export default function Landing() {
       {/* -- HERO ------------------------------------------ */}
       <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
         {/* Layered living background (z-0, content sits at z-10 above):
-            1. WebGL volumetric nebula — cinematic violet/gold/indigo fog
+            1. WebGL volumetric nebula - cinematic violet/gold/indigo fog
             2. animated SVG forecast lines drawing on top (guaranteed visible)
             3. readability scrim under the headline + bottom fade            */}
         <div className="absolute inset-0 z-0 pointer-events-none">
@@ -115,7 +115,7 @@ export default function Landing() {
           <motion.p className="micro uppercase tracking-widest text-gold"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
           >
-            TFG · Inflation Forecasting · Model Context Protocol
+            TFG | Inflation Forecasting | Model Context Protocol
           </motion.p>
 
           <motion.h1 className="font-grotesk font-bold text-gradient-hero text-[clamp(2.8rem,8.5vw,6rem)] leading-[0.98] tracking-[-0.03em]"
@@ -134,7 +134,7 @@ export default function Landing() {
             with MCP macro context, beat classical baselines at forecasting inflation?
           </motion.p>
 
-          {/* The two research questions — the spine of everything */}
+          {/* The two research questions - the spine of everything */}
           <motion.div className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl"
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
           >
@@ -190,7 +190,7 @@ export default function Landing() {
           <p className="micro text-foreground-subtle uppercase">Explore the thesis</p>
           <h2 className="font-grotesk font-semibold text-display-lg leading-tight tracking-[-0.02em]">Three ways in.</h2>
           <p className="font-mono text-data-base text-foreground-muted max-w-lg leading-relaxed">
-            Each door answers one piece of the argument — run the models, weigh the evidence, probe the mechanism.
+            Each door answers one piece of the argument - run the models, weigh the evidence, probe the mechanism.
           </p>
         </motion.div>
 
@@ -219,7 +219,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* -- DIVIDER — faint forecast-line callback -------- */}
+      {/* -- DIVIDER - faint forecast-line callback -------- */}
       <ForecastDivider className="max-w-5xl mx-auto px-6" theme={theme} />
 
       {/* -- LIVE PULSE ------------------------------------ */}
@@ -228,11 +228,11 @@ export default function Landing() {
           <div className="section-glow flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <Radio size={13} className="text-gold" />
-              <p className="micro text-gold uppercase">Live · right now</p>
+              <p className="micro text-gold uppercase">Live | right now</p>
             </div>
             <h2 className="font-grotesk font-semibold text-display-lg leading-tight tracking-[-0.02em]">The economy, as it speaks.</h2>
             <p className="font-mono text-data-base text-foreground-muted max-w-lg leading-relaxed">
-              Real inflation headlines from GDELT, scored live by FinBERT through the MCP server —
+              Real inflation headlines from GDELT, scored live by FinBERT through the MCP server -
               the exact sentiment channel the models consume as C1 context.
             </p>
           </div>
@@ -255,7 +255,7 @@ export default function Landing() {
           </h2>
           <p className="font-mono text-data-base text-foreground-muted max-w-md">
             Run experiments, weigh them with statistical significance, and probe how MCP signals
-            move the forecast — all in one place.
+            move the forecast - all in one place.
           </p>
         </motion.div>
         <motion.div className="flex items-center gap-3" {...reveal(0.2)}>
@@ -270,8 +270,8 @@ export default function Landing() {
 
       {/* -- FOOTER ---------------------------------------- */}
       <footer className="border-t border-border px-6 py-5 flex items-center justify-between">
-        <span className="font-mono text-data-sm text-foreground-subtle">tfg-ipc-mcp · 2026</span>
-        <span className="font-mono text-data-sm text-foreground-subtle">Diego Ramírez · TFG</span>
+        <span className="font-mono text-data-sm text-foreground-subtle">tfg-ipc-mcp | 2026</span>
+        <span className="font-mono text-data-sm text-foreground-subtle">Diego Ramírez | TFG</span>
       </footer>
     </div>
   );

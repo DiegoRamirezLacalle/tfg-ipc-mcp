@@ -134,7 +134,7 @@ export function MetricRadar({ runs, hoveredModel, onHoverModel }: MetricRadarPro
         })}
       </div>
       <p className="font-mono text-[10px] text-foreground-subtle uppercase tracking-widest text-center pt-2">
-        normalized 0–100 · larger polygon = better overall
+        normalized 0-100 | larger polygon = better overall
       </p>
     </div>
   );

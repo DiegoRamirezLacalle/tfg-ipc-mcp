@@ -133,12 +133,12 @@ export default function Simulator() {
         <div className="flex items-center gap-3">
           <SlidersHorizontal size={20} className="text-gold" />
           <h1 className="font-sans text-display-lg tracking-tight text-foreground">What-if Simulator</h1>
-          <span className="pill pill-mcp text-[10px] ml-1">◈ MCP signals</span>
+          <span className="pill pill-mcp text-[10px] ml-1">MCP signals</span>
         </div>
         <p className="font-mono text-data-sm text-foreground-muted max-w-2xl">
           Perturb the macro / monetary-policy signals and watch the forecast respond. The counterfactual
           isolates the <span className="text-gold">marginal effect</span> of each signal on future
-          inflation <span className="text-foreground-muted">changes</span> — the same exogenous-signal logic
+          inflation <span className="text-foreground-muted">changes</span> - the same exogenous-signal logic
           behind the C1 conditions in the thesis.
         </p>
       </motion.div>
@@ -196,7 +196,7 @@ export default function Simulator() {
       </div>
 
       {setup.isLoading && (
-        <p className="font-mono text-data-sm text-foreground-subtle py-12">Computing base forecast…</p>
+        <p className="font-mono text-data-sm text-foreground-subtle py-12">Computing base forecast...</p>
       )}
       {setup.error && (
         <p className="font-mono text-data-sm text-destructive">{(setup.error as Error).message}</p>
@@ -221,7 +221,7 @@ export default function Simulator() {
             <div className="p-4 flex flex-col gap-5">
               {!setup.data.signals_available && (
                 <p className="font-mono text-data-sm text-warning">
-                  MCP signal parquet not mounted — only the baseline forecast is shown.
+                  MCP signal parquet not mounted - only the baseline forecast is shown.
                 </p>
               )}
               {setup.data.signals.map((sig) => (
@@ -246,7 +246,7 @@ export default function Simulator() {
                 <div className="card-tech p-4 flex flex-col gap-1">
                   <span className="micro uppercase">Top Driver</span>
                   <span className="font-mono text-data-base text-foreground truncate">
-                    {summary.topKey && Math.abs(summary.topContrib) > 1e-6 ? summary.topKey : "—"}
+                    {summary.topKey && Math.abs(summary.topContrib) > 1e-6 ? summary.topKey : "-"}
                   </span>
                   {summary.topKey && Math.abs(summary.topContrib) > 1e-6 && (
                     <span className={"font-mono text-data-sm " + (summary.topContrib > 0 ? "text-destructive" : "text-success")}>
@@ -259,7 +259,7 @@ export default function Simulator() {
 
             <div className="card-tech flex flex-col overflow-hidden">
               <div className="border-b border-border px-4 py-3 flex items-center justify-between bg-muted/50">
-                <span className="micro uppercase">{setup.data.series_name} · forecast</span>
+                <span className="micro uppercase">{setup.data.series_name} | forecast</span>
                 <div className="flex items-center gap-4 font-mono text-data-sm">
                   <span className="flex items-center gap-1.5 text-foreground-muted">
                     <span className="w-4 border-t-2 border-dashed border-mcp" /> Baseline
@@ -282,13 +282,13 @@ export default function Simulator() {
             <p className="font-mono text-[11px] text-foreground-subtle px-1">
               Counterfactual = baseline + Σ (slider − baseline) × per-step marginal effect. Effects come from a
               direct multi-step Ridge fit on the <span className="text-foreground-muted">h-step change</span> (not
-              the level — which avoids the spurious level correlation), standardised and expressed in{" "}
+              the level - which avoids the spurious level correlation), standardised and expressed in{" "}
               {setup.data.unit ?? "target"} units.
             </p>
           </div>
         </div>
 
-        {/* Chat tutor — knows the live simulator state and the thesis concepts */}
+        {/* Chat tutor - knows the live simulator state and the thesis concepts */}
         <SimulatorChat context={chatContext} />
         </div>
       )}

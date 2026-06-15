@@ -3,7 +3,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from app.schemas.run import RunOut  # noqa: F401 — re-exported for backwards compat
+from app.schemas.run import RunOut  # noqa: F401 - re-exported for backwards compat
 
 
 class ExperimentCreate(BaseModel):

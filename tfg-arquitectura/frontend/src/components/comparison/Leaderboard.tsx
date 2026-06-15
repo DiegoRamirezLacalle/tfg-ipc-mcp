@@ -14,17 +14,17 @@ interface LeaderboardProps {
 }
 
 function fmtNum(v: number | null, decimals = 4): string {
-  return v === null ? "—" : v.toFixed(decimals);
+  return v === null ? "-" : v.toFixed(decimals);
 }
 
 function fmtDuration(sec: number | null): string {
-  if (sec === null) return "—";
+  if (sec === null) return "-";
   if (sec < 60) return `${sec.toFixed(1)}s`;
   return `${(sec / 60).toFixed(1)}m`;
 }
 
 function fmtPct(v: number | null): string {
-  return v === null ? "—" : `${(v * 100).toFixed(1)}%`;
+  return v === null ? "-" : `${(v * 100).toFixed(1)}%`;
 }
 
 export function Leaderboard({ runs, hoveredModel, onHoverModel }: LeaderboardProps) {
@@ -115,7 +115,7 @@ export function Leaderboard({ runs, hoveredModel, onHoverModel }: LeaderboardPro
                   </span>
                 </div>
                 <div className="text-center">
-                  {row.useMcp && <span className="pill pill-mcp text-[10px]">◈</span>}
+                  {row.useMcp && <span className="pill pill-mcp text-[10px]"></span>}
                 </div>
                 <ValueCell value={row.mae} best={bests.mae} compare="lt" />
                 <ValueCell value={row.rmse} best={bests.rmse} compare="lt" />
@@ -153,7 +153,7 @@ interface ValueCellProps {
 }
 
 function ValueCell({ value, best, compare, formatter }: ValueCellProps) {
-  if (value === null) return <span className="font-mono text-data-sm text-foreground-subtle text-right">—</span>;
+  if (value === null) return <span className="font-mono text-data-sm text-foreground-subtle text-right">-</span>;
   const isBest =
     best !== null && (compare === "lt" ? value === best : value === best);
   const text = formatter ? formatter(value) : value.toFixed(4);
@@ -161,7 +161,7 @@ function ValueCell({ value, best, compare, formatter }: ValueCellProps) {
     <div className="text-right">
       {isBest ? (
         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-gold/15 border border-gold/40 font-mono text-data-sm text-gold tabular-nums">
-          ★ {text}
+          {text}
         </span>
       ) : (
         <span className="font-mono text-data-sm text-foreground tabular-nums">{text}</span>
@@ -171,7 +171,7 @@ function ValueCell({ value, best, compare, formatter }: ValueCellProps) {
 }
 
 function SkillCell({ value, best }: { value: number | null; best: number | null }) {
-  if (value === null) return <span className="font-mono text-data-sm text-foreground-subtle text-right block">—</span>;
+  if (value === null) return <span className="font-mono text-data-sm text-foreground-subtle text-right block">-</span>;
   const isBest = best !== null && value === best;
   const tone = value > 0 ? "text-success" : value < 0 ? "text-destructive" : "text-foreground-muted";
   const sign = value > 0 ? "+" : "";
@@ -179,7 +179,7 @@ function SkillCell({ value, best }: { value: number | null; best: number | null 
     <div className="text-right">
       {isBest ? (
         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-gold/15 border border-gold/40 font-mono text-data-sm text-gold tabular-nums">
-          ★ {sign}{(value * 100).toFixed(1)}%
+          {sign}{(value * 100).toFixed(1)}%
         </span>
       ) : (
         <span className={`font-mono text-data-sm tabular-nums ${tone}`}>{sign}{(value * 100).toFixed(1)}%</span>
@@ -189,14 +189,14 @@ function SkillCell({ value, best }: { value: number | null; best: number | null 
 }
 
 function DurationCell({ value, best }: { value: number | null; best: number | null }) {
-  if (value === null) return <span className="font-mono text-data-sm text-foreground-subtle text-right block">—</span>;
+  if (value === null) return <span className="font-mono text-data-sm text-foreground-subtle text-right block">-</span>;
   const isBest = best !== null && value === best;
   const text = value < 60 ? `${value.toFixed(1)}s` : `${(value / 60).toFixed(1)}m`;
   return (
     <div className="text-right">
       {isBest ? (
         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-gold/15 border border-gold/40 font-mono text-data-sm text-gold tabular-nums">
-          ★ {text}
+          {text}
         </span>
       ) : (
         <span className="font-mono text-data-sm text-foreground tabular-nums">{text}</span>

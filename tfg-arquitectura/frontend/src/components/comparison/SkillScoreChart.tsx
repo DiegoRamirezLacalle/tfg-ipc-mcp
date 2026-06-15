@@ -32,7 +32,7 @@ export function SkillScoreChart({ runs, hoveredModel, onHoverModel }: SkillScore
   if (rows.length === 0) {
     return (
       <div className="font-mono text-data-sm text-foreground-subtle py-8 text-center">
-        Skill score unavailable — need ≥12 months of history to compute a seasonal-naive baseline.
+        Skill score unavailable - need ≥12 months of history to compute a seasonal-naive baseline.
       </div>
     );
   }
@@ -101,7 +101,7 @@ export function SkillScoreChart({ runs, hoveredModel, onHoverModel }: SkillScore
         </BarChart>
       </ResponsiveContainer>
       <p className="font-mono text-[10px] text-foreground-subtle uppercase tracking-widest text-center pt-2">
-        positive = beats seasonal naïve baseline · negative = worse than baseline
+        positive = beats seasonal naïve baseline | negative = worse than baseline
       </p>
     </div>
   );

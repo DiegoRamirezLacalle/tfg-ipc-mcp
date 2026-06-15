@@ -140,10 +140,10 @@ export function MetricBars({ runs, hoveredModel, onHoverModel }: MetricBarsProps
       </ResponsiveContainer>
       <div className="flex items-center justify-between mt-2 px-1">
         <span className="font-mono text-[10px] text-foreground-subtle uppercase tracking-widest">
-          left axis · MAE / RMSE
+          left axis | MAE / RMSE
         </span>
         <span className="font-mono text-[10px] text-foreground-subtle uppercase tracking-widest">
-          right axis · MAPE %
+          right axis | MAPE %
         </span>
       </div>
     </div>

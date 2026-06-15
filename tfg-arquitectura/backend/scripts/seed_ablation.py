@@ -6,7 +6,7 @@ Creates and triggers:
   - chronos-2    h=12  [MCP]      (C1_mcp)
   - timesfm      h=12  [no-MCP]   (C0)
   - timesfm      h=12  [MCP]      (C1_mcp)
-  - timegpt      h=12  [MCP]      (C1_mcp — C0 already seeded)
+  - timegpt      h=12  [MCP]      (C1_mcp - C0 already seeded)
 
 Run inside the backend container:
   docker compose exec backend python scripts/seed_ablation.py
@@ -53,7 +53,7 @@ def resolve_series(client: httpx.Client, h: dict) -> int:
     r.raise_for_status()
     ds = next((d for d in r.json() if d["slug"] == TARGET_DATASET), None)
     if not ds:
-        sys.exit(f"Dataset '{TARGET_DATASET}' not found — run seed_ipc.py first")
+        sys.exit(f"Dataset '{TARGET_DATASET}' not found - run seed_ipc.py first")
 
     r = client.get(f"{BASE_URL}/datasets/{ds['id']}/series", headers=h)
     r.raise_for_status()
@@ -99,13 +99,13 @@ def seed(client: httpx.Client, h: dict) -> list[tuple]:
         run_id = r.json()["id"]
 
         run_ids.append((slug, label, exp_id, run_id))
-        print(f"  Queued: {exp_name}  → exp {exp_id}, run {run_id}")
+        print(f"  Queued: {exp_name}  -> exp {exp_id}, run {run_id}")
 
     return run_ids
 
 
 def wait(client: httpx.Client, h: dict, run_ids: list[tuple]):
-    print(f"\n{len(run_ids)} runs queued.  Waiting (max 20 min)…\n")
+    print(f"\n{len(run_ids)} runs queued.  Waiting (max 20 min)...\n")
     pending  = list(run_ids)
     deadline = time.time() + 1200
 
@@ -116,15 +116,15 @@ def wait(client: httpx.Client, h: dict, run_ids: list[tuple]):
             r.raise_for_status()
             st = r.json()["status"]
             if st in ("done", "failed"):
-                icon = "✓" if st == "done" else "✗"
-                print(f"  {icon} run {run_id}  {slug} [{label}]  → {st}")
+                icon = "" if st == "done" else ""
+                print(f"  {icon} run {run_id}  {slug} [{label}]  -> {st}")
                 if st == "failed":
                     print(f"      {r.json().get('error_message','')[:140]}")
             else:
                 still.append((slug, label, exp_id, run_id))
         pending = still
         if pending:
-            print(f"    …{len(pending)} still running, sleeping 12s…")
+            print(f"    ...{len(pending)} still running, sleeping 12s...")
             time.sleep(12)
 
     if pending:

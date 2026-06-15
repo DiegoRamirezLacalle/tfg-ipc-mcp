@@ -133,7 +133,7 @@ export default function ExperimentsList() {
         <div>
           {isLoading && (
             <div className="px-4 py-8 text-center font-mono text-data-sm text-foreground-subtle">
-              Loading experiments…
+              Loading experiments...
             </div>
           )}
           {!isLoading && visible.length === 0 && (
@@ -147,7 +147,7 @@ export default function ExperimentsList() {
               <div className="px-4 py-2 bg-muted/40 border-b border-border flex items-center gap-2 sticky top-0 z-10">
                 <span className="w-1.5 h-1.5 rounded-full bg-gold" />
                 <span className="font-mono text-data-sm text-foreground">{g.seriesName}</span>
-                <span className="font-mono text-[10px] text-foreground-subtle">· {g.datasetName}</span>
+                <span className="font-mono text-[10px] text-foreground-subtle">- {g.datasetName}</span>
                 <span className="font-mono text-[10px] text-foreground-subtle uppercase tracking-wider ml-auto">
                   {g.items.length} experiment{g.items.length === 1 ? "" : "s"}
                 </span>

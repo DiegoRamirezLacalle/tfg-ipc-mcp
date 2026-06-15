@@ -1,4 +1,4 @@
-"""Ensemble-stack adapter — inverse-MAE weighted combiner.
+"""Ensemble-stack adapter - inverse-MAE weighted combiner.
 
 Creates a combined forecast from N completed runs by weighting each model's
 predictions by the inverse of its MAE. A run with lower MAE gets more weight.

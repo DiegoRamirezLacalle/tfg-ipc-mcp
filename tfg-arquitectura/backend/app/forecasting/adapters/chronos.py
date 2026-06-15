@@ -1,4 +1,4 @@
-"""Chronos-2 (Amazon) adapter — zero-shot probabilistic forecasting (p50 point estimate).
+"""Chronos-2 (Amazon) adapter - zero-shot probabilistic forecasting (p50 point estimate).
 
 C0 (exog=None): pure zero-shot.
 C1_mcp (exog provided): zero-shot base + Ridge residual correction from MCP signals.
@@ -62,7 +62,7 @@ class Chronos2Adapter:
         # preds shape: (n_variates=1, n_quantiles=21, prediction_length=h)
         preds_raw = model.predict([context], prediction_length=h)
         quantiles = preds_raw[0].numpy()  # (1, 21, h)
-        p50 = quantiles[0, _P50_IDX, :]   # (h,) — median
+        p50 = quantiles[0, _P50_IDX, :]   # (h,) - median
 
         # Ridge correction from MCP signals (C1_mcp condition)
         if inp.exog is not None:

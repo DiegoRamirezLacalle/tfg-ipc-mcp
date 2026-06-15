@@ -59,7 +59,7 @@ def _build_prompt(
 
     pred_str = ", ".join(f"{p:.2f}" for p in predictions[:6])
     if len(predictions) > 6:
-        pred_str += f", … ({len(predictions)} steps total)"
+        pred_str += f", ... ({len(predictions)} steps total)"
 
     mcp_note = ""
     if use_mcp and mcp_signals:
@@ -76,7 +76,7 @@ def _build_prompt(
             if fomc is not None:
                 parts.append(f"FOMC hawkishness {fomc:.2f}")
             if parts:
-                mcp_note = " · " + ", ".join(parts) + " (0=dovish, 1=hawkish)"
+                mcp_note = " | " + ", ".join(parts) + " (0=dovish, 1=hawkish)"
 
     mae_str  = f"{mae:.4f}"  if mae  is not None else "N/A"
     rmse_str = f"{rmse:.4f}" if rmse is not None else "N/A"

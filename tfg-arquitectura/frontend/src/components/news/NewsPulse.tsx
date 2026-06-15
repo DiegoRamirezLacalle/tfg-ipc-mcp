@@ -32,12 +32,12 @@ export function NewsPulse({ limit = 10, showRefresh = true }: NewsPulseProps) {
         <div className="flex items-center gap-2">
           <Cpu size={13} className="text-mcp" />
           <span className="micro uppercase">FinBERT Pulse</span>
-          <span className="pill pill-mcp text-[10px] ml-auto">◈ MCP</span>
+          <span className="pill pill-mcp text-[10px] ml-auto">MCP</span>
         </div>
 
         {sentiment.isLoading && month && (
           <div className="flex items-center gap-2 font-mono text-data-sm text-foreground-subtle py-4">
-            <Loader2 size={12} className="animate-spin" /> Scoring with FinBERT…
+            <Loader2 size={12} className="animate-spin" /> Scoring with FinBERT...
           </div>
         )}
 
@@ -45,7 +45,7 @@ export function NewsPulse({ limit = 10, showRefresh = true }: NewsPulseProps) {
           <div className="flex flex-col gap-4">
             <Gauge
               label="News sentiment"
-              hint="negative ← → positive"
+              hint="negative <- -> positive"
               value={sentiment.data.sentiment_mean ?? 0}
               min={-1}
               max={1}
@@ -53,7 +53,7 @@ export function NewsPulse({ limit = 10, showRefresh = true }: NewsPulseProps) {
             />
             <Gauge
               label="Hawkish share"
-              hint="dovish ← → hawkish"
+              hint="dovish <- -> hawkish"
               value={sentiment.data.hawkish_score ?? 0}
               min={0}
               max={1}
@@ -80,17 +80,17 @@ export function NewsPulse({ limit = 10, showRefresh = true }: NewsPulseProps) {
             className="mt-auto flex items-center justify-center gap-1.5 px-3 py-2 rounded border border-border font-mono text-data-sm text-foreground-muted hover:text-foreground hover:border-foreground-subtle transition-colors disabled:opacity-50"
           >
             {refresh.isPending ? (
-              <><Loader2 size={11} className="animate-spin" /> Fetching GDELT…</>
+              <><Loader2 size={11} className="animate-spin" /> Fetching GDELT...</>
             ) : (
               <><RefreshCw size={11} /> Refresh from GDELT</>
             )}
           </button>
         )}
         {refresh.data && "rate_limited" in (refresh.data as object) && (
-          <p className="font-mono text-[10px] text-warning">GDELT rate-limited — try again in a few seconds.</p>
+          <p className="font-mono text-[10px] text-warning">GDELT rate-limited - try again in a few seconds.</p>
         )}
         <p className="font-mono text-[10px] text-foreground-subtle">
-          updated {fmtRefresh(today.data?.last_refresh ?? null)} · {today.data?.total ?? 0} cached
+          updated {fmtRefresh(today.data?.last_refresh ?? null)} | {today.data?.total ?? 0} cached
         </p>
       </div>
 
@@ -104,7 +104,7 @@ export function NewsPulse({ limit = 10, showRefresh = true }: NewsPulseProps) {
 
         {today.isLoading && (
           <div className="p-6 font-mono text-data-sm text-foreground-subtle flex items-center gap-2">
-            <Loader2 size={12} className="animate-spin" /> Loading headlines…
+            <Loader2 size={12} className="animate-spin" /> Loading headlines...
           </div>
         )}
 

@@ -10,7 +10,7 @@ Two public functions:
 
   apply_ridge_correction(base_preds, y_train, full_exog, test_index)
       Post-hoc correction for foundation models that lack native exog
-      support (TimesFM, Chronos-2).  Fits Ridge(MCP signals → target)
+      support (TimesFM, Chronos-2).  Fits Ridge(MCP signals -> target)
       on the training period and applies a damped level correction to
       the zero-shot base predictions.
 """
@@ -113,7 +113,7 @@ def apply_ridge_correction(
 ) -> np.ndarray:
     """Additive Ridge correction for models without native exog support.
 
-    Fits Ridge(historical_signals → historical_target) on the training
+    Fits Ridge(historical_signals -> historical_target) on the training
     period.  Correction is:
 
         delta[i] = damping * (signal_future[i] - mean(signal_train[-12:]))

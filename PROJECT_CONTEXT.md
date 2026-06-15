@@ -10,7 +10,7 @@
 
 **Central hypothesis**: Do foundation time-series models (Chronos-2, TimesFM, TimeGPT) improve inflation forecasting over classical statistical baselines (ARIMA/SARIMA)? Do exogenous signals built with an MCP pipeline add predictive value?
 
-**Author**: Diego Ramirez · `analacallealvarez@gmail.com`
+**Author**: Diego Ramirez | `analacallealvarez@gmail.com`
 
 ### Two parts of the repository
 
@@ -25,70 +25,70 @@
 
 ```
 tfg-ipc-mcp/
-├── PROJECT_CONTEXT.md          ← this file
-├── README.md                   ← updated project overview
-├── pyproject.toml              ← monorepo Python dependencies
-├── docker-compose.yml          ← web services orchestration
-├── shared/                     ← utilities shared across scripts
-│   ├── constants.py            ← frozen date splits, FORECAST_HORIZON, FREQ
-│   ├── exog_policies.py        ← as-of-origin exogenous guards (assert_no_future)
-│   ├── metrics.py              ← MAE, RMSE, MASE, Diebold-Mariano
-│   └── logger.py               ← standard logger
+├── PROJECT_CONTEXT.md          <- this file
+├── README.md                   <- updated project overview
+├── pyproject.toml              <- monorepo Python dependencies
+├── docker-compose.yml          <- web services orchestration
+├── shared/                     <- utilities shared across scripts
+│   ├── constants.py            <- frozen date splits, FORECAST_HORIZON, FREQ
+│   ├── exog_policies.py        <- as-of-origin exogenous guards (assert_no_future)
+│   ├── metrics.py              <- MAE, RMSE, MASE, Diebold-Mariano
+│   └── logger.py               <- standard logger
 │
 ├── tfg-forecasting/
 │   ├── data/
-│   │   ├── raw/                ← downloaded CSVs (INE, ECB, FRED, etc.)
-│   │   └── processed/          ← parquets ready for models (see §4)
+│   │   ├── raw/                <- downloaded CSVs (INE, ECB, FRED, etc.)
+│   │   └── processed/          <- parquets ready for models (see §4)
 │   │
-│   ├── 01_etl/                 ← 13 ingestion & feature-engineering scripts
-│   ├── 02_eda/                 ← 13 notebooks (visual, stationarity, seasonality, ACF/PACF, regimes)
-│   ├── 03_models_baseline/     ← ARIMA, SARIMA, SARIMAX, AutoARIMA
-│   ├── 04_models_deep/         ← LSTM, N-BEATS, N-HiTS (NeuralForecast)
-│   ├── 05_mcp_pipeline/        ← Spain MCP pipeline (GDELT + ECB press releases)
-│   ├── 05_mcp_pipeline_global/ ← Global MCP pipeline (FOMC + BLS press releases)
-│   ├── 06_models_foundation/   ← 29 scripts — Chronos-2, TimesFM, TimeGPT (C0/C1, 3 series)
-│   ├── 07_evaluation/          ← evaluation notebooks + Diebold-Mariano tests
-│   ├── 08_results/             ← JSON metrics, Parquet predictions, PNG figures
-│   ├── 09_future_work/         ← exploratory extensions (MIDAS, multi-agent)
-│   ├── tests/                  ← pytest unit tests + artifact/leakage checks
-│   └── lightning_logs/         ← PyTorch Lightning logs (gitignored)
+│   ├── 01_etl/                 <- 13 ingestion & feature-engineering scripts
+│   ├── 02_eda/                 <- 13 notebooks (visual, stationarity, seasonality, ACF/PACF, regimes)
+│   ├── 03_models_baseline/     <- ARIMA, SARIMA, SARIMAX, AutoARIMA
+│   ├── 04_models_deep/         <- LSTM, N-BEATS, N-HiTS (NeuralForecast)
+│   ├── 05_mcp_pipeline/        <- Spain MCP pipeline (GDELT + ECB press releases)
+│   ├── 05_mcp_pipeline_global/ <- Global MCP pipeline (FOMC + BLS press releases)
+│   ├── 06_models_foundation/   <- 29 scripts - Chronos-2, TimesFM, TimeGPT (C0/C1, 3 series)
+│   ├── 07_evaluation/          <- evaluation notebooks + Diebold-Mariano tests
+│   ├── 08_results/             <- JSON metrics, Parquet predictions, PNG figures
+│   ├── 09_future_work/         <- exploratory extensions (MIDAS, multi-agent)
+│   ├── tests/                  <- pytest unit tests + artifact/leakage checks
+│   └── lightning_logs/         <- PyTorch Lightning logs (gitignored)
 │
 └── tfg-arquitectura/
-    ├── backend/                ← FastAPI (app/, migrations/, scripts/, tests/)
-    ├── frontend/               ← React + Vite + Tailwind (src/)
-    ├── gateway/                ← nginx reverse proxy + static build
-    └── mcp_server/             ← MCP server (news signals via SSE)
+    ├── backend/                <- FastAPI (app/, migrations/, scripts/, tests/)
+    ├── frontend/               <- React + Vite + Tailwind (src/)
+    ├── gateway/                <- nginx reverse proxy + static build
+    └── mcp_server/             <- MCP server (news signals via SSE)
 ```
 
-### Module 01_etl — Ingestion scripts
+### Module 01_etl - Ingestion scripts
 
 | Script | What it does |
 |--------|-------------|
-| `01_ingest_cpi_global.py` | Downloads World Bank CPI → `cpi_global_monthly.parquet` |
-| `03_ingest_ecb_rates.py` | ECB rates (DFR, MRR) → `ecb_rates_monthly.parquet` |
+| `01_ingest_cpi_global.py` | Downloads World Bank CPI -> `cpi_global_monthly.parquet` |
+| `03_ingest_ecb_rates.py` | ECB rates (DFR, MRR) -> `ecb_rates_monthly.parquet` |
 | `05_clean_and_align.py` | Temporal alignment to monthly frequency |
-| `06_feature_engineering_exog.py` | Builds lags/MAs/diffs → `features_exog.parquet` |
-| `07_ingest_energy_prices.py` | Brent + TTF gas → `energy_prices_monthly.parquet` |
+| `06_feature_engineering_exog.py` | Builds lags/MAs/diffs -> `features_exog.parquet` |
+| `07_ingest_energy_prices.py` | Brent + TTF gas -> `energy_prices_monthly.parquet` |
 | `08_merge_energy_features.py` | Merges energy into features_c1 |
 | `09_ingest_institutional_signals.py` | EPU Europe + ECB signals (Spain/Europe) |
-| `10_ingest_institutional_signals_global.py` | GEPU, GSCPI, VIX, DXY, USG10Y, FEDFUNDS → `institutional_signals_monthly.parquet` |
+| `10_ingest_institutional_signals_global.py` | GEPU, GSCPI, VIX, DXY, USG10Y, FEDFUNDS -> `institutional_signals_monthly.parquet` |
 | `10_merge_institutional_features.py` | Merges institutional into features_c1 |
 | `11_ingest_hicp_europe.py` | HICP update |
-| `12_ingest_europe_signals.py` | ESI Eurozone, 5y breakeven, EUR/USD → `europe_signals_monthly.parquet` |
+| `12_ingest_europe_signals.py` | ESI Eurozone, 5y breakeven, EUR/USD -> `europe_signals_monthly.parquet` |
 | `13_build_features_c1_europe.py` | Assembles `features_c1_europe.parquet` |
 
-### Module 07_evaluation — Evaluation notebooks
+### Module 07_evaluation - Evaluation notebooks
 
 | Notebook | Content |
 |----------|---------|
 | `02_compare_all_models.ipynb` | Full Spain evaluation: ranking, MAE profiles, ΔC1 heatmap, DM tests |
-| `03_evaluation_global.ipynb` | Global CPI evaluation — MASE/MAE profiles, family comparison, AutoARIMA |
+| `03_evaluation_global.ipynb` | Global CPI evaluation - MASE/MAE profiles, family comparison, AutoARIMA |
 | `03_regime_analysis.ipynb` | Regime analysis (pre-pandemic, COVID, energy shock, post-shock) |
 | `04_ablation_context_type.ipynb` | Ablation C0 vs C1_inst vs C1_mcp vs C1_full |
-| `04_evaluation_europe.ipynb` | Europe HICP evaluation — MASE/MAE profiles, C1 ablation, AutoARIMA |
-| `05_spain_vs_global_vs_europe.ipynb` | Cross-series synthesis — main thesis figure |
-| `01_diebold_mariano_tests.py` | DM tests Spain → `diebold_mariano_results_final.json` |
-| `05_diebold_mariano_europe.py` | DM tests Europe → `diebold_mariano_results_europe.json` |
+| `04_evaluation_europe.ipynb` | Europe HICP evaluation - MASE/MAE profiles, C1 ablation, AutoARIMA |
+| `05_spain_vs_global_vs_europe.ipynb` | Cross-series synthesis - main thesis figure |
+| `01_diebold_mariano_tests.py` | DM tests Spain -> `diebold_mariano_results_final.json` |
+| `05_diebold_mariano_europe.py` | DM tests Europe -> `diebold_mariano_results_europe.json` |
 | `build_metrics_summary_final.py` | Builds `metrics_summary_final.json` (Spain master) |
 | `tabla_maestra_modelos.py` | LaTeX table of all models |
 
@@ -105,7 +105,7 @@ Test (rolling-origin):   2021-01 to 2024-12  (48 origins)
 ```
 
 Split is done **by date**, not by numeric index. The initial training period is used to:
-- Compute the MASE scale (MAE of naive lag-12 over 2002–2020)
+- Compute the MASE scale (MAE of naive lag-12 over 2002-2020)
 - Select fixed ARIMA/SARIMA orders (once, no reselection)
 - Train deep learning models on the 24-month window
 
@@ -134,17 +134,17 @@ naive_scale = mean(|y_t - y_{t-12}|)  # computed over 2002-2020
 # Europe : 1.4558 pp
 ```
 
-MASE < 1 → the model beats the seasonal naive lag-12.
+MASE < 1 -> the model beats the seasonal naive lag-12.
 
 ### Diebold-Mariano (DM) tests
 
 - Two-sided test, Harvey-Leybourne-Newbold (HLN) correction
 - Null: both models have the same mean squared error
 - Applied per horizon h and per sub-period
-- Sub-periods: full-2021, Shock-2022 (2022-01 to 2022-12), Post-shock (2023–2024)
+- Sub-periods: full-2021, Shock-2022 (2022-01 to 2022-12), Post-shock (2023-2024)
 - Results in `08_results/diebold_mariano_results_final.json` and `*_europe.json`
 
-### Leakage prevention — shift +1 on exogenous signals
+### Leakage prevention - shift +1 on exogenous signals
 
 **CRITICAL**: all exogenous signals are shifted +1 month before being passed to the model.
 
@@ -178,13 +178,13 @@ Without normalization, Ridge produces an almost-constant correction of ~+1.11 pp
 
 | File | Variable | Period | Obs | Source |
 |------|----------|--------|-----|--------|
-| `ipc_spain_index.parquet` | `indice_general` (+ 13 sub-indices) | 2002-01 → 2026-01 | 289 | INE |
-| `hicp_europe_index.parquet` | `hicp_index` | 2002-01 → 2024-12 | 276 | ECB SDW |
-| `cpi_global_monthly.parquet` | `cpi_global_rate` | 2002-01 → 2024-12 | 276 | World Bank |
+| `ipc_spain_index.parquet` | `indice_general` (+ 13 sub-indices) | 2002-01 -> 2026-01 | 289 | INE |
+| `hicp_europe_index.parquet` | `hicp_index` | 2002-01 -> 2024-12 | 276 | ECB SDW |
+| `cpi_global_monthly.parquet` | `cpi_global_rate` | 2002-01 -> 2024-12 | 276 | World Bank |
 
 **Important**: `hicp_europe_index.parquet` has an integer index (0..275) and `date` as a regular column (not a DatetimeIndex). All Europe scripts must do `df = df.set_index('date')` after loading.
 
-### Exogenous signals — Spain (`features_c1.parquet`, 282 obs × 34 cols)
+### Exogenous signals - Spain (`features_c1.parquet`, 282 obs × 34 cols)
 
 | Group | Key columns |
 |-------|------------|
@@ -197,7 +197,7 @@ Without normalization, Ridge produces an almost-constant correction of ~+1.11 pp
 | EPU Europe | `epu_europe_log`, `epu_europe_ma3`, `epu_europe_lag1` |
 | MCP availability | `signal_available` (0/1 per month) |
 
-### Exogenous signals — Global (`features_c1_global_institutional.parquet`, 276 obs × 31 cols)
+### Exogenous signals - Global (`features_c1_global_institutional.parquet`, 276 obs × 31 cols)
 
 Global institutional signals, all with `_ma3`, `_lag1`, `_diff` suffixes:
 `gepu` (Global EPU), `imf_comm` (IMF commodity), `dxy` (US Dollar Index),
@@ -207,7 +207,7 @@ Global institutional signals, all with `_ma3`, `_lag1`, `_diff` suffixes:
 
 Final selected columns in `08_results/c1_global_inst_selected_cols.json`.
 
-### Exogenous signals — Europe (`features_c1_europe.parquet`, 276 obs × 15 cols)
+### Exogenous signals - Europe (`features_c1_europe.parquet`, 276 obs × 15 cols)
 
 `hicp_index`, `dfr`, `dfr_ma3`, `mrr`, `brent_ma3`, `ttf_ma3`,
 `epu_europe_ma3`, `esi_eurozone` (Economic Sentiment Indicator), `breakeven_5y_lag1`,
@@ -222,7 +222,7 @@ Final selected columns in `08_results/c1_global_inst_selected_cols.json`.
 
 | Condition | Description |
 |-----------|-------------|
-| **C0** | Univariate — target series only, no exogenous signals |
+| **C0** | Univariate - target series only, no exogenous signals |
 | **C1_inst** | + Institutional signals (ECB rates, EPU, energy, macro indicators) |
 | **C1_mcp** | + MCP text signals (GDELT tone, ECB press releases processed by Claude) |
 | **C1_full** | C1_inst + C1_mcp combined (Europe only) |
@@ -235,7 +235,7 @@ Final selected columns in `08_results/c1_global_inst_selected_cols.json`.
 |-------|--------|--------|-------|
 | Naive lag-12 | implicit in metrics | all | reference benchmark |
 | ARIMA | `01_arima_auto{_europe,_global}.py` | all | fixed orders selected by auto_arima once |
-| ARIMA(1,1,1) | — | Global | fixed-order variant for comparison |
+| ARIMA(1,1,1) | - | Global | fixed-order variant for comparison |
 | SARIMA | `02_sarima{_europe,_global}.py` | Spain/Europe | includes seasonal component (1,0,1,12) |
 | SARIMAX | `03_sarimax{_europe,_global}.py` | all | SARIMA + institutional exogenous |
 | AutoARIMA | `07_autoarima_{spain,europe,global}.py` | all | order reselection at each origin |
@@ -262,7 +262,7 @@ Logs in `lightning_logs/` (~263 versions).
 |-----------|--------|-----------|
 | `timesfm_C0` | `01_timesfm_C0.py` | C0 |
 | `timesfm_C1` | `02_timesfm_C1.py` | C1_mcp (GDELT) |
-| `timesfm_C1_inst` | `11_timesfm_C1_inst.py` | C1_inst (EPU Europe) ★ |
+| `timesfm_C1_inst` | `11_timesfm_C1_inst.py` | C1_inst (EPU Europe) |
 | `timesfm_C1_macro` | `12_timesfm_C1_macro.py` | C1_macro |
 | `chronos2_C0` | `03_chronos2_C0.py` | C0 |
 | `chronos2_C1` | `04_chronos2_C1.py` | C1_mcp |
@@ -283,34 +283,34 @@ Logs in `lightning_logs/` (~263 versions).
 |-----------|--------|-----------|
 | `chronos2_C0_global` | `30_chronos2_C0_global.py` | C0 |
 | `timesfm_C0_global` | `31_timesfm_C0_global.py` | C0 |
-| `timegpt_C0_global` | `32_timegpt_C0_global.py` | C0 (pending — Nixtla API unavailable) |
-| `chronos2_C1_inst_global` | `15_chronos2_C1_inst_global.py` | C1_inst ★★ |
+| `timegpt_C0_global` | `32_timegpt_C0_global.py` | C0 (pending - Nixtla API unavailable) |
+| `chronos2_C1_inst_global` | `15_chronos2_C1_inst_global.py` | C1_inst |
 | `timesfm_C1_inst_global` | `16_timesfm_C1_inst_global.py` | C1_inst |
 | `timegpt_C1_inst_global` | `17_timegpt_C1_inst_global.py` | C1_inst |
 
-> ⚠️ Global foundation **C0** uses its own dedicated scripts/files (`30–32`,
+> ⚠️ Global foundation **C0** uses its own dedicated scripts/files (`30-32`,
 > `*_C0_global_metrics.json`). The plain `*_C0` keys above are **Spain** artifacts
 > and must never be reused as Global C0 (see `07_evaluation/audit_foundation_targets.py`).
 
 #### Europe (metrics in `rolling_metrics_europe.json` + `*_europe_metrics.json`)
 
-Each family has C0, C1_inst, C1_mcp, C1_full (scripts 18–29):
+Each family has C0, C1_inst, C1_mcp, C1_full (scripts 18-29):
 
 | Family | C0 | C1_inst | C1_mcp | C1_full |
 |--------|----|---------|--------|---------|
 | Chronos-2 | `18_` | `21_` | `22_` | `23_` |
-| TimesFM | `19_` | `24_` | `25_` | `26_` ★★ |
+| TimesFM | `19_` | `24_` | `25_` | `26_` |
 | TimeGPT | `20_` | `27_` | `28_` | `29_` |
 
 ---
 
 ## 6. Final Results
 
-### Spain — CPI (MASE scale: 1.4051 pp)
+### Spain - CPI (MASE scale: 1.4051 pp)
 
 | Model | MAE h=1 | MAE h=3 | MAE h=6 | MAE h=12 | MASE h=1 | MASE h=12 |
 |-------|---------|---------|---------|----------|----------|----------|
-| Naive lag-12 | 3.626 | — | — | 6.588 | 2.580 | 4.689 |
+| Naive lag-12 | 3.626 | - | - | 6.588 | 2.580 | 4.689 |
 | ARIMA | **0.478** | **0.672** | **0.966** | **1.541** | 0.340 | **1.097** |
 | SARIMA | 0.442 | 0.724 | 1.008 | 1.595 | **0.314** | 1.135 |
 | AutoARIMA | 0.456 | 0.761 | 1.138 | 1.866 | 0.325 | 1.328 |
@@ -318,44 +318,44 @@ Each family has C0, C1_inst, C1_mcp, C1_full (scripts 18–29):
 | TimesFM C0 | 0.436 | 0.785 | 1.129 | 1.864 | 0.311 | 1.326 |
 | TimesFM C1_inst | 0.445 | 0.746 | 1.100 | 1.878 | 0.317 | 1.337 |
 | TimesFM C1_macro | 0.462 | 0.747 | 1.097 | 1.884 | 0.329 | 1.341 |
-| Chronos-2 C0 | 0.520 | — | — | 1.990 | 0.370 | 1.416 |
-| TimeGPT C0 | 0.549 | — | — | 2.010 | 0.391 | 1.430 |
+| Chronos-2 C0 | 0.520 | - | - | 1.990 | 0.370 | 1.416 |
+| TimeGPT C0 | 0.549 | - | - | 2.010 | 0.391 | 1.430 |
 
 **Spain verdict**:
 - Fixed ARIMA is the best model at h≥3 and h=12. No foundation model beats ARIMA at long horizons.
 - N-BEATS wins at h=1 (MAE=0.359), but deteriorates badly at h=12 (MAE=1.895, worse than ARIMA).
 - `timesfm_C1_inst` and `timesfm_C1_macro` are close to TimesFM C0 at h=12 (neutral C1 effect); neither beats ARIMA.
 - C1_mcp (GDELT) **systematically degrades** all models.
-- The most informative signal is EPU Europe (level correlation +0.737 with CPI), but this is spurious level correlation — it does not predict month-to-month changes.
+- The most informative signal is EPU Europe (level correlation +0.737 with CPI), but this is spurious level correlation - it does not predict month-to-month changes.
 
-### Global — World CPI (MASE scale: 1.1720 pp)
+### Global - World CPI (MASE scale: 1.1720 pp)
 
 | Model | MAE h=1 | MAE h=6 | MAE h=12 | MASE h=12 |
 |-------|---------|---------|----------|----------|
 | ARIMA | 0.191 | 0.682 | 1.544 | 1.318 |
 | AutoARIMA | **0.179** | 0.567 | **1.329** | **1.134** |
-| Chronos-2 C1_inst ★★ | 0.200 | **0.591** | **1.143** | **0.976** |
+| Chronos-2 C1_inst | 0.200 | **0.591** | **1.143** | **0.976** |
 | TimesFM C1_inst | **0.214** | **0.607** | **1.191** | **1.016** |
 | TimeGPT C1_inst | 0.415 | 1.180 | 2.114 | 1.803 |
 
 **Global verdict**:
-- `chronos2_C1_inst_global` is the **only model with MASE < 1.0 at h=12** (0.976) — beats the seasonal naive.
+- `chronos2_C1_inst_global` is the **only model with MASE < 1.0 at h=12** (0.976) - beats the seasonal naive.
 - Chronos-2 beats ARIMA from h=3 onwards (h=3: −4.2%, h=6: −13.3%, h=12: **−26.0%**).
 - **After the StandardScaler fix**, TimesFM C1_inst improved significantly: h=1 −20.7%, h=12 −7.2% vs old unscaled result; now MASE=1.016 at h=12 (near-Chronos-2 territory).
 - At h=1 ARIMA is still better; both Chronos-2 and TimesFM C1_inst beat it from h=3 onward.
-- AutoARIMA also beats fixed ARIMA in Global (h=1: −6.3%, h=12: −13.9%) — the one case where dynamic order selection helps.
+- AutoARIMA also beats fixed ARIMA in Global (h=1: −6.3%, h=12: −13.9%) - the one case where dynamic order selection helps.
 - TimeGPT severely degrades with signals (+77% worse than ARIMA at h=12).
 - C1_inst signals used: IMF commodity index, Brent log MA3, GSCPI (NY Fed supply chain pressure).
 
-### Europe — HICP Eurozone (MASE scale: 1.4558 pp)
+### Europe - HICP Eurozone (MASE scale: 1.4558 pp)
 
 | Model | MAE h=1 | MAE h=6 | MAE h=12 | MASE h=12 |
 |-------|---------|---------|----------|----------|
 | SARIMA | 0.413 | 1.226 | 2.411 | 1.656 |
 | AutoARIMA | 0.376 | 1.147 | 2.510 | 1.724 |
 | TimesFM C0 | **0.353** | 1.048 | 2.014 | 1.384 |
-| TimesFM C1_full ★★ | 0.436 | **0.995** | **1.995** | **1.370** |
-| Chronos-2 C0 | 0.512 | — | 2.300 | 1.580 |
+| TimesFM C1_full | 0.436 | **0.995** | **1.995** | **1.370** |
+| Chronos-2 C0 | 0.512 | - | 2.300 | 1.580 |
 
 **Europe verdict**:
 - `timesfm_C1_full_europe` is the overall best model: first to break the MAE < 2.0 barrier at h=12 (1.995).
@@ -371,10 +371,10 @@ Each family has C0, C1_inst, C1_mcp, C1_full (scripts 18–29):
 | Series | Best statistical | MASE h=12 | Best foundation | MASE h=12 | C1 effect |
 |--------|-----------------|-----------|-----------------|-----------|-----------|
 | Spain CPI | ARIMA | **1.097** | TimesFM C0 | 1.326 | neutral (C1_inst = 1.337, +0.8%) |
-| Global CPI | AutoARIMA | 1.134 | Chronos-2 C1_inst ★★ | **0.976** | −14% vs AutoARIMA, −26% vs ARIMA |
-| Europe HICP | SARIMA | 1.656 | TimesFM C1_full ★★ | **1.370** | −17% |
+| Global CPI | AutoARIMA | 1.134 | Chronos-2 C1_inst | **0.976** | −14% vs AutoARIMA, −26% vs ARIMA |
+| Europe HICP | SARIMA | 1.656 | TimesFM C1_full | **1.370** | −17% |
 
-### AutoARIMA — Cross-series methodological finding
+### AutoARIMA - Cross-series methodological finding
 
 | Series | h=1 vs ref | h=12 vs ref | Reference |
 |--------|------------|-------------|-----------|
@@ -385,7 +385,7 @@ Each family has C0, C1_inst, C1_mcp, C1_full (scripts 18–29):
 - In **Global**, AutoARIMA improves on fixed ARIMA (series with more structural change).
 - In **Spain**, AutoARIMA is systematically worse than ARIMA/SARIMA at h≥3.
 - In **Europe**, AutoARIMA competes at short horizons but loses at h=12.
-- Root cause for Spain: the fixed ARIMA (3,1,0)(1,0,1,12) selected on 2002–2020 captures seasonal dynamics better than orders that vary by rolling window.
+- Root cause for Spain: the fixed ARIMA (3,1,0)(1,0,1,12) selected on 2002-2020 captures seasonal dynamics better than orders that vary by rolling window.
 
 ---
 
@@ -428,12 +428,12 @@ Internal structure of metrics JSON:
 
 | File | Content |
 |------|---------|
-| `metrics_summary_final.json` | Spain master: 24 models (naive → auto_arima) |
+| `metrics_summary_final.json` | Spain master: 24 models (naive -> auto_arima) |
 | `rolling_metrics_global.json` | Global baselines: naive, arima, arima111, arimax, auto_arima |
 | `rolling_metrics_europe.json` | Europe baselines: naive, sarima, sarimax, auto_arima |
 | `rolling_metrics_C1_inst_global.json` | SARIMAX global with institutional signals |
-| `deep_rolling_metrics_global.json` | Deep models — Global |
-| `deep_rolling_metrics_europe.json` | Deep models — Europe |
+| `deep_rolling_metrics_global.json` | Deep models - Global |
+| `deep_rolling_metrics_europe.json` | Deep models - Europe |
 | `diebold_mariano_results_final.json` | DM tests Spain (list of objects) |
 | `diebold_mariano_results_europe.json` | DM tests Europe |
 
@@ -452,7 +452,7 @@ for src in ['rolling_metrics_europe.json', 'deep_rolling_metrics_europe.json']:
     d = json.load(open(RESULTS / src))
     for k, v in d.items():
         europe_raw[f'{k}_europe'] = v   # IMPORTANT: _europe suffix added here
-# + individual *_europe_metrics.json (no suffix needed — already in name)
+# + individual *_europe_metrics.json (no suffix needed - already in name)
 ```
 
 ### Rolling backtesting pattern (all modules)
@@ -492,7 +492,7 @@ statsmodels  >= 0.14        # ARIMA/SARIMA/DM tests
 pmdarima     >= 2.1.1       # auto_arima (dynamic AutoARIMA)
 torch        >= 2.2         # LSTM
 neuralforecast              # N-BEATS, N-HiTS
-nixtla       >= 0.5         # TimeGPT (API — requires NIXTLA_API_KEY)
+nixtla       >= 0.5         # TimeGPT (API - requires NIXTLA_API_KEY)
 timesfm                     # TimesFM (separate install, see requirements.txt)
 anthropic    >= 0.25        # MCP pipeline
 mcp          >= 1.0         # MCP server/client
@@ -500,8 +500,8 @@ scikit-learn                # StandardScaler for exogenous signals
 ```
 
 Required environment variables:
-- `NIXTLA_API_KEY` — for TimeGPT
-- `ANTHROPIC_API_KEY` — for the MCP pipeline (Claude extractor agent)
+- `NIXTLA_API_KEY` - for TimeGPT
+- `ANTHROPIC_API_KEY` - for the MCP pipeline (Claude extractor agent)
 
 ---
 
@@ -516,27 +516,27 @@ Required environment variables:
 - [x] Global institutional signals (GEPU, FEDFUNDS, VIX, GSCPI, etc.)
 - [x] Europe signals (ECB DFR, Brent, TTF, EPU, ESI, 5y breakeven, EUR/USD)
 - [x] Feature engineering: lags (1,3,6,12), MAs (3,6), diffs, log-transforms
-- [x] EDA: stationarity, seasonality, ACF/PACF, correlation analysis — all 3 series
+- [x] EDA: stationarity, seasonality, ACF/PACF, correlation analysis - all 3 series
 
 **Statistical models**:
-- [x] ARIMA, SARIMA, SARIMAX — Spain, Global, Europe
-- [x] AutoARIMA rolling — Spain, Global, Europe
+- [x] ARIMA, SARIMA, SARIMAX - Spain, Global, Europe
+- [x] AutoARIMA rolling - Spain, Global, Europe
 - [x] Rolling backtesting (48 origins) for all baselines
 
 **Deep learning**:
-- [x] LSTM univariate — Spain, Europe, Global
-- [x] N-BEATS — Spain, Europe, Global
-- [x] N-HiTS — Spain, Europe, Global
+- [x] LSTM univariate - Spain, Europe, Global
+- [x] N-BEATS - Spain, Europe, Global
+- [x] N-HiTS - Spain, Europe, Global
 
 **Foundation models** (29 configurations total):
-- [x] TimesFM: C0, C1_mcp, C1_inst, C1_macro — Spain
-- [x] Chronos-2: C0, C1_mcp, C1_inst, C1_macro, C1_energy, C1_energy_only — Spain
-- [x] TimeGPT: C0, C1_mcp, C1_inst, C1_macro, C1_energy, C1_energy_only — Spain
-- [x] Chronos-2, TimesFM, TimeGPT: C1_inst — Global
-- [x] Chronos-2, TimesFM, TimeGPT: C0, C1_inst, C1_mcp, C1_full — Europe
+- [x] TimesFM: C0, C1_mcp, C1_inst, C1_macro - Spain
+- [x] Chronos-2: C0, C1_mcp, C1_inst, C1_macro, C1_energy, C1_energy_only - Spain
+- [x] TimeGPT: C0, C1_mcp, C1_inst, C1_macro, C1_energy, C1_energy_only - Spain
+- [x] Chronos-2, TimesFM, TimeGPT: C1_inst - Global
+- [x] Chronos-2, TimesFM, TimeGPT: C0, C1_inst, C1_mcp, C1_full - Europe
 
 **Evaluation**:
-- [x] DM tests — Spain and Europe
+- [x] DM tests - Spain and Europe
 - [x] Regime analysis (pre-pandemic, COVID, energy shock, post-shock)
 - [x] Context-type ablation (C0 vs C1_inst vs C1_mcp vs C1_full)
 - [x] Cross-series comparison of all 3 series (`05_spain_vs_global_vs_europe.ipynb`)
@@ -549,12 +549,12 @@ Required environment variables:
 - [x] README.md fully rewritten with final data and results
 
 **Output figures** (`08_results/`):
-- [x] `fig_MAIN_comparison.png` — 2×3 cross-series panel (main thesis figure)
-- [x] `fig_MAIN_summary.png` — Spain evaluation summary
-- [x] `fig_comp1_difficulty.png` — forecast difficulty by series
-- [x] `fig_comp2_foundation_vs_stat.png` — foundation vs statistical MAE profiles
-- [x] `fig_comp3_families.png` — family comparison (Chronos-2 / TimesFM / TimeGPT)
-- [x] `fig_comp4_c1_effect.png` — C1 signal effect heatmap (Δ MAE %)
+- [x] `fig_MAIN_comparison.png` - 2×3 cross-series panel (main thesis figure)
+- [x] `fig_MAIN_summary.png` - Spain evaluation summary
+- [x] `fig_comp1_difficulty.png` - forecast difficulty by series
+- [x] `fig_comp2_foundation_vs_stat.png` - foundation vs statistical MAE profiles
+- [x] `fig_comp3_families.png` - family comparison (Chronos-2 / TimesFM / TimeGPT)
+- [x] `fig_comp4_c1_effect.png` - C1 signal effect heatmap (Δ MAE %)
 
 ### Pending / In progress ⏳
 
@@ -571,17 +571,17 @@ Required environment variables:
 - [x] Deployment (Docker Compose + nginx gateway on port 80, production build)
 - [x] All 4 datasets seeded: ipc-spain-ine, cpi-global-monthly, hicp-europe-monthly, features-exog
 - [x] 11/13 baseline experiments run (TimeGPT blocked by free-tier rate limit)
-- [x] **Phase D — GDELT sentiment via MCP (FinBERT)**:
+- [x] **Phase D - GDELT sentiment via MCP (FinBERT)**:
   - `mcp_server/server.py`: new `get_news_sentiment(country, year_month)` tool; lazy-loads ProsusAI/finbert (440MB, CPU, double-checked locking), queries MongoDB `news_raw`, returns `{sentiment_mean, sentiment_std, n_articles, hawkish_score}`. `sentiment_mean = mean(pos_prob − neg_prob)` per article.
   - `mcp_server/Dockerfile`: added `torch>=2.2 (CPU wheel)` + `transformers>=4.40`; `hf_cache` named Docker volume at `/root/.cache/huggingface` so model survives restarts
   - `backend/app/mcp/client.py`: `fetch_signals_for_timestamps` now calls both `get_macro_signals` AND `get_news_sentiment` per timestamp; merges `sentiment_mean`, `sentiment_std`, `sentiment_n`, `sentiment_hawkish` into signal dict; graceful per-call error handling
-  - `frontend/src/components/charts/SentimentChart.tsx`: dual-axis Recharts `LineChart`; violet line = sentiment (yAxis −1 to +1), rose dashed = hawkish% (right yAxis 0–1)
+  - `frontend/src/components/charts/SentimentChart.tsx`: dual-axis Recharts `LineChart`; violet line = sentiment (yAxis −1 to +1), rose dashed = hawkish% (right yAxis 0-1)
   - `frontend/src/pages/RunDetail.tsx`: renders `<SentimentChart>` when MCP context contains at least one `sentiment_mean` value
-- [x] **Phase E — Methodological rigor**:
-  - **Ensemble-stack**: `backend/app/forecasting/adapters/ensemble.py` — `EnsembleStackAdapter` (slug `ensemble-stack`); takes `config.stack_run_ids=[id1,id2,...]`; loads predictions+MAEs from N runs, combines with inverse-MAE weights (`w = 1/(mae + eps)`, normalized); `ForecastInput` extended with `stack_preds: pd.DataFrame | None` and `stack_weights: np.ndarray | None`. Registered in `registry.py` + seeded in `etl/load_parquets.py` (model_type `"ensemble"`).
-  - **Alembic migration 0004**: `migrations/versions/20260519_0004_model_type_ensemble.py` — `ALTER TYPE model_type ADD VALUE IF NOT EXISTS 'ensemble'`; `ModelType` enum in `models/model_catalog.py` updated.
+- [x] **Phase E - Methodological rigor**:
+  - **Ensemble-stack**: `backend/app/forecasting/adapters/ensemble.py` - `EnsembleStackAdapter` (slug `ensemble-stack`); takes `config.stack_run_ids=[id1,id2,...]`; loads predictions+MAEs from N runs, combines with inverse-MAE weights (`w = 1/(mae + eps)`, normalized); `ForecastInput` extended with `stack_preds: pd.DataFrame | None` and `stack_weights: np.ndarray | None`. Registered in `registry.py` + seeded in `etl/load_parquets.py` (model_type `"ensemble"`).
+  - **Alembic migration 0004**: `migrations/versions/20260519_0004_model_type_ensemble.py` - `ALTER TYPE model_type ADD VALUE IF NOT EXISTS 'ensemble'`; `ModelType` enum in `models/model_catalog.py` updated.
   - **MLflow tracking**: `docker-compose.yml` adds `mlflow` service (`ghcr.io/mlflow/mlflow:v2.16.0`), SQLite backend, port 5000; `backend` gets `MLFLOW_TRACKING_URI: http://mlflow:5000`; `backend/app/api/v1/runs.py` logs params+metrics after each run via `mlflow.start_run()`; gracefully skipped on failure.
-  - **KS drift detector**: `backend/app/api/v1/drift.py` — `GET /drift?experiment_id=N`; finds latest `done` run, loads predictions vs actuals, computes residuals, 60/40 split, `scipy.stats.ks_2samp`; returns `{drifted, p_value, ks_statistic, n_early, n_recent, message}`. Registered in `api/v1/__init__.py`.
+  - **KS drift detector**: `backend/app/api/v1/drift.py` - `GET /drift?experiment_id=N`; finds latest `done` run, loads predictions vs actuals, computes residuals, 60/40 split, `scipy.stats.ks_2samp`; returns `{drifted, p_value, ks_statistic, n_early, n_recent, message}`. Registered in `api/v1/__init__.py`.
   - **Drift UI**: `frontend/src/lib/queries.ts` adds `DriftResult` interface + `useDrift(experimentId)` hook; `frontend/src/pages/ExperimentDetail.tsx` shows animated warning banner with KS stats when `drift.data.drifted === true`.
 
 **Possible experimental additions**:

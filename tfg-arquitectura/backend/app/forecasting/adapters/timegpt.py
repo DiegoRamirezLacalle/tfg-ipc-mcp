@@ -1,4 +1,4 @@
-"""TimeGPT (Nixtla) adapter — API-based foundation model forecasting.
+"""TimeGPT (Nixtla) adapter - API-based foundation model forecasting.
 
 C0 (use_mcp=False): zero-shot forecast, no exogenous features.
 C1_mcp (use_mcp=True): forecast with MCP signal history + future signals

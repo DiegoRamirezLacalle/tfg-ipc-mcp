@@ -68,7 +68,7 @@ export default function Signup() {
           type="submit" disabled={signup.isPending}
           className="h-10 bg-gold/90 hover:bg-gold text-background font-mono text-label-caps uppercase tracking-widest rounded transition-colors disabled:opacity-50"
         >
-          {signup.isPending ? "Creating…" : "Create account →"}
+          {signup.isPending ? "Creating..." : "Create account ->"}
         </button>
 
         <p className="text-center font-mono text-data-sm text-foreground-muted">

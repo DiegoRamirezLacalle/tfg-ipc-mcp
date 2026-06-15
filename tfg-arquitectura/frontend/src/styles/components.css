@@ -10,7 +10,7 @@
     @apply bg-card border border-border rounded;
   }
 
-  /* Header micro-label, e.g. "RUNS · 4" */
+  /* Header micro-label, e.g. "RUNS | 4" */
   .micro {
     @apply font-mono text-label-caps uppercase text-foreground-muted;
   }

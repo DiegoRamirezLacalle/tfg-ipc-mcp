@@ -33,7 +33,7 @@ const SUGGESTIONS = [
   "Explain marginal effect in plain words",
   "Why did the forecast change?",
   "What does ECB Deposit Rate do to inflation?",
-  "Baseline vs counterfactual — what's the difference?",
+  "Baseline vs counterfactual - what's the difference?",
 ];
 
 export function SimulatorChat({ context }: Props) {
@@ -115,7 +115,7 @@ export function SimulatorChat({ context }: Props) {
         <span className="font-mono text-[10px] text-foreground-subtle ml-1">
           ask anything about this simulation
         </span>
-        <span className="pill pill-mcp text-[10px] ml-auto">◈ local LLM</span>
+        <span className="pill pill-mcp text-[10px] ml-auto">local LLM</span>
       </div>
 
       <div ref={scrollRef} className="px-4 py-4 flex flex-col gap-3 max-h-[420px] overflow-y-auto">
@@ -154,7 +154,7 @@ export function SimulatorChat({ context }: Props) {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about a signal, the result, or any concept…"
+          placeholder="Ask about a signal, the result, or any concept..."
           disabled={streaming}
           className="flex-1 bg-background border border-border rounded px-3 py-2 font-mono text-data-sm text-foreground placeholder:text-foreground-subtle focus:border-mcp focus:ring-1 focus:ring-mcp/20 outline-none disabled:opacity-50"
         />
@@ -188,7 +188,7 @@ function MessageBubble({ role, content, streaming }: { role: "user" | "assistant
             : "bg-card border border-border text-foreground")
         }
       >
-        {content || (streaming ? <span className="text-foreground-subtle">…</span> : null)}
+        {content || (streaming ? <span className="text-foreground-subtle">...</span> : null)}
         {streaming && content && <span className="inline-block w-2 h-3 ml-0.5 bg-gold align-middle animate-blink" />}
       </div>
       {isUser && (

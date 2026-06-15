@@ -1,6 +1,6 @@
-"""TimesFM (Google) adapter — zero-shot univariate forecasting.
+"""TimesFM (Google) adapter - zero-shot univariate forecasting.
 
-Uses timesfm 1.x API:  TimesFm(hparams=..., checkpoint=...) → .forecast()
+Uses timesfm 1.x API:  TimesFm(hparams=..., checkpoint=...) -> .forecast()
 
 C0 (exog=None): pure zero-shot.
 C1_mcp (exog provided): zero-shot base + Ridge residual correction from MCP signals.
@@ -38,7 +38,7 @@ def _load_model(timesfm_mod):
     """Load the TimesFM singleton, hardened against cold-start failures.
 
     The whole load runs under a lock so two concurrent runs never initialise
-    the torch checkpoint at the same time — a race that can leave weights on
+    the torch checkpoint at the same time - a race that can leave weights on
     the ``meta`` device ("Cannot copy out of meta tensor"). If the first
     construction still hits that transient error, we retry once: by then the
     HuggingFace weights are cached locally and the load is clean.
@@ -54,7 +54,7 @@ def _load_model(timesfm_mod):
         except (RuntimeError, NotImplementedError) as exc:
             if "meta" not in str(exc).lower():
                 raise
-            # Transient cold-start meta-tensor issue — retry once, weights cached.
+            # Transient cold-start meta-tensor issue - retry once, weights cached.
             _MODEL = _construct(timesfm_mod)
     return _MODEL
 
@@ -84,7 +84,7 @@ class TimesFMAdapter:
         model = _load_model(timesfm)
         context = y_train.values.astype(np.float32).tolist()
 
-        # freq=0 → low-frequency (monthly / quarterly)
+        # freq=0 -> low-frequency (monthly / quarterly)
         point_out, _ = model.forecast(inputs=[context], freq=[0])
         preds = np.asarray(point_out[0][:h], dtype=np.float64)
 

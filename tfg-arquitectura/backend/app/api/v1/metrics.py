@@ -1,4 +1,4 @@
-"""Metrics aggregation — cross-experiment comparison table + DM significance."""
+"""Metrics aggregation - cross-experiment comparison table + DM significance."""
 
 import numpy as np
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -111,14 +111,14 @@ def _diebold_mariano_hln(
     """Diebold-Mariano test with Harvey-Leybourne-Newbold small-sample correction.
 
     Compares two models' forecast errors over a common set of observations.
-    Loss differential d = |e1|^power - |e2|^power (power=2 → squared loss).
+    Loss differential d = |e1|^power - |e2|^power (power=2 -> squared loss).
 
     The long-run variance uses autocovariances up to lag (h-1) for h-step
     forecasts. The HLN factor corrects DM for small samples and the statistic
-    is referred to a t-distribution with (n-1) df — appropriate for the short
+    is referred to a t-distribution with (n-1) df - appropriate for the short
     per-run evaluation windows on this platform.
 
-    dm_stat < 0 → model 1 better (lower loss); > 0 → model 2 better.
+    dm_stat < 0 -> model 1 better (lower loss); > 0 -> model 2 better.
     """
     d = np.abs(e1) ** power - np.abs(e2) ** power
     n = len(d)

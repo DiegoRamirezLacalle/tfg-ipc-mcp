@@ -2,7 +2,7 @@
 
 CRITICAL SAFETY: the integration tests TRUNCATE the whole schema between tests.
 To make that safe, every test run is redirected to a DEDICATED database whose
-name ends in ``_test`` — set in the environment *before* the app is imported, so
+name ends in ``_test`` - set in the environment *before* the app is imported, so
 the engine in ``app.db.postgres`` (and every module that imported
 ``AsyncSessionLocal`` from it) binds to the test database, never production.
 
@@ -18,7 +18,7 @@ if not _BASE_DB.endswith("_test"):
     os.environ["POSTGRES_DB"] = f"{_BASE_DB}_test"
 
 # Mongo is isolated the same way so run-scoped caches (mcp_contexts) never leak
-# into — or out of — production. get_mongo_db() keys off settings.MONGO_DB.
+# into - or out of - production. get_mongo_db() keys off settings.MONGO_DB.
 _BASE_MONGO = os.environ.get("MONGO_DB", "tfg_news")
 if not _BASE_MONGO.endswith("_test"):
     os.environ["MONGO_DB"] = f"{_BASE_MONGO}_test"
@@ -98,7 +98,7 @@ async def clean_db():
         )
         await db.commit()
     # Postgres IDs reset each test (RESTART IDENTITY), so run-scoped Mongo caches
-    # would collide with stale docs — clear them too for true isolation.
+    # would collide with stale docs - clear them too for true isolation.
     mongo_db = get_mongo_db()
     await mongo_db["mcp_contexts"].delete_many({})
     yield

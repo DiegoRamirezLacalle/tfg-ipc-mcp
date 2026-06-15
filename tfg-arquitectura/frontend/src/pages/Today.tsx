@@ -15,11 +15,11 @@ export default function Today() {
         <div className="flex items-center gap-3">
           <Radio size={20} className="text-gold" />
           <h1 className="font-sans text-display-lg tracking-tight text-foreground">Today's Inflation Pulse</h1>
-          <span className="pill pill-mcp text-[10px] ml-1">◈ live</span>
+          <span className="pill pill-mcp text-[10px] ml-1">live</span>
         </div>
         <p className="font-mono text-data-sm text-foreground-muted max-w-2xl">
           Real-time inflation headlines pulled from <span className="text-gold">GDELT</span> and scored live by{" "}
-          <span className="text-mcp">FinBERT</span> through the MCP server — the same sentiment pipeline that
+          <span className="text-mcp">FinBERT</span> through the MCP server - the same sentiment pipeline that
           feeds the forecasting models' C1 context.
         </p>
       </motion.div>

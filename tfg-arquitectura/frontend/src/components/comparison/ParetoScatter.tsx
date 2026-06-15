@@ -127,7 +127,7 @@ export function ParetoScatter({ runs, hoveredModel, onHoverModel }: ParetoScatte
       </div>
 
       <p className="font-mono text-[10px] text-foreground-subtle uppercase tracking-widest text-center pt-1">
-        point size ∝ MAPE · larger = worse · max {maxMape.toFixed(1)}%
+        point size ∝ MAPE | larger = worse | max {maxMape.toFixed(1)}%
       </p>
     </div>
   );

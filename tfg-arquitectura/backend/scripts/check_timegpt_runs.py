@@ -13,7 +13,7 @@ for _ in range(30):
     pending = [rid for rid, r in results.items() if r["status"] not in ("done", "failed")]
     for rid, r in results.items():
         if r["status"] in ("done", "failed"):
-            icon = "✓" if r["status"] == "done" else "✗"
+            icon = "" if r["status"] == "done" else ""
             print(f"  {icon} run {rid}: {r['status']}  {r.get('error_message','')[:100]}")
     if not pending:
         break

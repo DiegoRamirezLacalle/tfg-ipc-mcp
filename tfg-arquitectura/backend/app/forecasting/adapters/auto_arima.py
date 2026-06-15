@@ -20,7 +20,7 @@ class AutoARIMAAdapter:
             import pmdarima as pm
         except ImportError as exc:
             raise ImportError(
-                "pmdarima is required for AutoARIMA — rebuild the backend image"
+                "pmdarima is required for AutoARIMA - rebuild the backend image"
             ) from exc
 
         series = inp.series.sort_index()
