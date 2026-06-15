@@ -12,16 +12,26 @@ if the environment is misconfigured.
 
 import os
 
-# ── Redirect to a dedicated test database BEFORE importing the app ────────────
+# ── Redirect to dedicated test databases BEFORE importing the app ─────────────
 _BASE_DB = os.environ.get("POSTGRES_DB", "tfg_experiments")
 if not _BASE_DB.endswith("_test"):
     os.environ["POSTGRES_DB"] = f"{_BASE_DB}_test"
 
-# Belt-and-suspenders: refuse to run if we are not pointed at a *_test database.
+# Mongo is isolated the same way so run-scoped caches (mcp_contexts) never leak
+# into — or out of — production. get_mongo_db() keys off settings.MONGO_DB.
+_BASE_MONGO = os.environ.get("MONGO_DB", "tfg_news")
+if not _BASE_MONGO.endswith("_test"):
+    os.environ["MONGO_DB"] = f"{_BASE_MONGO}_test"
+
+# Belt-and-suspenders: refuse to run if we are not pointed at *_test databases.
 assert os.environ["POSTGRES_DB"].endswith("_test"), (
     "Refusing to run tests: POSTGRES_DB is not a *_test database "
     f"({os.environ['POSTGRES_DB']!r}). Tests TRUNCATE the schema and must never "
     "touch production."
+)
+assert os.environ["MONGO_DB"].endswith("_test"), (
+    f"Refusing to run tests: MONGO_DB is not a *_test database "
+    f"({os.environ['MONGO_DB']!r})."
 )
 
 import asyncpg  # noqa: E402
@@ -30,6 +40,7 @@ import pytest_asyncio  # noqa: E402
 from sqlalchemy import text  # noqa: E402
 
 from app.config import settings  # noqa: E402
+from app.db.mongo import get_mongo_db  # noqa: E402
 from app.db.postgres import AsyncSessionLocal, Base, engine  # noqa: E402
 from app.main import app  # noqa: E402
 
@@ -74,8 +85,9 @@ async def client():
 
 @pytest_asyncio.fixture(autouse=True)
 async def clean_db():
-    # Final guard right before the destructive statement.
+    # Final guard right before the destructive statements.
     assert settings.POSTGRES_DB.endswith("_test"), "TRUNCATE blocked: not a _test DB"
+    assert settings.MONGO_DB.endswith("_test"), "Mongo wipe blocked: not a _test DB"
     async with AsyncSessionLocal() as db:
         await db.execute(
             text(
@@ -85,4 +97,8 @@ async def clean_db():
             )
         )
         await db.commit()
+    # Postgres IDs reset each test (RESTART IDENTITY), so run-scoped Mongo caches
+    # would collide with stale docs — clear them too for true isolation.
+    mongo_db = get_mongo_db()
+    await mongo_db["mcp_contexts"].delete_many({})
     yield
