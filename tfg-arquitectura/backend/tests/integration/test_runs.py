@@ -243,27 +243,38 @@ async def test_trigger_run_ridge_exog_has_metrics(client, researcher, run_catalo
 # -- F7: foundation model adapters (graceful failure) --------------------------
 
 @pytest.mark.asyncio
-async def test_trigger_run_timesfm_missing_lib(client, researcher, run_catalog):
-    """TimesFM adapter must fail gracefully when timesfm package is not installed."""
+async def test_trigger_run_timesfm_graceful(client, researcher, run_catalog):
+    """TimesFM adapter reaches a terminal state without crashing the worker.
+
+    Environment-agnostic: when the timesfm package is installed the run
+    completes ('done'); when it is absent the adapter fails gracefully
+    ('failed' with an error message). Either way the worker never crashes.
+    """
     exp_id = await _make_experiment(
         client, researcher["headers"],
         run_catalog["series_id"], run_catalog["timesfm_model_id"],
     )
     run_id, detail = await _trigger_and_get(client, researcher["headers"], exp_id)
-    assert detail["status"] == "failed"
-    assert detail["error_message"] is not None
+    assert detail["status"] in {"done", "failed"}
+    if detail["status"] == "failed":
+        assert detail["error_message"] is not None
 
 
 @pytest.mark.asyncio
-async def test_trigger_run_chronos_missing_lib(client, researcher, run_catalog):
-    """Chronos-2 adapter must fail gracefully when chronos-forecasting is not installed."""
+async def test_trigger_run_chronos_graceful(client, researcher, run_catalog):
+    """Chronos-2 adapter reaches a terminal state without crashing the worker.
+
+    Environment-agnostic: completes when chronos-forecasting is installed,
+    fails gracefully (with an error message) when it is absent.
+    """
     exp_id = await _make_experiment(
         client, researcher["headers"],
         run_catalog["series_id"], run_catalog["chronos_model_id"],
     )
     run_id, detail = await _trigger_and_get(client, researcher["headers"], exp_id)
-    assert detail["status"] == "failed"
-    assert detail["error_message"] is not None
+    assert detail["status"] in {"done", "failed"}
+    if detail["status"] == "failed":
+        assert detail["error_message"] is not None
 
 
 @pytest.mark.asyncio
