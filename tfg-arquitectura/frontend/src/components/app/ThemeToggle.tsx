@@ -2,7 +2,7 @@ import { Moon, Sun, Sparkles } from "lucide-react";
 import { useTheme, type Theme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
-/* Compact icon button that cycles dark → light → violet → dark.
+/* Compact icon button that cycles dark -> light -> violet -> dark.
  * Reused in the landing nav, the inner TopNav, and Login. */
 
 const META: Record<Theme, { icon: typeof Moon; label: string; next: string }> = {
@@ -19,7 +19,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     <button
       type="button"
       onClick={cycleTheme}
-      title={`${label} — ${next}`}
+      title={`${label} - ${next}`}
       aria-label={`${label}. ${next}.`}
       className={cn(
         "flex items-center justify-center h-8 w-8 rounded border border-border",

@@ -6,12 +6,12 @@ import { useExperiment, useExperimentRuns, useModels, useTriggerRun, useDrift } 
 import { StatusPill } from "@/components/ui/StatusPill";
 
 function fmt(iso: string | null) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return iso.replace("T", " ").slice(0, 19) + " UTC";
 }
 
 function elapsed(start: string | null, end: string | null) {
-  if (!start || !end) return "—";
+  if (!start || !end) return "-";
   const ms = new Date(end).getTime() - new Date(start).getTime();
   if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
   return `${Math.round(ms / 60000)}m`;
@@ -36,7 +36,7 @@ export default function ExperimentDetail() {
     return (
       <div className="flex items-center gap-2 font-mono text-data-sm text-foreground-subtle py-12">
         <Activity size={14} className="animate-pulse-soft" />
-        Loading experiment…
+        Loading experiment...
       </div>
     );
   }
@@ -72,7 +72,7 @@ export default function ExperimentDetail() {
             <span><span className="text-foreground-subtle">Model:</span> {modelMap[e.model_id] ?? `#${e.model_id}`}</span>
             <span><span className="text-foreground-subtle">Horizon:</span> {e.horizon}m</span>
             <span><span className="text-foreground-subtle">Created:</span> {fmt(e.created_at)}</span>
-            {e.use_mcp && <span className="pill pill-mcp text-[10px]">MCP ◈</span>}
+            {e.use_mcp && <span className="pill pill-mcp text-[10px]">MCP </span>}
           </div>
         </div>
         <button
@@ -81,7 +81,7 @@ export default function ExperimentDetail() {
           className="flex items-center gap-2 bg-mcp hover:bg-mcp/90 text-white font-mono text-data-sm px-4 py-2 rounded transition-colors disabled:opacity-40 shrink-0"
         >
           <PlayCircle size={14} />
-          {trigger.isPending ? "Triggering…" : "New Run"}
+          {trigger.isPending ? "Triggering..." : "New Run"}
         </button>
       </motion.div>
 
@@ -96,7 +96,7 @@ export default function ExperimentDetail() {
         {hasRunning && (
           <div className="flex items-center gap-1.5 text-info">
             <span className="w-1.5 h-1.5 rounded-full bg-info animate-pulse" />
-            Live — auto-refreshing
+            Live - auto-refreshing
           </div>
         )}
       </div>
@@ -116,7 +116,7 @@ export default function ExperimentDetail() {
               {drift.data.message}
             </span>
             <span className="font-mono text-[11px] text-foreground-subtle">
-              KS test on run #{drift.data.run_id} residuals — early window n={drift.data.n_early}, recent window n={drift.data.n_recent}
+              KS test on run #{drift.data.run_id} residuals - early window n={drift.data.n_early}, recent window n={drift.data.n_recent}
             </span>
           </div>
         </motion.div>
@@ -128,7 +128,7 @@ export default function ExperimentDetail() {
 
         {runs.data?.length === 0 && (
           <div className="card-tech px-4 py-8 text-center font-mono text-data-sm text-foreground-subtle">
-            No runs yet — trigger one above.
+            No runs yet - trigger one above.
           </div>
         )}
 

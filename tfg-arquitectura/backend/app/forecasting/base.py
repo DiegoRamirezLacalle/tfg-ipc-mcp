@@ -18,7 +18,7 @@ class ForecastInput:
 
 @dataclass
 class ForecastResult:
-    predictions: np.ndarray    # shape (horizon,) — forecast values
+    predictions: np.ndarray    # shape (horizon,) - forecast values
     timestamps: list            # pd.Timestamp list matching predictions
     train_actuals: np.ndarray  # y_train used to fit
     test_actuals: np.ndarray   # held-out y_test (predictions evaluated against these)

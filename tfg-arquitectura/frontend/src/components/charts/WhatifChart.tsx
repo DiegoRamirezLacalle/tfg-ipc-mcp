@@ -113,7 +113,7 @@ export function WhatifChart({ history, baseline, counterfactual, unit }: WhatifC
             x={splitDate}
             stroke="#3F3F46"
             strokeDasharray="4 4"
-            label={{ value: "forecast →", fill: "hsl(var(--foreground-subtle))", fontSize: 10, fontFamily: "Geist Mono", position: "insideTopRight" }}
+            label={{ value: "forecast ->", fill: "hsl(var(--foreground-subtle))", fontSize: 10, fontFamily: "Geist Mono", position: "insideTopRight" }}
           />
         )}
         <Line

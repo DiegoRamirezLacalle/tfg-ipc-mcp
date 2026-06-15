@@ -63,7 +63,7 @@ export default function NewExperiment() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 max-w-4xl">
-      {/* Left — form */}
+      {/* Left - form */}
       <motion.form
         onSubmit={onSubmit}
         className="flex flex-col gap-6"
@@ -99,7 +99,7 @@ export default function NewExperiment() {
                 required
                 className={SELECT_CLS}
               >
-                <option value="" className="bg-card text-foreground-subtle">— select dataset —</option>
+                <option value="" className="bg-card text-foreground-subtle">- select dataset -</option>
                 {datasets.data?.map((d) => (
                   <option key={d.id} value={d.id} className="bg-card text-foreground">{d.name} ({d.frequency})</option>
                 ))}
@@ -117,7 +117,7 @@ export default function NewExperiment() {
                 disabled={!datasetId}
                 className={SELECT_CLS}
               >
-                <option value="" className="bg-card text-foreground-subtle">— select series —</option>
+                <option value="" className="bg-card text-foreground-subtle">- select series -</option>
                 {series.data?.map((s) => (
                   <option key={s.id} value={s.id} className="bg-card text-foreground">{s.name}{s.unit ? ` (${s.unit})` : ""}</option>
                 ))}
@@ -134,7 +134,7 @@ export default function NewExperiment() {
                 required
                 className={SELECT_CLS}
               >
-                <option value="" className="bg-card text-foreground-subtle">— select model —</option>
+                <option value="" className="bg-card text-foreground-subtle">- select model -</option>
                 {MODEL_GROUPS.map((group) => {
                   const groupModels = models.data?.filter(
                     (m) => m.is_active && group.slugs.includes(m.slug)
@@ -144,7 +144,7 @@ export default function NewExperiment() {
                     <optgroup key={group.label} label={group.label} className="bg-card text-foreground-subtle font-mono">
                       {groupModels.map((m) => (
                         <option key={m.id} value={m.id} className="bg-card text-foreground">
-                          {m.name} · {m.slug}{m.supports_mcp ? " ◈" : ""}
+                          {m.name} | {m.slug}{m.supports_mcp ? " " : ""}
                         </option>
                       ))}
                     </optgroup>
@@ -184,7 +184,7 @@ export default function NewExperiment() {
             <div>
               <span className="font-mono text-data-base text-foreground">Use MCP semantic context</span>
               <p className="font-mono text-data-sm text-foreground-muted">
-                Enriches forecast with macro signals via MCP server ◈
+                Enriches forecast with macro signals via MCP server 
               </p>
             </div>
           </label>
@@ -200,7 +200,7 @@ export default function NewExperiment() {
             disabled={create.isPending || !name || !seriesId || !modelId}
             className="h-10 px-6 bg-mcp hover:bg-mcp/90 text-white font-mono text-label-caps uppercase tracking-widest rounded transition-colors disabled:opacity-40"
           >
-            {create.isPending ? "Creating…" : "Create →"}
+            {create.isPending ? "Creating..." : "Create ->"}
           </button>
           <button
             type="button"
@@ -212,7 +212,7 @@ export default function NewExperiment() {
         </div>
       </motion.form>
 
-      {/* Right — JSON preview */}
+      {/* Right - JSON preview */}
       <motion.aside
         className="card-tech p-5 flex flex-col gap-3"
         initial={{ opacity: 0, x: 8 }}

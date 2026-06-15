@@ -11,12 +11,12 @@ import { Renderer, Program, Mesh, Triangle, Vec2, Vec3 } from "ogl";
  *   violet  #8B5CF6  (--mcp,  dominant)
  *   gold    #E0B96A  (--gold, reserved for the brightest crests)
  *   cyan    #06B6D4  (--info, cool accent)
- * over a near-black zinc base (#0A0A0C → --background).
+ * over a near-black zinc base (#0A0A0C -> --background).
  *
  * Guards (all required):
- *   · prefers-reduced-motion → render one static frame, no RAF loop
- *   · WebGL unavailable       → render nothing (parent CSS gradient shows)
- *   · canvas offscreen        → pause the RAF loop (IntersectionObserver)
+ *   | prefers-reduced-motion -> render one static frame, no RAF loop
+ *   | WebGL unavailable       -> render nothing (parent CSS gradient shows)
+ *   | canvas offscreen        -> pause the RAF loop (IntersectionObserver)
  *
  * Inspired by the ogl-based shaders on 21st.dev (AuroraWaves / Plasma),
  * rewritten for this palette and concept rather than copied.
@@ -55,7 +55,7 @@ const FRAGMENT = /* glsl */ `
   uniform vec3  uGold;         // champagne gold
   uniform vec3  uInfo;         // cyan
   uniform vec3  uIndigo;       // deep indigo (cloud mid-tone)
-  uniform float uLight;        // 1.0 → light theme (subtractive pastel fog)
+  uniform float uLight;        // 1.0 -> light theme (subtractive pastel fog)
 
   // -- value noise + fbm ----------------------------------------------
   float hash(vec2 p) {
@@ -88,7 +88,7 @@ const FRAGMENT = /* glsl */ `
   }
 
   // -- volumetric cloud density via domain-warped fbm ------------------
-  // Two layers of warping → billowing, organic fog that never repeats.
+  // Two layers of warping -> billowing, organic fog that never repeats.
   float clouds(vec2 p) {
     float t = uTime * 0.06;
     vec2 q = vec2(fbm(p + vec2(0.0, t)), fbm(p + vec2(5.2, 1.3 - t)));
@@ -192,7 +192,7 @@ export function FlowField({
         dpr: Math.min(window.devicePixelRatio || 1, 2),
       });
     } catch {
-      // No WebGL → leave the container empty; the parent CSS gradient shows.
+      // No WebGL -> leave the container empty; the parent CSS gradient shows.
       return;
     }
 
@@ -248,7 +248,7 @@ export function FlowField({
     };
     if (interactive) window.addEventListener("mousemove", onMouse);
 
-    // Reduced motion → one static frame, no animation loop.
+    // Reduced motion -> one static frame, no animation loop.
     if (reduced) {
       program.uniforms.uTime.value = 12.0; // a pleasant frozen pose
       renderer.render({ scene: mesh });

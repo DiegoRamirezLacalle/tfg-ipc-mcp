@@ -1,10 +1,10 @@
-"""Live news pulse — GDELT ingestion + FinBERT sentiment via MCP.
+"""Live news pulse - GDELT ingestion + FinBERT sentiment via MCP.
 
 Public (no auth) read endpoints so the landing page can show a live pulse:
 
-  POST /api/v1/news/refresh        — ingest latest GDELT articles into MongoDB
-  GET  /api/v1/news/today          — latest cached articles + meta (fast, from Mongo)
-  GET  /api/v1/news/sentiment      — FinBERT aggregate for a month (slow, via MCP)
+  POST /api/v1/news/refresh        - ingest latest GDELT articles into MongoDB
+  GET  /api/v1/news/today          - latest cached articles + meta (fast, from Mongo)
+  GET  /api/v1/news/sentiment      - FinBERT aggregate for a month (slow, via MCP)
 
 GDELT is strictly rate-limited ("one request every 5 seconds"), so /refresh is
 guarded server-side and the page always reads cached articles from Mongo.
@@ -51,7 +51,7 @@ async def refresh_news(
                     "ingested": 0,
                     "total": total,
                     "skipped": True,
-                    "reason": f"refreshed {int(elapsed)}s ago — try again shortly",
+                    "reason": f"refreshed {int(elapsed)}s ago - try again shortly",
                     "last_refresh": last_iso,
                 }
         except ValueError:
@@ -65,7 +65,7 @@ async def refresh_news(
             "ingested": 0,
             "total": total,
             "rate_limited": True,
-            "reason": "GDELT rate limit hit — showing cached articles",
+            "reason": "GDELT rate limit hit - showing cached articles",
             "last_refresh": last_iso,
         }
     except Exception as exc:  # noqa: BLE001

@@ -147,7 +147,7 @@ export function ForecastOverlay({ data, hoveredModel, onHoverModel, historyMonth
               strokeOpacity={0.45}
               strokeDasharray="5 5"
               label={{
-                value: "forecast →",
+                value: "forecast ->",
                 position: "insideTopRight",
                 fill: "#8B5CF6",
                 fontSize: 10,

@@ -1,7 +1,7 @@
 """ARIMA(1,1,1) adapter.
 
 Non-seasonal baseline matching the research rolling evaluation in
-04_backtesting_rolling.py. Uses SARIMAX with no seasonal component —
+04_backtesting_rolling.py. Uses SARIMAX with no seasonal component -
 numerically identical to statsmodels ARIMA.
 """
 import warnings

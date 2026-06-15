@@ -31,7 +31,7 @@ export function DMMatrix({ runs, hoveredModel, onHoverModel }: DMMatrixProps) {
   if (dm.isLoading) {
     return (
       <div className="h-40 flex items-center justify-center gap-2 font-mono text-data-sm text-foreground-subtle">
-        <Activity size={13} className="animate-pulse-soft" /> Computing Diebold-Mariano tests…
+        <Activity size={13} className="animate-pulse-soft" /> Computing Diebold-Mariano tests...
       </div>
     );
   }
@@ -62,7 +62,7 @@ export function DMMatrix({ runs, hoveredModel, onHoverModel }: DMMatrixProps) {
 
       {!anyComparable && (
         <p className="font-mono text-data-sm text-warning">
-          No comparable pairs — selected runs use different series or have too few aligned forecast points.
+          No comparable pairs - selected runs use different series or have too few aligned forecast points.
         </p>
       )}
 
@@ -118,7 +118,7 @@ export function DMMatrix({ runs, hoveredModel, onHoverModel }: DMMatrixProps) {
                       return (
                         <td key={col.runId} className="p-1">
                           <div className="w-14 h-10 flex items-center justify-center text-foreground-subtle font-mono text-[11px] bg-muted/40 rounded">
-                            —
+                            -
                           </div>
                         </td>
                       );
@@ -142,7 +142,7 @@ export function DMMatrix({ runs, hoveredModel, onHoverModel }: DMMatrixProps) {
 
 function Cell({ pair, rowRunId }: { pair: DmPair | undefined; rowRunId: number }) {
   if (!pair) {
-    return <div className="w-14 h-10 flex items-center justify-center text-foreground-subtle/50 font-mono text-[11px]">·</div>;
+    return <div className="w-14 h-10 flex items-center justify-center text-foreground-subtle/50 font-mono text-[11px]">-</div>;
   }
   if (!pair.comparable) {
     return (

@@ -48,32 +48,32 @@ _RIDGE_ALPHA = 1.0
 _MIN_TRAIN = 24
 
 # Curated levers. `source` selects where the column is loaded from:
-#   "ecb" → Postgres features-exog dataset · "mcp" → mcp_signals_global.parquet
+#   "ecb" -> Postgres features-exog dataset | "mcp" -> mcp_signals_global.parquet
 # Only columns that actually vary in the data survive into the response.
 _LEVERS: list[dict] = [
     {
         "key": "dfr",
         "source": "ecb",
         "label": "ECB Deposit Rate",
-        "hint": "ECB policy rate (%) — the main euro-area lever",
+        "hint": "ECB policy rate (%) - the main euro-area lever",
     },
     {
         "key": "fomc_hawkish_score",
         "source": "mcp",
         "label": "Fed (FOMC) Stance",
-        "hint": "0 = dovish · 1 = hawkish",
+        "hint": "0 = dovish | 1 = hawkish",
     },
     {
         "key": "fomc_forward_guidance_num",
         "source": "mcp",
         "label": "Fed Forward Guidance",
-        "hint": "-1 = easing path · +1 = tightening path",
+        "hint": "-1 = easing path | +1 = tightening path",
     },
     {
         "key": "us_cpi_direction_num",
         "source": "mcp",
         "label": "US CPI Direction",
-        "hint": "-1 = decelerating · +1 = accelerating",
+        "hint": "-1 = decelerating | +1 = accelerating",
     },
 ]
 

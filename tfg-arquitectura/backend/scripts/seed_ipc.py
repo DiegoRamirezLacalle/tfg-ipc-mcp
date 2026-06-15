@@ -2,10 +2,10 @@
 Seed script: loads all processed time-series datasets into the platform.
 
 Datasets seeded:
-  1. ipc-spain-ine       — Spanish IPC monthly index (INE, base 2021=100)
-  2. cpi-global-monthly  — Global CPI monthly rate
-  3. hicp-europe-monthly — European HICP monthly index (Eurostat)
-  4. features-exog       — ECB rate features used by ridge-exog / sarimax
+  1. ipc-spain-ine       - Spanish IPC monthly index (INE, base 2021=100)
+  2. cpi-global-monthly  - Global CPI monthly rate
+  3. hicp-europe-monthly - European HICP monthly index (Eurostat)
+  4. features-exog       - ECB rate features used by ridge-exog / sarimax
 
 Run inside the backend container:
   docker compose exec backend python scripts/seed_ipc.py
@@ -39,7 +39,7 @@ _DATA_DIR = os.path.join(
 DATASETS = [
     {
         "slug": "ipc-spain-ine",
-        "name": "IPC España — INE",
+        "name": "IPC España - INE",
         "description": "Índice de Precios de Consumo mensual. Fuente: INE (Instituto Nacional de Estadística). Base 2021=100.",
         "frequency": "monthly",
         "version": "v1",
@@ -145,7 +145,7 @@ async def _seed_dataset(session, ds_def: dict) -> None:
     df = df.sort_index()
 
     print(f"\n=== {ds_def['slug']} ===")
-    print(f"  {len(df)} rows, {df.index.min().date()} → {df.index.max().date()}")
+    print(f"  {len(df)} rows, {df.index.min().date()} -> {df.index.max().date()}")
     print(f"  Columns: {list(df.columns)}")
 
     dataset_id = await _upsert_dataset(session, ds_def)
@@ -166,7 +166,7 @@ async def _seed_dataset(session, ds_def: dict) -> None:
                 text("DELETE FROM observations WHERE series_id = :sid"),
                 {"sid": series_id},
             )
-            print(f"  Series '{slug}' exists (id={series_id}) — refreshing observations")
+            print(f"  Series '{slug}' exists (id={series_id}) - refreshing observations")
         else:
             result = await session.execute(
                 text("""
@@ -192,7 +192,7 @@ async def _seed_dataset(session, ds_def: dict) -> None:
                 """),
                 values,
             )
-        print(f"    → {len(values)} observations inserted")
+        print(f"    -> {len(values)} observations inserted")
 
     await session.commit()
 

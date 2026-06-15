@@ -21,7 +21,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-background">
-      {/* Living background — a dim, slow echo of the landing hero */}
+      {/* Living background - a dim, slow echo of the landing hero */}
       <div className="absolute inset-0 pointer-events-none">
         <AnimatedField
           className={"absolute inset-0 h-full w-full opacity-40 " + (theme === "light" ? "mix-blend-multiply" : "")}
@@ -67,7 +67,7 @@ export default function Login() {
             "The difficulty lies not so much in developing new ideas as in escaping from old ones."
           </p>
           <cite className="font-mono text-label-caps text-foreground-subtle/50 uppercase tracking-widest mt-2 block not-italic">
-            — J.M. Keynes
+            - J.M. Keynes
           </cite>
         </motion.blockquote>
 
@@ -126,7 +126,7 @@ export default function Login() {
             disabled={login.isPending}
             className="h-10 bg-mcp hover:bg-mcp/90 text-white font-mono text-label-caps uppercase tracking-widest rounded transition-colors disabled:opacity-50"
           >
-            {login.isPending ? "Authenticating…" : "Authenticate →"}
+            {login.isPending ? "Authenticating..." : "Authenticate ->"}
           </button>
 
           <div className="flex items-center gap-3">
@@ -138,7 +138,7 @@ export default function Login() {
           <p className="text-center font-mono text-data-sm text-foreground-muted">
             No account yet?{" "}
             <Link to="/signup" className="text-mcp hover:text-mcp/80 transition-colors">
-              Create one →
+              Create one {"->"}
             </Link>
           </p>
 

@@ -64,7 +64,7 @@ async def test_admin_cannot_demote_self(client, admin):
 
 @pytest.mark.asyncio
 async def test_promoted_user_can_create_experiment(client, admin, viewer, run_catalog):
-    # promote viewer → researcher
+    # promote viewer -> researcher
     await client.patch(
         f"/api/v1/users/{viewer['user'].id}/role",
         json={"role": "researcher"},

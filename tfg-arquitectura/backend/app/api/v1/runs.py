@@ -117,14 +117,14 @@ async def _load_stack_preds(
         return None, None
 
     stack_df = pd.DataFrame(frames)
-    # Inverse-MAE weights: lower MAE → higher weight
+    # Inverse-MAE weights: lower MAE -> higher weight
     eps = 1e-9
     weights = np.array([1.0 / (maes.get(rid, 1.0) + eps) for rid in frames])
     return stack_df, weights
 
 
 async def _execute_forecast(run_id: int) -> None:
-    """Background worker — owns its own AsyncSession, never shares with the request."""
+    """Background worker - owns its own AsyncSession, never shares with the request."""
     async with AsyncSessionLocal() as db:
         run = await db.get(Run, run_id)
         if not run:

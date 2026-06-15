@@ -107,7 +107,7 @@ async def run_catalog(researcher):
             name="SARIMA",
             model_type=ModelType.arima,
         )
-        # Slug not in registry → tests "not implemented" path
+        # Slug not in registry -> tests "not implemented" path
         m_unsupported = ModelCatalog(
             slug="not-a-model",
             name="Not A Model",

@@ -4,7 +4,7 @@ Direct multi-step forecasting strategy:
   - For each horizon step d = 1..H, a separate Ridge_d model is trained.
   - Features: AR lags of the target [y[t-1], y[t-2], y[t-3], y[t-12]]
               + ECB rate features [dfr, mrr, dfr_diff, dfr_lag3, dfr_lag6, dfr_lag12]
-              at the same time step t (no look-ahead — rates are published mid-month
+              at the same time step t (no look-ahead - rates are published mid-month
               and are public knowledge before the IPC release).
   - All features are standardised with sklearn StandardScaler.
   - Falls back to AR-only mode when exogenous data is not available.

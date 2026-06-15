@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 /* ------------------------------------------------------------------------
  * AnimatedField - dramatic, looping "forecast being computed" lines.
  *
- * Each trajectory DRAWS itself left→right (Framer `pathLength` 0→1) with a
+ * Each trajectory DRAWS itself left->right (Framer `pathLength` 0->1) with a
  * glowing leading dot that races along the curve (CSS `offset-path`), holds
  * lit for a beat, fades out, then redraws - forever, staggered across lines.
  * Reads as a live prediction being generated. Pure SVG/CSS + Framer Motion,
@@ -20,7 +20,7 @@ interface Trace {
   /** stroke colour per theme: [dark/violet, light] */
   colors: [string, string];
   width: number;
-  /** seconds for one full draw→hold→fade cycle */
+  /** seconds for one full draw->hold->fade cycle */
   cycle: number;
   /** start offset so lines fire in sequence, not all at once */
   delay: number;
@@ -67,7 +67,7 @@ export function AnimatedField({
         </filter>
       </defs>
 
-      {/* faint terminal grid — the motif from the original landing */}
+      {/* faint terminal grid - the motif from the original landing */}
       <g stroke={gridStroke} strokeWidth="1" opacity="0.6">
         {GRID_Y.map((y) => (
           <line key={`y${y}`} x1="0" y1={y} x2="1200" y2={y} />
@@ -77,7 +77,7 @@ export function AnimatedField({
         ))}
       </g>
 
-      {/* convergence target — gold pulse on the right (where forecasts home) */}
+      {/* convergence target - gold pulse on the right (where forecasts home) */}
       <motion.circle
         cx={1150} cy={248} r={5} fill={dotColor}
         animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.5, 1] }}

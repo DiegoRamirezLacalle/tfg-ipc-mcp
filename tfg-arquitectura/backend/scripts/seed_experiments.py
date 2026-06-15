@@ -14,7 +14,7 @@ BASE_URL = "http://localhost:8000/api/v1"
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@tfg.local")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "changeme-dev")
 
-# Models to run (slug → display label)
+# Models to run (slug -> display label)
 MODELS_TO_RUN = [
     "naive-seasonal",
     "arima",
@@ -44,7 +44,7 @@ def get_series_id(client: httpx.Client, headers: dict) -> int:
     r.raise_for_status()
     ds = next((d for d in r.json() if d["slug"] == TARGET_DATASET_SLUG), None)
     if not ds:
-        raise RuntimeError(f"Dataset '{TARGET_DATASET_SLUG}' not found — run seed_ipc.py first")
+        raise RuntimeError(f"Dataset '{TARGET_DATASET_SLUG}' not found - run seed_ipc.py first")
 
     r = client.get(f"{BASE_URL}/datasets/{ds['id']}/series", headers=headers)
     r.raise_for_status()
@@ -98,7 +98,7 @@ def seed(client: httpx.Client, headers: dict):
             r.raise_for_status()
             run_id = r.json()["id"]
             run_ids.append((slug, label, exp_id, run_id))
-            print(f"  Queued: {exp_name} → experiment {exp_id}, run {run_id}")
+            print(f"  Queued: {exp_name} -> experiment {exp_id}, run {run_id}")
 
     print(f"\n{len(run_ids)} runs queued. Waiting for completion...")
     return run_ids
@@ -116,7 +116,7 @@ def wait_for_runs(client: httpx.Client, headers: dict, run_ids: list):
             r.raise_for_status()
             status = r.json()["status"]
             if status in ("done", "failed"):
-                icon = "✓" if status == "done" else "✗"
+                icon = "" if status == "done" else ""
                 print(f"  {icon} {slug} [{label}] run {run_id}: {status}")
                 if status == "failed":
                     error = r.json().get("error_message", "")

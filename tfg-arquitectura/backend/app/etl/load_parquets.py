@@ -4,7 +4,7 @@ ETL: load processed parquet files from tfg-forecasting into Postgres.
 Run inside Docker:
   python -m app.etl.load_parquets
 
-Idempotent — uses INSERT ... ON CONFLICT DO NOTHING for all records.
+Idempotent - uses INSERT ... ON CONFLICT DO NOTHING for all records.
 """
 import asyncio
 import logging
@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 
 DATA_ROOT = Path(os.getenv("TFG_DATA_ROOT", "/app/tfg-forecasting/data/processed"))
 
-# Parquet files → (dataset_slug, dataset_name, frequency, unit_hint)
+# Parquet files -> (dataset_slug, dataset_name, frequency, unit_hint)
 DATASETS = {
     "ipc_spain_index.parquet": (
         "ipc-spain",
@@ -49,7 +49,7 @@ MODEL_CATALOG_SEED = [
         "slug": "naive-seasonal",
         "name": "Naive Seasonal",
         "model_type": "naive",
-        "description": "Seasonal naïve baseline — repeats last observed seasonal cycle.",
+        "description": "Seasonal naïve baseline - repeats last observed seasonal cycle.",
         "supports_mcp": False,
     },
     {

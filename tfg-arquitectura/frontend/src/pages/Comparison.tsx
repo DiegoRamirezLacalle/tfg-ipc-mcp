@@ -34,7 +34,7 @@ export default function Comparison() {
         return {
           id: sid,
           count,
-          label: info ? `${info.datasetName} · ${info.name}` : `series #${sid}`,
+          label: info ? `${info.datasetName} | ${info.name}` : `series #${sid}`,
         };
       })
       .sort((a, b) => b.count - a.count);
@@ -73,7 +73,7 @@ export default function Comparison() {
   const runs = data?.runs ?? [];
   const hasEnough = runs.length >= 2;
   const activeSeriesLabel =
-    seriesOptions.find((o) => o.id === seriesId)?.label ?? "—";
+    seriesOptions.find((o) => o.id === seriesId)?.label ?? "-";
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] min-h-[calc(100vh-56px-64px)]">
@@ -83,7 +83,7 @@ export default function Comparison() {
           <div>
             <h2 className="font-sans text-headline-md text-foreground">Experiments</h2>
             <p className="font-mono text-data-sm text-foreground-muted mt-1">
-              Same-series only — overlays are comparable
+              Same-series only - overlays are comparable
             </p>
           </div>
           <label className="flex flex-col gap-1">
@@ -124,7 +124,7 @@ export default function Comparison() {
               <div className="flex flex-col min-w-0">
                 <span className="font-mono text-data-sm text-foreground truncate">{e.name}</span>
                 <span className="font-mono text-[10px] text-foreground-subtle uppercase tracking-wider">
-                  #{e.id} · h={e.horizon}
+                  #{e.id} | h={e.horizon}
                 </span>
               </div>
             </label>
@@ -145,14 +145,14 @@ export default function Comparison() {
             <div>
               <h1 className="font-sans text-display-lg tracking-tight text-foreground">Model Comparison</h1>
               <p className="font-mono text-data-sm text-foreground-muted mt-1">
-                Same-series models on <span className="text-gold">{activeSeriesLabel}</span> · overlay,
+                Same-series models on <span className="text-gold">{activeSeriesLabel}</span> | overlay,
                 horizon decay, skill score, and Diebold-Mariano significance.
               </p>
             </div>
             {isLoading && selected.size > 0 && (
               <span className="flex items-center gap-2 font-mono text-data-sm text-foreground-subtle">
                 <Activity size={13} className="animate-pulse-soft" />
-                Loading data…
+                Loading data...
               </span>
             )}
           </div>
@@ -165,7 +165,7 @@ export default function Comparison() {
         {hasEnough && data && (
           <div className="flex flex-col">
             {/* -- Core thesis evidence ------------------------------- */}
-            <SectionCard number="01" title="Forecast Overlay" subtitle="Actuals vs every selected forecast — the visual story">
+            <SectionCard number="01" title="Forecast Overlay" subtitle="Actuals vs every selected forecast - the visual story">
               <ForecastOverlay
                 data={data}
                 hoveredModel={hoveredModel}
@@ -181,7 +181,7 @@ export default function Comparison() {
               <SkillScoreChart runs={runs} hoveredModel={hoveredModel} onHoverModel={setHoveredModel} />
             </SectionCard>
 
-            <SectionCard number="04" title="Leaderboard" subtitle="Ranked by MAE · ★ marks best · click headers to sort" delay={0.15}>
+            <SectionCard number="04" title="Leaderboard" subtitle="Ranked by MAE | marks best | click headers to sort" delay={0.15}>
               <Leaderboard runs={runs} hoveredModel={hoveredModel} onHoverModel={setHoveredModel} />
             </SectionCard>
 
@@ -198,20 +198,20 @@ export default function Comparison() {
                 size={14}
                 className={"transition-transform " + (showDeepDive ? "rotate-180" : "")}
               />
-              {showDeepDive ? "Hide" : "Show"} deep-dive views · metric bars, radar, accuracy×runtime
+              {showDeepDive ? "Hide" : "Show"} deep-dive views | metric bars, radar, accuracy×runtime
             </button>
 
             {showDeepDive && (
               <>
-                <SectionCard number="06" title="Metric Comparison" subtitle="MAE / RMSE on left axis · MAPE % on right" delay={0.02}>
+                <SectionCard number="06" title="Metric Comparison" subtitle="MAE / RMSE on left axis | MAPE % on right" delay={0.02}>
                   <MetricBars runs={runs} hoveredModel={hoveredModel} onHoverModel={setHoveredModel} />
                 </SectionCard>
 
-                <SectionCard number="07" title="Multi-Metric Radar" subtitle="normalized — bigger is better" delay={0.04}>
+                <SectionCard number="07" title="Multi-Metric Radar" subtitle="normalized - bigger is better" delay={0.04}>
                   <MetricRadar runs={runs} hoveredModel={hoveredModel} onHoverModel={setHoveredModel} />
                 </SectionCard>
 
-                <SectionCard number="08" title="Accuracy × Runtime" subtitle="Pareto frontier · point size ∝ MAPE" delay={0.06}>
+                <SectionCard number="08" title="Accuracy × Runtime" subtitle="Pareto frontier | point size ∝ MAPE" delay={0.06}>
                   <ParetoScatter runs={runs} hoveredModel={hoveredModel} onHoverModel={setHoveredModel} />
                 </SectionCard>
               </>
@@ -239,7 +239,7 @@ function EmptyState({ reason }: { reason: "select" | "needMore" }) {
         {message}
       </p>
       <p className="font-mono text-data-sm text-foreground-subtle/70 mt-2">
-        the dashboard reveals forecast overlay · metric bars · radar · skill score · horizon decay · pareto frontier · leaderboard
+        the dashboard reveals forecast overlay | metric bars | radar | skill score | horizon decay | pareto frontier | leaderboard
       </p>
     </motion.div>
   );

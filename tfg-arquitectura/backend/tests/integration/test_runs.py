@@ -92,7 +92,7 @@ async def test_trigger_run_use_mcp_stub(client, researcher, run_catalog):
 
 @pytest.mark.asyncio
 async def test_trigger_run_series_no_observations(client, researcher, catalog):
-    """catalog fixture has a series with no observations → 422."""
+    """catalog fixture has a series with no observations -> 422."""
     exp_id = await _make_experiment(
         client, researcher["headers"],
         catalog["series_id"], catalog["model_id"],

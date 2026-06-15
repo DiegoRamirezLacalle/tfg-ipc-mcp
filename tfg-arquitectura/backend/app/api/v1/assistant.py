@@ -1,4 +1,4 @@
-"""Simulator chat assistant — streaming LLM tutor.
+"""Simulator chat assistant - streaming LLM tutor.
 
 POST /api/v1/assistant/simulator/chat
 
@@ -80,8 +80,8 @@ effect isolates the genuine predictive contribution and avoids the spurious \
 level correlation the thesis warns about.
 - Baseline = an ARIMA-based time-series forecast that ignores signals. \
 Counterfactual = baseline + signal-driven correction.
-- The thesis research questions: RQ1 — Do foundation models (TimesFM, Chronos-2, \
-TimeGPT) beat classical baselines (ARIMA, SARIMA)? RQ2 — Do MCP exogenous signals \
+- The thesis research questions: RQ1 - Do foundation models (TimesFM, Chronos-2, \
+TimeGPT) beat classical baselines (ARIMA, SARIMA)? RQ2 - Do MCP exogenous signals \
 add predictive value?
 - The MCP (Model Context Protocol) is what fetches the macro signals and the \
 FinBERT news sentiment that the forecasters consume as C1 context.
@@ -113,9 +113,9 @@ def _format_context(ctx: SimChatContext | None) -> str:
             delta = s.current_value - s.baseline_value
             eff = ""
             if s.final_effect is not None:
-                eff = f" · per-unit effect at last h ≈ {s.final_effect:+.3f}"
+                eff = f" | per-unit effect at last h ~ {s.final_effect:+.3f}"
             lines.append(
-                f"    · {s.label} (key={s.key}): baseline={s.baseline_value:.3f}, "
+                f"    | {s.label} (key={s.key}): baseline={s.baseline_value:.3f}, "
                 f"current={s.current_value:.3f}, Δ={delta:+.3f}{eff}"
             )
 

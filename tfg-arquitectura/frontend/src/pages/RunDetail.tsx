@@ -8,7 +8,7 @@ import { ForecastChart } from "@/components/charts/ForecastChart";
 import { SentimentChart } from "@/components/charts/SentimentChart";
 
 function fmt(iso: string | null) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return iso.replace("T", " ").slice(0, 19) + " UTC";
 }
 
@@ -42,7 +42,7 @@ function MetricCard({ icon, label, value, suffix = "", decimals = 4, delay = 0 }
             className="font-mono text-data-2xl text-foreground"
           />
         ) : (
-          <span className="font-mono text-data-2xl text-foreground-subtle">—</span>
+          <span className="font-mono text-data-2xl text-foreground-subtle">-</span>
         )}
       </div>
     </motion.div>
@@ -62,7 +62,7 @@ export default function RunDetail() {
   if (run.isLoading) {
     return (
       <div className="flex items-center gap-2 font-mono text-data-sm text-foreground-subtle py-12">
-        Loading run…
+        Loading run...
       </div>
     );
   }
@@ -102,7 +102,7 @@ export default function RunDetail() {
           {(r.status === "running" || r.status === "pending") && (
             <span className="text-info flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-info animate-pulse" />
-              Live — auto-refreshing every 2s
+              Live - auto-refreshing every 2s
             </span>
           )}
         </div>
@@ -154,30 +154,30 @@ export default function RunDetail() {
           <div className="border-b border-border px-4 py-3 flex items-center gap-2 bg-muted/50">
             <Cpu size={13} className="text-mcp" />
             <span className="micro uppercase">MCP Macro Context</span>
-            <span className="pill pill-mcp text-[10px] ml-auto">◈ MCP</span>
+            <span className="pill pill-mcp text-[10px] ml-auto">MCP</span>
           </div>
           <div className="p-4 flex flex-col gap-4">
             <p className="font-mono text-data-sm text-foreground-muted">
-              Fetched: {fmt(mcp.data.fetched_at)} · {mcp.data.signals?.length ?? 0} signal rows
+              Fetched: {fmt(mcp.data.fetched_at)} | {mcp.data.signals?.length ?? 0} signal rows
             </p>
 
-            {/* Sentiment timeline — only rendered if at least one row has sentiment data */}
+            {/* Sentiment timeline - only rendered if at least one row has sentiment data */}
             {(mcp.data.signals ?? []).some((s) => s.sentiment_mean !== undefined && s.sentiment_mean !== null) && (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <span className="micro uppercase text-foreground-muted">FinBERT Sentiment Timeline</span>
-                  <span className="pill pill-mcp text-[10px]">◈ FinBERT</span>
+                  <span className="pill pill-mcp text-[10px]">FinBERT</span>
                 </div>
                 <SentimentChart signals={mcp.data.signals ?? []} />
                 <p className="font-mono text-[11px] text-foreground-subtle">
-                  Sentiment: FinBERT pos−neg score (violet) · Hawkish %: fraction of articles with tightening keywords (rose)
+                  Sentiment: FinBERT pos−neg score (violet) | Hawkish %: fraction of articles with tightening keywords (rose)
                 </p>
               </div>
             )}
 
             <pre className="font-mono text-data-sm text-foreground-muted bg-background border border-border rounded p-4 overflow-auto max-h-48 text-xs">
               {JSON.stringify(mcp.data.signals?.slice(0, 3), null, 2)}
-              {(mcp.data.signals?.length ?? 0) > 3 && "\n…"}
+              {(mcp.data.signals?.length ?? 0) > 3 && "\n..."}
             </pre>
           </div>
         </motion.section>
@@ -205,7 +205,7 @@ export default function RunDetail() {
               {narration.isPending ? (
                 <>
                   <Loader2 size={11} className="animate-spin" />
-                  Generating…
+                  Generating...
                 </>
               ) : (
                 <>

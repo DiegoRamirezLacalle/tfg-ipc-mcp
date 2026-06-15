@@ -29,7 +29,7 @@ cp .env.example .env        # fill in POSTGRES_*, JWT_SECRET, NIXTLA_API_KEY
 docker compose up -d --build
 docker compose exec backend alembic upgrade head
 docker compose exec backend python scripts/seed_ipc.py
-# → http://localhost:3000 (dev) or http://localhost:80 (gateway build)
+# -> http://localhost:3000 (dev) or http://localhost:80 (gateway build)
 ```
 
 ## Tests
