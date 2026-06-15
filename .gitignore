@@ -47,6 +47,6 @@ tfg-forecasting/04_models_deep/results/*.parquet
 # Internal session context (not for the public repo)
 PROJECT_CONTEXT.md
 
-# Design-tool scaffolding (kept locally, not published)
-docs/design/stitch/
-docs/ai-assistance/stitch-prompt.md
+# Internal AI-assistance notes (kept locally, not published)
+docs/ai-assistance/
+docs/dev-diary.md

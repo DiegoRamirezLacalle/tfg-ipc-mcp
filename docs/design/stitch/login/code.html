@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TFG Inflation Forecasting Platform - Login</title>
+<!-- Fonts: Geist Sans & Geist Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&amp;family=Geist:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#d0bcff",
+                    "primary-container": "#a078ff",
+                    "on-secondary-container": "#00424e",
+                    "on-secondary-fixed-variant": "#004e5c",
+                    "on-secondary-fixed": "#001f26",
+                    "on-error": "#690005",
+                    "inverse-on-surface": "#322f39",
+                    "surface": "#15121b",
+                    "secondary-fixed-dim": "#4cd7f6",
+                    "tertiary-fixed": "#ffdcbb",
+                    "on-tertiary-fixed": "#2c1700",
+                    "surface-variant": "#37333d",
+                    "outline-variant": "#494454",
+                    "on-primary-fixed-variant": "#5516be",
+                    "tertiary": "#ffb869",
+                    "surface-bright": "#3b3742",
+                    "surface-dim": "#15121b",
+                    "surface-container-low": "#1d1a23",
+                    "on-primary-container": "#340080",
+                    "on-surface": "#e7e0ed",
+                    "on-background": "#e7e0ed",
+                    "surface-container-high": "#2c2832",
+                    "secondary-container": "#03b5d3",
+                    "secondary": "#4cd7f6",
+                    "on-tertiary": "#482900",
+                    "on-tertiary-container": "#3f2300",
+                    "surface-container-lowest": "#0f0d15",
+                    "on-primary-fixed": "#23005c",
+                    "error-container": "#93000a",
+                    "primary-fixed": "#e9ddff",
+                    "primary": "#d0bcff",
+                    "inverse-primary": "#6d3bd7",
+                    "background": "#15121b",
+                    "on-surface-variant": "#cbc3d7",
+                    "tertiary-fixed-dim": "#ffb869",
+                    "on-tertiary-fixed-variant": "#673d00",
+                    "surface-tint": "#d0bcff",
+                    "on-secondary": "#003640",
+                    "error": "#ffb4ab",
+                    "secondary-fixed": "#acedff",
+                    "outline": "#958ea0",
+                    "on-primary": "#3c0091",
+                    "surface-container-highest": "#37333d",
+                    "surface-container": "#211e27",
+                    "on-error-container": "#ffdad6",
+                    "inverse-surface": "#e7e0ed",
+                    "tertiary-container": "#ca801e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "nav-height": "56px",
+                    "4": "4px",
+                    "8": "8px",
+                    "48": "48px",
+                    "12": "12px",
+                    "16": "16px",
+                    "32": "32px",
+                    "64": "64px",
+                    "24": "24px"
+            },
+            "fontFamily": {
+                    "data-sm": ["Geist Mono", "monospace"],
+                    "data-lg": ["Geist Mono", "monospace"],
+                    "headline-md": ["Geist Sans", "sans-serif"],
+                    "body-base": ["Geist Sans", "sans-serif"],
+                    "label-caps": ["Geist Mono", "monospace"],
+                    "data-base": ["Geist Mono", "monospace"],
+                    "body-sm": ["Geist Sans", "sans-serif"],
+                    "display-lg": ["Geist Sans", "sans-serif"]
+            },
+            "fontSize": {
+                    "data-sm": ["12px", { "lineHeight": "1.2", "letterSpacing": "0em", "fontWeight": "400" }],
+                    "data-lg": ["18px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                    "headline-md": ["20px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                    "body-base": ["14px", { "lineHeight": "1.5", "letterSpacing": "0em", "fontWeight": "400" }],
+                    "label-caps": ["11px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                    "data-base": ["14px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+                    "body-sm": ["12px", { "lineHeight": "1.4", "letterSpacing": "0em", "fontWeight": "400" }],
+                    "display-lg": ["32px", { "lineHeight": "1.1", "letterSpacing": "-0.05em", "fontWeight": "600" }]
+            }
+          }
+        }
+      }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background flex flex-col items-center justify-center min-h-screen antialiased selection:bg-primary selection:text-on-primary">
+<main class="w-full max-w-[384px] px-4 md:px-0 flex flex-col gap-8">
+<header class="text-center w-full">
+<h1 class="font-data-lg text-data-lg text-on-surface lowercase tracking-tighter">tfg-ipc-mcp</h1>
+</header>
+<div class="bg-surface-container-lowest border border-outline-variant p-6 md:p-8 rounded shadow-sm flex flex-col gap-6 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-primary/20"></div>
+<div class="flex flex-col gap-2">
+<h2 class="font-data-lg text-data-lg text-on-surface uppercase tracking-tight">System Access</h2>
+<p class="font-data-sm text-data-sm text-on-surface-variant">Secure authentication required for inflation forecasting tools.</p>
+</div>
+<form class="flex flex-col gap-5">
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase" for="email">Email</label>
+<div class="relative">
+<input class="w-full bg-background border border-outline-variant text-on-surface font-data-base text-data-base px-3 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded transition-colors placeholder:text-on-surface-variant/40" id="email" name="email" placeholder="analyst@tfg.com" required="" type="email"/>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase" for="password">Password</label>
+<div class="relative">
+<input class="w-full bg-background border border-outline-variant text-on-surface font-data-base text-data-base px-3 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary rounded transition-colors placeholder:text-on-surface-variant/40" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<div class="pt-2">
+<button class="w-full bg-primary hover:bg-primary-fixed-dim text-on-primary border border-transparent font-label-caps text-label-caps uppercase tracking-widest py-3 px-4 rounded flex items-center justify-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background" type="button">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+                        Authenticate
+                    </button>
+</div>
+</form>
+</div>
+<footer class="text-center w-full">
+<p class="font-data-sm text-data-sm text-on-surface-variant/50 uppercase tracking-widest">Confidential &amp; Proprietary</p>
+</footer>
+</main>
+</body></html>
