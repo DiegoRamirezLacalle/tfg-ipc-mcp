@@ -189,6 +189,31 @@ def fill_global_foundation(records: list[dict]) -> None:
             records.append(_row("Global", "Foundation", family, "inst", h, dm[h]))
 
 
+def fill_global_improved(records: list[dict]) -> None:
+    """Improved Global C1 variants vs C0_global (Phase 1-3, no original C1 touched).
+
+    - inst+fwd       : Chronos-2 with honest damped-drift forward covariates (script 33)
+    - inst+regime    : change/regime-gated context overlay (script 09)
+    - inst+validated : pre-2021 Ridge context overlay (script 08)
+    """
+    variants = [
+        ("chronos2", "inst+fwd",       "chronos2_C1_fwd_global_predictions.parquet"),
+        ("chronos2", "inst+regime",    "chronos2_C1_regime_global_predictions.parquet"),
+        ("timesfm",  "inst+regime",    "timesfm_C1_regime_global_predictions.parquet"),
+        ("chronos2", "inst+validated", "chronos2_C1_validated_global_predictions.parquet"),
+        ("timesfm",  "inst+validated", "timesfm_C1_validated_global_predictions.parquet"),
+    ]
+    for family, signal, fname in variants:
+        c0 = _load_preds(RESULTS / f"{family}_C0_global_predictions.parquet")
+        c1 = _load_preds(RESULTS / fname)
+        if c0 is None or c1 is None:
+            logger.warning("[!] Global improved variant missing: %s", fname)
+            continue
+        dm = _dm_from_forecasts(c0, c1)
+        for h in HORIZONS:
+            records.append(_row("Global", "Foundation", family, signal, h, dm[h]))
+
+
 def fill_europe_classical(records: list[dict]) -> None:
     """Europe classical SARIMA (C0) vs ARIMAX C1_inst / C1_full (script 08)."""
     c0 = _load_preds(RESULTS / "rolling_predictions_europe.parquet", model="sarima")
@@ -280,6 +305,7 @@ def main() -> None:
     extract_spain(records)
     extract_europe(records)
     fill_global_foundation(records)
+    fill_global_improved(records)
     fill_europe_classical(records)
 
     if not records:

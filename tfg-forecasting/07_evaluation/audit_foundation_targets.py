@@ -46,6 +46,14 @@ GLOBAL_COL = "cpi_global_rate"
 SPAIN_C0 = ["chronos2_C0", "timesfm_C0", "timegpt_C0"]
 GLOBAL_C0 = ["chronos2_C0_global", "timesfm_C0_global", "timegpt_C0_global"]
 GLOBAL_C1 = ["chronos2_C1_inst_global", "timesfm_C1_inst_global", "timegpt_C1_inst_global"]
+# Improved Global C1 variants added by the Phase 1-3 work (overlay corrections
+# and the honest-forward-path Chronos-2). They must also carry the Global
+# cpi_global_rate as y_true and never sit on the Spain index scale.
+GLOBAL_C1_EXTRA = [
+    "chronos2_C1_fwd_global",
+    "chronos2_C1_regime_global", "timesfm_C1_regime_global",
+    "chronos2_C1_validated_global", "timesfm_C1_validated_global",
+]
 
 FOUNDATION_FAMILIES = ["chronos2", "timesfm", "timegpt"]
 SPAIN_INDEX_FLOOR = 40.0   # Spain index sits at 58-101; a CPI rate never exceeds ~10
@@ -125,14 +133,19 @@ def main() -> int:
             continue
         _check_match(m, global_t, "Global.cpi_global_rate", errors)
 
-    # 3. Global C1 must match cpi_global_rate
+    # 3. Global C1 must match cpi_global_rate (institutional + improved variants)
     logger.info("\n[3] Global C1 predictions match cpi_global_rate:")
     for m in GLOBAL_C1:
         _check_match(m, global_t, "Global.cpi_global_rate", errors)
+    for m in GLOBAL_C1_EXTRA:
+        if (RESULTS / f"{m}_predictions.parquet").exists():
+            _check_match(m, global_t, "Global.cpi_global_rate", errors)
+        else:
+            warnings.append(f"[{m}] improved Global C1 variant not generated")
 
     # 4. No GLOBAL foundation file has Spain-scale y_true
     logger.info("\n[4] Global foundation files NOT on Spain index scale:")
-    for m in GLOBAL_C0 + GLOBAL_C1:
+    for m in GLOBAL_C0 + GLOBAL_C1 + GLOBAL_C1_EXTRA:
         _check_not_spain_scale(m, errors)
 
     # 5. Spain vs Global C0 h=12 MAE must NOT be identical across all three families

@@ -29,5 +29,10 @@
 | Global | Foundation | timesfm | inst | 0.867 (C0) | 0.281 (C1) | 0.171 (C1) | 0.267 (C1) |
 | Global | Foundation | chronos2 | inst | 0.117 (C1) | 0.740 (C1) | 0.653 (C1) | 0.463 (C1) |
 | Global | Foundation | timegpt | inst | [VERIFY] | [VERIFY] | [VERIFY] | [VERIFY] |
+| Global | Foundation | chronos2 | inst+fwd | 0.066* (C1) | 0.273 (C1) | 0.205 (C1) | 0.154 (C1) |
+| Global | Foundation | chronos2 | inst+regime | 0.190 (C1) | 0.016** (C1) | 0.034** (C1) | 0.048** (C1) |
+| Global | Foundation | timesfm | inst+regime | 0.165 (C0) | 0.258 (C0) | 0.339 (C0) | 0.494 (C0) |
+| Global | Foundation | chronos2 | inst+validated | 0.024** (C0) | 0.742 (C1) | 0.005** (C1) | 0.000** (C1) |
+| Global | Foundation | timesfm | inst+validated | 0.076* (C1) | 0.090* (C1) | 0.066* (C1) | 0.341 (C1) |
 | Europe | Classical (ARIMAX) | sarimax | inst | 0.551 (C0) | 0.361 (C1) | 0.031** (C1) | 0.061* (C1) |
 | Europe | Classical (ARIMAX) | sarimax | full | 0.820 (C1) | 0.567 (C1) | 0.345 (C1) | 0.266 (C1) |

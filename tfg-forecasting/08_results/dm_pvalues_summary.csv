@@ -99,6 +99,26 @@ Global,Foundation,timegpt,inst,1,0,[VERIFY],[VERIFY],[VERIFY],[VERIFY]
 Global,Foundation,timegpt,inst,3,0,[VERIFY],[VERIFY],[VERIFY],[VERIFY]
 Global,Foundation,timegpt,inst,6,0,[VERIFY],[VERIFY],[VERIFY],[VERIFY]
 Global,Foundation,timegpt,inst,12,0,[VERIFY],[VERIFY],[VERIFY],[VERIFY]
+Global,Foundation,chronos2,inst+fwd,1,47,1.8411,0.0656,*,C1
+Global,Foundation,chronos2,inst+fwd,3,135,1.0967,0.2728,ns,C1
+Global,Foundation,chronos2,inst+fwd,6,252,1.2672,0.2051,ns,C1
+Global,Foundation,chronos2,inst+fwd,12,432,1.4258,0.1539,ns,C1
+Global,Foundation,chronos2,inst+regime,1,47,1.3122,0.1895,ns,C1
+Global,Foundation,chronos2,inst+regime,3,135,2.4143,0.0158,**,C1
+Global,Foundation,chronos2,inst+regime,6,252,2.1196,0.034,**,C1
+Global,Foundation,chronos2,inst+regime,12,432,1.9787,0.0479,**,C1
+Global,Foundation,timesfm,inst+regime,1,47,-1.3889,0.1649,ns,C0
+Global,Foundation,timesfm,inst+regime,3,135,-1.1301,0.2584,ns,C0
+Global,Foundation,timesfm,inst+regime,6,252,-0.9553,0.3394,ns,C0
+Global,Foundation,timesfm,inst+regime,12,432,-0.6837,0.4942,ns,C0
+Global,Foundation,chronos2,inst+validated,1,47,-2.262,0.0237,**,C0
+Global,Foundation,chronos2,inst+validated,3,135,0.3287,0.7424,ns,C1
+Global,Foundation,chronos2,inst+validated,6,252,2.8346,0.0046,**,C1
+Global,Foundation,chronos2,inst+validated,12,432,3.7501,0.0002,**,C1
+Global,Foundation,timesfm,inst+validated,1,47,1.7734,0.0762,*,C1
+Global,Foundation,timesfm,inst+validated,3,135,1.6948,0.0901,*,C1
+Global,Foundation,timesfm,inst+validated,6,252,1.84,0.0658,*,C1
+Global,Foundation,timesfm,inst+validated,12,432,0.9531,0.3405,ns,C1
 Europe,Classical (ARIMAX),sarimax,inst,1,47,-0.5959,0.5513,ns,C0
 Europe,Classical (ARIMAX),sarimax,inst,3,135,0.9132,0.3611,ns,C1
 Europe,Classical (ARIMAX),sarimax,inst,6,252,2.1564,0.031,**,C1

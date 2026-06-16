@@ -62,6 +62,9 @@ MODELS = [
     ("Global", "C1", "institutional", "Chronos-2",       "chronos2_C1_inst_global_metrics.json", "chronos2_C1_inst_global"),
     ("Global", "C1", "institutional", "TimesFM",         "timesfm_C1_inst_global_metrics.json",  "timesfm_C1_inst_global"),
     ("Global", "C1", "institutional", "TimeGPT",         "timegpt_C1_inst_global_metrics.json",  "timegpt_C1_inst_global"),
+    # Phase 2 improvement: native covariates with an honest damped-drift forward
+    # path (script 33) instead of the flat-hold future of the institutional C1.
+    ("Global", "C1", "inst+forward",  "Chronos-2 (fwd)", "chronos2_C1_fwd_global_metrics.json",   "chronos2_C1_fwd_global"),
 
     # ===== SPAIN =====
     ("Spain", "C0", "-",             "Naive (lag-12)",  "metrics_summary_final.json",           "naive"),
