@@ -99,7 +99,41 @@ All exogenous signals use **shift+1** (value known at forecast time) and are nor
 
 ---
 
-## Quick Start
+## Quick Start - Web Platform (`tfg-arquitectura`)
+
+The INF platform runs as a coordinated Docker Compose stack (PostgreSQL,
+MongoDB, MLflow, backend, MCP server, frontend, and gateway). From the
+repository root:
+
+```bash
+# 1. Configure the environment, then review the values
+cp .env.example .env
+
+# 2. Start the full service stack
+docker compose up -d
+
+# 3. Load the processed datasets into PostgreSQL
+#    (Spain IPC, Global CPI, Europe HICP and the exogenous features)
+docker compose exec backend python scripts/seed_ipc.py
+
+# 4. (optional) Seed baseline experiments and their runs
+docker compose exec backend python scripts/seed_experiments.py
+```
+
+Open the platform through the gateway at <http://localhost>, then sign in with
+the seeded admin account (`ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env`) or sign up
+to create experiments, trigger runs, compare models, and explore the simulator
+and inflation-pulse views.
+
+Run the backend test suite inside the running stack:
+
+```bash
+docker compose exec backend pytest -q
+```
+
+---
+
+## Quick Start - Forecasting Pipeline (`tfg-forecasting`)
 
 ```bash
 cp .env.example .env
