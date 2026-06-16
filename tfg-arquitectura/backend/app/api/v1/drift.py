@@ -36,6 +36,48 @@ router = APIRouter(tags=["drift"])
 _DRIFT_ALPHA = 0.05  # significance threshold
 
 
+def compute_drift_stats(residuals: list[float], alpha: float = _DRIFT_ALPHA) -> dict:
+    """Pure KS drift computation over a residual series (no DB / IO).
+
+    Splits the residuals into an early window (first 60%) and a recent window
+    (last 40%) and runs a two-sample Kolmogorov-Smirnov test. Returns the drift
+    verdict and statistics; the caller adds experiment_id / run_id.
+
+    With fewer than 4 residuals the test is not meaningful and a neutral
+    "insufficient data" result is returned instead.
+    """
+    n = len(residuals)
+    if n < 4:
+        return {
+            "drifted": False,
+            "p_value": None,
+            "ks_statistic": None,
+            "n_early": n,
+            "n_recent": 0,
+            "message": f"Insufficient residuals for KS test ({n} < 4).",
+        }
+
+    split = max(2, int(n * 0.6))
+    early = residuals[:split]
+    recent = residuals[split:]
+
+    ks_stat, p_value = ks_2samp(early, recent)
+    drifted = bool(p_value < alpha)
+
+    return {
+        "drifted": drifted,
+        "p_value": round(float(p_value), 4),
+        "ks_statistic": round(float(ks_stat), 4),
+        "n_early": len(early),
+        "n_recent": len(recent),
+        "message": (
+            f"Drift detected (KS={ks_stat:.3f}, p={p_value:.4f} < {alpha})"
+            if drifted
+            else f"No significant drift (KS={ks_stat:.3f}, p={p_value:.4f})"
+        ),
+    }
+
+
 @router.get("/drift")
 async def check_drift(
     experiment_id: int = Query(..., description="Experiment to check for residual drift"),
@@ -95,37 +137,8 @@ async def check_drift(
         if p.timestamp in obs_map
     ]
 
-    n = len(residuals)
-    if n < 4:
-        return {
-            "experiment_id": experiment_id,
-            "run_id": run.id,
-            "drifted": False,
-            "p_value": None,
-            "ks_statistic": None,
-            "n_early": n,
-            "n_recent": 0,
-            "message": f"Insufficient residuals for KS test ({n} < 4).",
-        }
-
-    split = max(2, int(n * 0.6))
-    early  = residuals[:split]
-    recent = residuals[split:]
-
-    ks_stat, p_value = ks_2samp(early, recent)
-    drifted = bool(p_value < _DRIFT_ALPHA)
-
     return {
         "experiment_id": experiment_id,
         "run_id": run.id,
-        "drifted": drifted,
-        "p_value": round(float(p_value), 4),
-        "ks_statistic": round(float(ks_stat), 4),
-        "n_early": len(early),
-        "n_recent": len(recent),
-        "message": (
-            f"Drift detected (KS={ks_stat:.3f}, p={p_value:.4f} < {_DRIFT_ALPHA})"
-            if drifted
-            else f"No significant drift (KS={ks_stat:.3f}, p={p_value:.4f})"
-        ),
+        **compute_drift_stats(residuals),
     }
