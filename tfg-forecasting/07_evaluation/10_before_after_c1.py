@@ -14,28 +14,59 @@ Variants (all evaluated against the same foundation C0 of that series/family):
   fwd         - Chronos-2 native covariates with honest damped-drift forward
                 paths (script 33). Global Chronos-2 only.
 
-DM via shared.metrics.diebold_mariano (HLN, power=1 => MAE), paired by
-(origin, fc_date). Read-only on stored forecasts.
+DM: the strict Harvey-Leybourne-Newbold adjusted Diebold-Mariano test with
+abs-error (MAE) loss, identical to 07_thesis_critical_dm_recompute.py::dm_hln
+(HAC lags h-1, HLN small-sample factor, two-sided Student-t p with df=n-1) --
+NOT shared.metrics.diebold_mariano (which uses a circular np.roll autocovariance
+and a normal reference). Paired by (origin, fc_date). Read-only on stored
+forecasts.
 
 Output: 08_results/before_after_c1.md
 """
 
 from __future__ import annotations
 
-import sys
+import math
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 ROOT = Path(__file__).resolve().parents[1]
-MONOREPO = ROOT.parent
-sys.path.insert(0, str(MONOREPO))
-
-from shared.metrics import diebold_mariano  # noqa: E402
-
 RESULTS = ROOT / "08_results"
 HORIZONS = [1, 3, 6, 12]
+
+
+def dm_hln_abs(error_a: np.ndarray, error_b: np.ndarray, horizon: int) -> tuple[float, float]:
+    """MAE-loss HLN-adjusted Diebold-Mariano (mirror of script 07's dm_hln).
+
+    d = |error_a| - |error_b|; returns (dm_adj, two-sided p). NaN when the loss
+    differential has no usable variance (e.g. a no-op overlay where C1 == C0).
+    """
+    d = np.abs(np.asarray(error_a, dtype=float)) - np.abs(np.asarray(error_b, dtype=float))
+    d = d[np.isfinite(d)]
+    n = len(d)
+    if n < 4:
+        return math.nan, math.nan
+    d_bar = float(np.mean(d))
+    centered = d - d_bar
+    long_run = float(np.dot(centered, centered) / n)
+    for lag in range(1, horizon):
+        if n <= lag:
+            break
+        gamma = float(np.dot(centered[lag:], centered[:-lag]) / n)
+        long_run += 2.0 * gamma
+    var_d_bar = long_run / n
+    if not math.isfinite(var_d_bar) or var_d_bar <= 0:
+        return math.nan, math.nan
+    dm = d_bar / math.sqrt(var_d_bar)
+    hln_factor = (n + 1 - 2 * horizon + horizon * (horizon - 1) / n) / n
+    if hln_factor <= 0:
+        return math.nan, math.nan
+    dm_adj = dm * math.sqrt(hln_factor)
+    p_value = 2.0 * stats.t.sf(abs(dm_adj), df=n - 1)
+    return float(dm_adj), float(p_value)
 
 # series -> family -> (C0 file, {variant: C1 file})
 PLAN = {
@@ -95,15 +126,19 @@ def compare(c0: pd.DataFrame, c1: pd.DataFrame, h: int) -> tuple | None:
     if len(m) < 8:
         return None
     e0, e1 = m["error_0"].values, m["error_1"].values
-    dm = diebold_mariano(e0, e1, h=h, power=1)
     mae0, mae1 = float(np.abs(e0).mean()), float(np.abs(e1).mean())
-    return mae0, mae1, (mae1 - mae0) / mae0 * 100.0, dm["p_value"], ("C1" if dm["dm_stat"] > 0 else "C0")
+    _, p = dm_hln_abs(e0, e1, h)
+    winner = "C1" if mae1 < mae0 else ("C0" if mae1 > mae0 else "=")
+    return mae0, mae1, (mae1 - mae0) / mae0 * 100.0, p, winner
 
 
 def cell(res: tuple | None) -> str:
     if res is None:
         return "-"
     _, _, dpct, p, better = res
+    if not math.isfinite(p):
+        # no usable loss differential (e.g. a no-op overlay: C1 == C0)
+        return f"{dpct:+.1f}% n/a ({better})"
     star = "**" if p < 0.05 else ("*" if p < 0.10 else "")
     return f"{dpct:+.1f}% {p:.3f}{star} ({better})"
 

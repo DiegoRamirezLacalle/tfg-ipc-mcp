@@ -45,26 +45,26 @@ Delta is model B versus model A, so negative means model B has lower MAE.
 | Spain | TimesFM context | 3 | 135 | 45 | 0.7320 | 0.7460 | 1.9% [0.3, 3.7] | timesfm_C0 | 0.0095 | ** | 0.0522 | * |
 | Spain | TimesFM context | 6 | 252 | 42 | 1.0866 | 1.1000 | 1.2% [0.1, 2.4] | timesfm_C0 | 0.0180 | ** | 0.0265 | ** |
 | Spain | TimesFM context | 12 | 432 | 36 | 1.8635 | 1.8781 | 0.8% [0.0, 1.6] | timesfm_C0 | 0.0364 | ** | 0.0388 | ** |
-| Spain | TimesFM validated context | 1 | 47 | 47 | 0.4364 | 0.4382 | 0.4% [-0.0, 0.9] | timesfm_C0 | 0.0770 | * | 0.1317 | ns |
-| Spain | TimesFM validated context | 3 | 135 | 45 | 0.7320 | 0.7347 | 0.4% [0.2, 0.6] | timesfm_C0 | 0.0057 | ** | 0.0102 | ** |
-| Spain | TimesFM validated context | 6 | 252 | 42 | 1.0866 | 1.0900 | 0.3% [0.2, 0.4] | timesfm_C0 | 0.0006 | ** | 0.0015 | ** |
-| Spain | TimesFM validated context | 12 | 432 | 36 | 1.8635 | 1.8662 | 0.1% [0.1, 0.2] | timesfm_C0 | 0.0056 | ** | 0.0023 | ** |
+| Spain | TimesFM validated context | 1 | 47 | 47 | 0.4364 | 0.4364 | 0.0% [0.0, 0.0] | timesfm_C1_validated | NA | NA | NA | NA |
+| Spain | TimesFM validated context | 3 | 135 | 45 | 0.7320 | 0.7320 | 0.0% [0.0, 0.0] | timesfm_C1_validated | NA | NA | NA | NA |
+| Spain | TimesFM validated context | 6 | 252 | 42 | 1.0866 | 1.0866 | 0.0% [0.0, 0.0] | timesfm_C1_validated | NA | NA | NA | NA |
+| Spain | TimesFM validated context | 12 | 432 | 36 | 1.8635 | 1.8635 | 0.0% [0.0, 0.0] | timesfm_C1_validated | NA | NA | NA | NA |
 | Spain | Chronos-2 context | 1 | 47 | 47 | 0.5202 | 0.5488 | 5.5% [-11.0, 25.3] | chronos2_C0 | 0.5300 | ns | 0.7810 | ns |
 | Spain | Chronos-2 context | 3 | 135 | 45 | 0.8179 | 0.8212 | 0.4% [-10.5, 11.6] | chronos2_C0 | 0.9532 | ns | 0.7676 | ns |
 | Spain | Chronos-2 context | 6 | 252 | 42 | 1.2060 | 1.2370 | 2.6% [-5.6, 10.1] | chronos2_C0 | 0.6465 | ns | 0.2792 | ns |
 | Spain | Chronos-2 context | 12 | 432 | 36 | 1.9898 | 2.0694 | 4.0% [-4.3, 12.2] | chronos2_C0 | 0.4876 | ns | 0.1873 | ns |
-| Spain | Chronos-2 validated context | 1 | 47 | 47 | 0.5202 | 0.5226 | 0.5% [0.1, 1.0] | chronos2_C0 | 0.0158 | ** | 0.3512 | ns |
-| Spain | Chronos-2 validated context | 3 | 135 | 45 | 0.8179 | 0.8214 | 0.4% [0.2, 0.7] | chronos2_C0 | 0.0001 | ** | 0.0231 | ** |
-| Spain | Chronos-2 validated context | 6 | 252 | 42 | 1.2060 | 1.2095 | 0.3% [0.2, 0.5] | chronos2_C0 | 0.0002 | ** | 0.0031 | ** |
-| Spain | Chronos-2 validated context | 12 | 432 | 36 | 1.9898 | 1.9928 | 0.2% [0.1, 0.2] | chronos2_C0 | 0.0020 | ** | 0.0068 | ** |
-| Spain | TimesFM regime context | 1 | 47 | 47 | 0.4364 | 0.4371 | 0.2% [-0.1, 0.4] | timesfm_C0 | 0.2842 | ns | 0.3080 | ns |
-| Spain | TimesFM regime context | 3 | 135 | 45 | 0.7320 | 0.7332 | 0.2% [0.0, 0.3] | timesfm_C0 | 0.0781 | * | 0.0645 | * |
-| Spain | TimesFM regime context | 6 | 252 | 42 | 1.0866 | 1.0881 | 0.1% [0.0, 0.2] | timesfm_C0 | 0.0551 | * | 0.0587 | * |
-| Spain | TimesFM regime context | 12 | 432 | 36 | 1.8635 | 1.8648 | 0.1% [0.0, 0.1] | timesfm_C0 | 0.1351 | ns | 0.1190 | ns |
-| Spain | Chronos-2 regime context | 1 | 47 | 47 | 0.5202 | 0.5209 | 0.1% [-0.1, 0.4] | chronos2_C0 | 0.2926 | ns | 0.8956 | ns |
-| Spain | Chronos-2 regime context | 3 | 135 | 45 | 0.8179 | 0.8191 | 0.2% [0.0, 0.3] | chronos2_C0 | 0.0728 | * | 0.4112 | ns |
-| Spain | Chronos-2 regime context | 6 | 252 | 42 | 1.2060 | 1.2073 | 0.1% [0.0, 0.2] | chronos2_C0 | 0.0698 | * | 0.1706 | ns |
-| Spain | Chronos-2 regime context | 12 | 432 | 36 | 1.9898 | 1.9912 | 0.1% [0.0, 0.2] | chronos2_C0 | 0.0874 | * | 0.2667 | ns |
+| Spain | Chronos-2 validated context | 1 | 47 | 47 | 0.5202 | 0.5202 | 0.0% [0.0, 0.0] | chronos2_C1_validated | NA | NA | NA | NA |
+| Spain | Chronos-2 validated context | 3 | 135 | 45 | 0.8179 | 0.8179 | 0.0% [0.0, 0.0] | chronos2_C1_validated | NA | NA | NA | NA |
+| Spain | Chronos-2 validated context | 6 | 252 | 42 | 1.2060 | 1.2060 | 0.0% [0.0, 0.0] | chronos2_C1_validated | NA | NA | NA | NA |
+| Spain | Chronos-2 validated context | 12 | 432 | 36 | 1.9898 | 1.9898 | 0.0% [0.0, 0.0] | chronos2_C1_validated | NA | NA | NA | NA |
+| Spain | TimesFM regime context | 1 | 47 | 47 | 0.4364 | 0.4364 | 0.0% [0.0, 0.0] | timesfm_C1_regime | NA | NA | NA | NA |
+| Spain | TimesFM regime context | 3 | 135 | 45 | 0.7320 | 0.7320 | 0.0% [0.0, 0.0] | timesfm_C1_regime | NA | NA | NA | NA |
+| Spain | TimesFM regime context | 6 | 252 | 42 | 1.0866 | 1.0866 | 0.0% [0.0, 0.0] | timesfm_C1_regime | NA | NA | NA | NA |
+| Spain | TimesFM regime context | 12 | 432 | 36 | 1.8635 | 1.8635 | 0.0% [0.0, 0.0] | timesfm_C1_regime | NA | NA | NA | NA |
+| Spain | Chronos-2 regime context | 1 | 47 | 47 | 0.5202 | 0.5202 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
+| Spain | Chronos-2 regime context | 3 | 135 | 45 | 0.8179 | 0.8179 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
+| Spain | Chronos-2 regime context | 6 | 252 | 42 | 1.2060 | 1.2060 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
+| Spain | Chronos-2 regime context | 12 | 432 | 36 | 1.9898 | 1.9898 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
 | Global | Chronos-2 context | 1 | 47 | 47 | 0.2519 | 0.2004 | -20.4% [-40.6, 7.0] | chronos2_C1_inst_global | 0.1283 | ns | 0.1316 | ns |
 | Global | Chronos-2 context | 3 | 135 | 45 | 0.3580 | 0.3417 | -4.5% [-23.5, 21.0] | chronos2_C1_inst_global | 0.7448 | ns | 0.8156 | ns |
 | Global | Chronos-2 context | 6 | 252 | 42 | 0.6423 | 0.5914 | -7.9% [-30.2, 22.0] | chronos2_C1_inst_global | 0.6608 | ns | 0.5835 | ns |
@@ -170,26 +170,26 @@ Delta is model B versus model A, so negative means model B has lower MAE.
 | Spain | TimesFM context | 3 | 45 | 45 | 1.0179 | 1.0376 | 1.9% [0.5, 3.6] | timesfm_C0 | 0.0056 | ** | 0.0046 | ** |
 | Spain | TimesFM context | 6 | 42 | 42 | 1.5794 | 1.5909 | 0.7% [-0.3, 1.9] | timesfm_C0 | 0.1936 | ns | 0.0758 | * |
 | Spain | TimesFM context | 12 | 36 | 36 | 3.0884 | 3.1024 | 0.5% [-0.1, 1.1] | timesfm_C0 | 0.1043 | ns | 0.1090 | ns |
-| Spain | TimesFM validated context | 1 | 47 | 47 | 0.4364 | 0.4382 | 0.4% [-0.0, 0.9] | timesfm_C0 | 0.0770 | * | 0.1317 | ns |
-| Spain | TimesFM validated context | 3 | 45 | 45 | 1.0179 | 1.0219 | 0.4% [0.2, 0.6] | timesfm_C0 | 0.0048 | ** | 0.0345 | ** |
-| Spain | TimesFM validated context | 6 | 42 | 42 | 1.5794 | 1.5828 | 0.2% [0.1, 0.3] | timesfm_C0 | 0.0291 | ** | 0.0881 | * |
-| Spain | TimesFM validated context | 12 | 36 | 36 | 3.0884 | 3.0910 | 0.1% [0.0, 0.2] | timesfm_C0 | 0.2575 | ns | 0.3605 | ns |
+| Spain | TimesFM validated context | 1 | 47 | 47 | 0.4364 | 0.4364 | 0.0% [0.0, 0.0] | timesfm_C1_validated | NA | NA | NA | NA |
+| Spain | TimesFM validated context | 3 | 45 | 45 | 1.0179 | 1.0179 | 0.0% [0.0, 0.0] | timesfm_C1_validated | NA | NA | NA | NA |
+| Spain | TimesFM validated context | 6 | 42 | 42 | 1.5794 | 1.5794 | 0.0% [0.0, 0.0] | timesfm_C1_validated | NA | NA | NA | NA |
+| Spain | TimesFM validated context | 12 | 36 | 36 | 3.0884 | 3.0884 | 0.0% [0.0, 0.0] | timesfm_C1_validated | NA | NA | NA | NA |
 | Spain | Chronos-2 context | 1 | 47 | 47 | 0.5202 | 0.5488 | 5.5% [-11.0, 25.3] | chronos2_C0 | 0.5300 | ns | 0.7810 | ns |
 | Spain | Chronos-2 context | 3 | 45 | 45 | 1.0943 | 1.0696 | -2.3% [-13.4, 7.7] | chronos2_C1_inst | 0.7684 | ns | 0.6254 | ns |
 | Spain | Chronos-2 context | 6 | 42 | 42 | 1.7756 | 1.8643 | 5.0% [-4.1, 14.2] | chronos2_C0 | 0.4091 | ns | 0.2322 | ns |
 | Spain | Chronos-2 context | 12 | 36 | 36 | 3.0825 | 3.2432 | 5.2% [-3.4, 15.0] | chronos2_C0 | 0.4080 | ns | 0.3268 | ns |
-| Spain | Chronos-2 validated context | 1 | 47 | 47 | 0.5202 | 0.5226 | 0.5% [0.1, 1.0] | chronos2_C0 | 0.0158 | ** | 0.3512 | ns |
-| Spain | Chronos-2 validated context | 3 | 45 | 45 | 1.0943 | 1.0980 | 0.3% [0.2, 0.6] | chronos2_C0 | 0.0055 | ** | 0.0129 | ** |
-| Spain | Chronos-2 validated context | 6 | 42 | 42 | 1.7756 | 1.7794 | 0.2% [0.1, 0.3] | chronos2_C0 | 0.0119 | ** | 0.1043 | ns |
-| Spain | Chronos-2 validated context | 12 | 36 | 36 | 3.0825 | 3.0864 | 0.1% [0.1, 0.2] | chronos2_C0 | 0.0581 | * | 0.3266 | ns |
-| Spain | TimesFM regime context | 1 | 47 | 47 | 0.4364 | 0.4371 | 0.2% [-0.1, 0.4] | timesfm_C0 | 0.2842 | ns | 0.3080 | ns |
-| Spain | TimesFM regime context | 3 | 45 | 45 | 1.0179 | 1.0197 | 0.2% [0.1, 0.3] | timesfm_C0 | 0.1329 | ns | 0.1599 | ns |
-| Spain | TimesFM regime context | 6 | 42 | 42 | 1.5794 | 1.5801 | 0.0% [-0.0, 0.1] | timesfm_C0 | 0.4321 | ns | 0.2695 | ns |
-| Spain | TimesFM regime context | 12 | 36 | 36 | 3.0884 | 3.0891 | 0.0% [-0.0, 0.1] | timesfm_C0 | NA | NA | NA | NA |
-| Spain | Chronos-2 regime context | 1 | 47 | 47 | 0.5202 | 0.5209 | 0.1% [-0.1, 0.4] | chronos2_C0 | 0.2926 | ns | 0.8956 | ns |
-| Spain | Chronos-2 regime context | 3 | 45 | 45 | 1.0943 | 1.0957 | 0.1% [0.0, 0.3] | chronos2_C0 | 0.1328 | ns | 0.2342 | ns |
-| Spain | Chronos-2 regime context | 6 | 42 | 42 | 1.7756 | 1.7770 | 0.1% [0.0, 0.2] | chronos2_C0 | 0.1050 | ns | 0.1809 | ns |
-| Spain | Chronos-2 regime context | 12 | 36 | 36 | 3.0825 | 3.0841 | 0.1% [0.0, 0.1] | chronos2_C0 | 0.0537 | * | NA | NA |
+| Spain | Chronos-2 validated context | 1 | 47 | 47 | 0.5202 | 0.5202 | 0.0% [0.0, 0.0] | chronos2_C1_validated | NA | NA | NA | NA |
+| Spain | Chronos-2 validated context | 3 | 45 | 45 | 1.0943 | 1.0943 | 0.0% [0.0, 0.0] | chronos2_C1_validated | NA | NA | NA | NA |
+| Spain | Chronos-2 validated context | 6 | 42 | 42 | 1.7756 | 1.7756 | 0.0% [0.0, 0.0] | chronos2_C1_validated | NA | NA | NA | NA |
+| Spain | Chronos-2 validated context | 12 | 36 | 36 | 3.0825 | 3.0825 | 0.0% [0.0, 0.0] | chronos2_C1_validated | NA | NA | NA | NA |
+| Spain | TimesFM regime context | 1 | 47 | 47 | 0.4364 | 0.4364 | 0.0% [0.0, 0.0] | timesfm_C1_regime | NA | NA | NA | NA |
+| Spain | TimesFM regime context | 3 | 45 | 45 | 1.0179 | 1.0179 | 0.0% [0.0, 0.0] | timesfm_C1_regime | NA | NA | NA | NA |
+| Spain | TimesFM regime context | 6 | 42 | 42 | 1.5794 | 1.5794 | 0.0% [0.0, 0.0] | timesfm_C1_regime | NA | NA | NA | NA |
+| Spain | TimesFM regime context | 12 | 36 | 36 | 3.0884 | 3.0884 | 0.0% [0.0, 0.0] | timesfm_C1_regime | NA | NA | NA | NA |
+| Spain | Chronos-2 regime context | 1 | 47 | 47 | 0.5202 | 0.5202 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
+| Spain | Chronos-2 regime context | 3 | 45 | 45 | 1.0943 | 1.0943 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
+| Spain | Chronos-2 regime context | 6 | 42 | 42 | 1.7756 | 1.7756 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
+| Spain | Chronos-2 regime context | 12 | 36 | 36 | 3.0825 | 3.0825 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
 | Global | Chronos-2 context | 1 | 47 | 47 | 0.2519 | 0.2004 | -20.4% [-40.6, 7.0] | chronos2_C1_inst_global | 0.1283 | ns | 0.1316 | ns |
 | Global | Chronos-2 context | 3 | 45 | 45 | 0.4898 | 0.4963 | 1.3% [-22.2, 35.4] | chronos2_C0_global | 0.9595 | ns | 0.9669 | ns |
 | Global | Chronos-2 context | 6 | 42 | 42 | 1.1443 | 0.9898 | -13.5% [-38.9, 22.2] | chronos2_C1_inst_global | 0.7711 | ns | 0.7425 | ns |

@@ -149,10 +149,16 @@ def target_for_mode(df: pd.DataFrame, target_col: str, mode: str) -> pd.Series:
 
 
 def change_selected_cols(df: pd.DataFrame, target_col: str, k: int = CHANGE_SEL_K) -> list[str]:
-    """Top-k signals by |corr with next-month increment| on the TRAINING window."""
+    """Top-k signals by |corr with next-month increment| on the TRAINING window.
+
+    The increment at row t is y[t+1] - y[t], so a row only counts as training if
+    its FULL difference lies inside the pre-2021 window, i.e. t+1 <= TRAIN_END.
+    Using t = TRAIN_END would pull y at 2021-01 (the first test month) into the
+    selection -- a one-month leak. Restrict to t <= TRAIN_END - 1 month.
+    """
     y = df[target_col].astype(float)
     nxt = y.shift(-1) - y
-    tr = df.index <= TRAIN_END
+    tr = df.index <= (TRAIN_END - pd.DateOffset(months=1))
     scored = []
     for c in df.columns:
         if c == target_col:
@@ -293,13 +299,17 @@ def apply_overlay(config, df, recipe, model_name, source_file, output_file) -> d
     pred["fc_date"] = pd.to_datetime(pred["fc_date"])
     base_labels = sorted(pred["model"].astype(str).unique().tolist())
 
+    # Only correct if the selected recipe beat the zero-correction baseline on
+    # the pre-2021 validation window; otherwise emit a no-op (identical to C0).
+    applied = bool(recipe.get("validation_beats_zero", False))
+
     corrections: dict[pd.Timestamp, float] = {}
     gate_open: dict[pd.Timestamp, int] = {}
     for origin in sorted(pred["origin"].drop_duplicates()):
         origin = pd.Timestamp(origin)
         opened = int(origin in vol.index and pd.notna(vol.loc[origin]) and vol.loc[origin] > thr)
         gate_open[origin] = opened
-        if origin not in df.index or not opened:
+        if not applied or origin not in df.index or not opened:
             corrections[origin] = 0.0
             continue
         fit = fit_final_recipe(config, df, recipe, origin)
@@ -326,6 +336,7 @@ def apply_overlay(config, df, recipe, model_name, source_file, output_file) -> d
         "output": output_file, "metrics": metrics_path.name, "status": "ok",
         "n_origins": int(len(corrections)), "n_regime_open": n_open,
         "regime_threshold": round(thr, 4),
+        "applied": applied, "validation_beats_zero": applied,
         "mean_abs_correction": float(np.mean(np.abs(nz))) if len(nz) else 0.0,
         "max_abs_correction": float(np.max(np.abs(nz))) if len(nz) else 0.0,
     }
@@ -333,8 +344,11 @@ def apply_overlay(config, df, recipe, model_name, source_file, output_file) -> d
 
 def compute_metrics(pred: pd.DataFrame, target_col: str, feature_df: pd.DataFrame) -> dict:
     y = feature_df[target_col].astype(float)
-    diffs = y.loc[:TRAIN_END].diff().dropna().abs()
-    mase_scale = float(diffs.mean()) if len(diffs) else math.nan
+    # Seasonal lag-12 MASE scale, matching the foundation-model convention, so
+    # overlay MASE is comparable with the foundation metrics.
+    train_vals = y.loc[:TRAIN_END].to_numpy(dtype=float)
+    mase_scale = (float(np.mean(np.abs(train_vals[12:] - train_vals[:-12])))
+                  if len(train_vals) > 12 else math.nan)
     out = {}
     for h in HORIZONS:
         sub = pred[pred["horizon"] == h]

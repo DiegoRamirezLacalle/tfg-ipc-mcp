@@ -251,10 +251,17 @@ def write_md(records: list[dict]) -> None:
     lines = [
         "# Diebold-Mariano p-values - main C0 vs C1 comparisons",
         "",
-        "> DM (Harvey-Leybourne-Newbold corrected), MAE-based (power=1). "
-        "model1 = C0, model2 = C1. `better` = C1 if the C1 (with-signals) model "
-        "has lower error, C0 otherwise. Significance: ** p<0.05, * p<0.10, ns = "
-        "not significant. `[VERIFY]` = forecast not available (cannot be tested).",
+        "> **LEGACY / SUPPLEMENTARY.** This table uses the older "
+        "`shared.metrics.diebold_mariano` (normal reference, circular-`np.roll` "
+        "autocovariance). The **canonical strict evidence for the thesis is "
+        "`thesis_critical_dm_recompute.md`** (HLN-adjusted Student-t, df=n-1, "
+        "proper HAC) and the per-variant `before_after_c1.md`. Keep this file for "
+        "continuity only.",
+        "",
+        "> DM, MAE-based (power=1). model1 = C0, model2 = C1. `better` = C1 if the "
+        "C1 (with-signals) model has lower error, C0 otherwise. Significance: "
+        "** p<0.05, * p<0.10, ns = not significant. `[VERIFY]` = forecast not "
+        "available (cannot be tested).",
         "",
     ]
     hdr = "| Series | Track | Family | C1 signal | h=1 | h=3 | h=6 | h=12 |"

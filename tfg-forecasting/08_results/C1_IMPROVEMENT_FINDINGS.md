@@ -58,31 +58,37 @@ only.
 
 ## Before/after (C1 vs C0, MAE delta and DM p-value)
 
-Full table: [before_after_c1.md](before_after_c1.md) and the canonical
-[dm_pvalues_summary.md](dm_pvalues_summary.md); independent recompute with
-bootstrap CIs in [thesis_critical_dm_recompute.md](thesis_critical_dm_recompute.md).
+**Canonical strict evidence: [thesis_critical_dm_recompute.md](thesis_critical_dm_recompute.md)**
+(independent recompute from Parquets, HLN-adjusted Student-t DM with bootstrap
+CIs). [before_after_c1.md](before_after_c1.md) uses the same strict test, laid
+out per variant. [dm_pvalues_summary.md](dm_pvalues_summary.md) is
+**legacy/supplementary only** — it uses the older normal-reference
+`shared.metrics.diebold_mariano` and should not be cited as the primary evidence.
 
-**Global (the win).** dMAE% vs Global C0, DM p in parentheses:
+**Global (the win).** dMAE% vs Global C0, strict HLN DM p in parentheses:
 
 | variant (Chronos-2) | h=1 | h=3 | h=6 | h=12 |
 |---|---|---|---|---|
-| inst (flat-hold, original) | −20.4% (0.117) | −4.5% (0.740) | −7.9% (0.653) | −14.5% (0.463) |
-| **fwd (forward path)** | **−23.6% (0.066\*)** | −14.1% (0.273) | −17.5% (0.205) | −20.4% (0.154) |
-| regime (gated overlay) | −1.3% (0.190) | −1.6% (0.016\*\*) | −1.0% (0.034\*\*) | −0.5% (0.048\*\*) |
+| inst (flat-hold, original) | −20.4% (0.128) | −4.5% (0.745) | −7.9% (0.661) | −14.5% (0.476) |
+| **fwd (forward path)** | **−23.6% (0.075\*)** | −14.1% (0.284) | −17.5% (0.216) | −20.4% (0.166) |
+| regime (gated overlay) | −1.3% (0.201) | −1.6% (0.019\*\*) | −1.0% (0.039\*\*) | −0.5% (0.054\*) |
 
 The forward-path model is the **best global model by MAE/MASE** (MASE
-0.16 / 0.26 / 0.45 / 0.91) and improves on the flat-hold C1 by 4–10%. Its DM
-significance is limited to h=1 because the gain is concentrated in the shock.
-The regime-gated overlay is the opposite trade-off: small but **DM-significant at
-h=3/6/12**. For TimesFM Global the always-on overlay helps (h1–6, p<0.10) but the
+0.16 / 0.26 / 0.45 / 0.91) and improves on the flat-hold C1 by ≈4–10%. Its DM
+significance is limited to h=1 (p=0.075) because the gain is concentrated in the
+shock over few origins. The regime-gated overlay is the opposite trade-off:
+small but **DM-significant at h=3/6** (p=0.019 / 0.039) and marginal at h=12
+(p=0.054). For TimesFM Global the always-on overlay helps (h1–6, p<0.10) but the
 regime gate removes the benefit (the signal helps broadly there, not only in
 high-vol months) — reported honestly.
 
-**Spain and Europe (no win).** The original C1 models are significantly *worse*
-than C0 (Spain TimesFM inst +0.8…+2.0%, p<0.05; Europe full +1…+24%). The
-overlays shrink this to ~0 and the regime gate keeps it non-significant, but no
-variant beats C0. Outside the rate target and the shock regime, the signals do
-not help the foundation forecast.
+**Spain and Europe (no win).** The original with-signals models are at best
+neutral and often significantly *worse* than C0 (Spain TimesFM inst +0.8…+2.0%,
+p<0.05; Europe full +1…+24%). On **Spain** the overlays' best pre-2021 recipe
+does not beat the zero-correction baseline, so they correctly emit a **no-op**
+(`chronos2/timesfm_C1_validated` ≡ `_C1_regime` ≡ C0). On **Europe** the overlays
+apply but stay neutral-to-slightly-worse. No variant beats C0: outside the rate
+target and the shock regime, the signals do not help the foundation forecast.
 
 ## Phase 4 — data-quality note (ECB placeholder)
 
@@ -96,6 +102,28 @@ produces it (`05_mcp_pipeline_global/`). The real ECB deposit-facility rate
 `features_c1_europe.parquet`). So the placeholder does not contaminate any C1
 result, and no fix was fabricated for a file nothing reads. If a true
 `C1_mcp_global` model is ever built, replace those columns with real `dfr` first.
+
+## Methodology corrections (defensibility)
+
+These do not change the modeling scope; they make the evaluation more defensible.
+
+- **Strict DM in the before/after.** `before_after_c1.py` now uses the
+  HLN-adjusted Student-t test (HAC lags h−1, df=n−1), identical to
+  `thesis_critical_dm_recompute.py`, not the normal-reference
+  `shared.metrics.diebold_mariano`. The strict test is more conservative: Global
+  Chronos-2 regime h=12 moves p=0.048→0.054 and forward-path h=1 → 0.075; the
+  h=3/h=6 regime wins stay significant. Conclusions are unchanged.
+- **Comparable MASE.** Overlay metrics (scripts 08/09) now use the seasonal
+  lag-12 MASE scale on the training series, matching the foundation models
+  (`mean |y[t]−y[t−12]|`), instead of a lag-1 scale. MAE/RMSE were unaffected.
+- **No `change_sel` leak.** Script 09 selects change-correlated features only
+  from rows whose full increment lies in the pre-2021 window (t+1 ≤ 2020-12),
+  removing a one-month leak into the first test increment. It is still not chosen
+  by the calm validation window, so selected recipes are unchanged.
+- **No-op when unvalidated.** The overlays apply a correction only if the
+  selected recipe beat the zero-correction baseline on pre-2021 validation;
+  otherwise they emit a no-op identical to C0. This is why the Spain overlays now
+  equal C0 exactly (their best recipe validates at +0.56%, i.e. worse than zero).
 
 ## Integrity
 

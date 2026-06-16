@@ -287,10 +287,16 @@ def apply_overlay(config: SeriesConfig, df: pd.DataFrame, recipe: dict, model_na
     base_labels = sorted(pred["model"].astype(str).unique().tolist())
     base_label = base_labels[0] if len(base_labels) == 1 else None
 
+    # Only apply a correction if the selected recipe actually beat the
+    # zero-correction baseline on the pre-2021 validation window. Otherwise the
+    # "validated" overlay emits a no-op (identical to C0): a method that cannot
+    # validate a correction must not invent one.
+    applied = bool(recipe.get("validation_beats_zero", False))
+
     corrections: dict[pd.Timestamp, float] = {}
     for origin in sorted(pred["origin"].drop_duplicates()):
         origin = pd.Timestamp(origin)
-        if origin not in df.index:
+        if not applied or origin not in df.index:
             corrections[origin] = 0.0
             continue
         fit = fit_final_recipe(config, df, recipe, origin)
@@ -320,6 +326,8 @@ def apply_overlay(config: SeriesConfig, df: pd.DataFrame, recipe: dict, model_na
         "metrics": metrics_path.name,
         "status": "ok",
         "n_origins": int(len(corrections)),
+        "applied": applied,
+        "validation_beats_zero": applied,
         "mean_abs_correction": float(np.mean(np.abs(nonzero))) if len(nonzero) else 0.0,
         "max_abs_correction": float(np.max(np.abs(nonzero))) if len(nonzero) else 0.0,
         "base_label": base_label,
@@ -329,8 +337,12 @@ def apply_overlay(config: SeriesConfig, df: pd.DataFrame, recipe: dict, model_na
 def compute_metrics(pred: pd.DataFrame, target_col: str, feature_df: pd.DataFrame) -> dict:
     y = feature_df[target_col].astype(float)
     train_y = y.loc[:pd.Timestamp("2020-12-01")]
-    diffs = train_y.diff().dropna().abs()
-    mase_scale = float(diffs.mean()) if len(diffs) else math.nan
+    # Seasonal lag-12 MASE scale, matching the foundation-model convention
+    # (06_models_foundation/*: mean |y[t] - y[t-12]| over the training series),
+    # so overlay MASE is comparable with the foundation metrics.
+    train_vals = train_y.to_numpy(dtype=float)
+    mase_scale = (float(np.mean(np.abs(train_vals[12:] - train_vals[:-12])))
+                  if len(train_vals) > 12 else math.nan)
     out = {}
     for h in HORIZONS:
         sub = pred[pred["horizon"] == h]

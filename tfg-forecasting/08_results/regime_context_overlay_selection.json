@@ -602,8 +602,10 @@
       "n_origins": 47,
       "n_regime_open": 20,
       "regime_threshold": 0.4971,
-      "mean_abs_correction": 0.002526357860930979,
-      "max_abs_correction": 0.012027311398158333
+      "applied": false,
+      "validation_beats_zero": false,
+      "mean_abs_correction": 0.0,
+      "max_abs_correction": 0.0
     },
     {
       "model": "chronos2_C1_regime",
@@ -617,8 +619,10 @@
       "n_origins": 47,
       "n_regime_open": 20,
       "regime_threshold": 0.4971,
-      "mean_abs_correction": 0.002526357860930979,
-      "max_abs_correction": 0.012027311398158333
+      "applied": false,
+      "validation_beats_zero": false,
+      "mean_abs_correction": 0.0,
+      "max_abs_correction": 0.0
     },
     {
       "model": "timesfm_C1_regime_global",
@@ -632,6 +636,8 @@
       "n_origins": 47,
       "n_regime_open": 11,
       "regime_threshold": 0.3029,
+      "applied": true,
+      "validation_beats_zero": true,
       "mean_abs_correction": 0.00659720497227433,
       "max_abs_correction": 0.07300327838600704
     },
@@ -647,6 +653,8 @@
       "n_origins": 47,
       "n_regime_open": 11,
       "regime_threshold": 0.3029,
+      "applied": true,
+      "validation_beats_zero": true,
       "mean_abs_correction": 0.00659720497227433,
       "max_abs_correction": 0.07300327838600704
     },
@@ -662,6 +670,8 @@
       "n_origins": 47,
       "n_regime_open": 20,
       "regime_threshold": 0.5552,
+      "applied": true,
+      "validation_beats_zero": true,
       "mean_abs_correction": 0.0067642951816029905,
       "max_abs_correction": 0.0344595959362724
     },
@@ -677,6 +687,8 @@
       "n_origins": 47,
       "n_regime_open": 20,
       "regime_threshold": 0.5552,
+      "applied": true,
+      "validation_beats_zero": true,
       "mean_abs_correction": 0.0067642951816029905,
       "max_abs_correction": 0.0344595959362724
     }

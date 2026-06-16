@@ -584,8 +584,10 @@
       "metrics": "timesfm_C1_validated_metrics.json",
       "status": "ok",
       "n_origins": 47,
-      "mean_abs_correction": 0.006077518823320391,
-      "max_abs_correction": 0.01239841171086814,
+      "applied": false,
+      "validation_beats_zero": false,
+      "mean_abs_correction": 0.0,
+      "max_abs_correction": 0.0,
       "base_label": "timesfm_C0"
     },
     {
@@ -598,8 +600,10 @@
       "metrics": "chronos2_C1_validated_metrics.json",
       "status": "ok",
       "n_origins": 47,
-      "mean_abs_correction": 0.006077518823320391,
-      "max_abs_correction": 0.01239841171086814,
+      "applied": false,
+      "validation_beats_zero": false,
+      "mean_abs_correction": 0.0,
+      "max_abs_correction": 0.0,
       "base_label": "chronos2_C0"
     },
     {
@@ -612,6 +616,8 @@
       "metrics": "timesfm_C1_validated_global_metrics.json",
       "status": "ok",
       "n_origins": 47,
+      "applied": true,
+      "validation_beats_zero": true,
       "mean_abs_correction": 0.04221283637063836,
       "max_abs_correction": 0.18115645752372556,
       "base_label": "timesfm_C0_global"
@@ -626,6 +632,8 @@
       "metrics": "chronos2_C1_validated_global_metrics.json",
       "status": "ok",
       "n_origins": 47,
+      "applied": true,
+      "validation_beats_zero": true,
       "mean_abs_correction": 0.04221283637063836,
       "max_abs_correction": 0.18115645752372556,
       "base_label": "chronos2_C0_global"
@@ -640,6 +648,8 @@
       "metrics": "timesfm_C1_validated_europe_metrics.json",
       "status": "ok",
       "n_origins": 47,
+      "applied": true,
+      "validation_beats_zero": true,
       "mean_abs_correction": 0.014126813076982004,
       "max_abs_correction": 0.0344595959362724,
       "base_label": "timesfm_C0_europe"
