@@ -25,6 +25,6 @@
 
 ## How to read it
 
-- **Global** is the only series where signals deliver genuine OOS gains. Chronos-2 with an honest forward covariate path (`fwd`) cuts MAE 14-24% vs C0 at every horizon (DM-significant only at h=1, p=0.066, because the gain is concentrated in the 2022 shock over few origins). The regime-gated overlay turns the Global Chronos-2 advantage into clean DM-significant wins at h=3/6/12 (smaller, ~1-1.6%).
+- **Global** is the only series where signals deliver genuine OOS gains. Chronos-2 with an honest forward covariate path (`fwd`) cuts MAE 14-24% vs C0 at every horizon (DM-significant only at h=1, p=0.075, because the gain is concentrated in the 2022 shock over few origins). The regime-gated overlay turns the Global Chronos-2 advantage into clean DM-significant wins at h=3/6/12 (smaller, ~1-1.6%).
 - **Spain and Europe (price-index targets)**: signals do not beat C0. The overlays shrink the original C1 damage to ~0; the regime gate keeps it non-significant. This is the honest finding - outside the rate target and the shock regime, exogenous/semantic signals do not improve the foundation forecast.
 - **TimesFM Global**: the always-on overlay (`validated`) helps (h1-6, p<0.10) but the regime gate removes that benefit, because here the signal helps broadly rather than only in high-volatility months.
