@@ -133,3 +133,9 @@ jupyter notebook tfg-forecasting/07_evaluation/05_spain_vs_global_vs_europe.ipyn
 | `fig_comp2_foundation_vs_stat.png` | Foundation vs statistical - MAE profiles |
 | `fig_comp3_families.png` | Family comparison (Chronos-2 / TimesFM / TimeGPT) |
 | `fig_comp4_c1_effect.png` | C1 signal effect heatmap (Δ MAE %) |
+
+---
+
+## License
+
+Released under the MIT License - see [LICENSE](LICENSE) for the full text.
