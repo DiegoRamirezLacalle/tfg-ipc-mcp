@@ -1,0 +1,28 @@
+series,target,signal,corr_level,corr_increment,corr_next_increment
+Europe (HICP index),hicp_index,epu_europe_ma3,0.813,0.107,0.115
+Europe (HICP index),hicp_index,brent_ma3,0.443,0.08,0.048
+Europe (HICP index),hicp_index,ttf_ma3,-0.222,0.151,0.147
+Europe (HICP index),hicp_index,esi_eurozone,0.136,0.181,0.19
+Europe (HICP index),hicp_index,eurusd_ma3,-0.28,-0.066,-0.065
+Europe (HICP index),hicp_index,dfr,0.01,0.005,-0.009
+Europe (HICP index),hicp_index,dfr_ma3,0.0,-0.008,-0.017
+Europe (HICP index),hicp_index,breakeven_5y_lag1,0.19,0.225,0.174
+Europe (HICP index),hicp_index,bce_shock_score,0.194,0.316,-0.009
+Europe (HICP index),hicp_index,bce_tone_numeric,0.288,0.134,0.331
+Europe (HICP index),hicp_index,gdelt_tone_ma6,0.159,0.048,0.244
+Global (CPI YoY rate),cpi_global_rate,imf_comm_ma3,0.584,0.065,0.002
+Global (CPI YoY rate),cpi_global_rate,brent_log_ma3,0.462,0.008,-0.037
+Global (CPI YoY rate),cpi_global_rate,gscpi_ma3,0.28,0.29,0.254
+Global (CPI YoY rate),cpi_global_rate,gepu_ma3,0.044,-0.091,-0.09
+Global (CPI YoY rate),cpi_global_rate,fedfunds_ma3,0.282,-0.045,-0.046
+Global (CPI YoY rate),cpi_global_rate,vix_ma3,0.247,-0.273,-0.241
+Global (CPI YoY rate),cpi_global_rate,dxy_ma3,-0.166,-0.078,-0.058
+Global (CPI YoY rate),cpi_global_rate,gpr_ma3,0.061,0.007,-0.017
+Spain (CPI index),indice_general,brent_ma3,0.505,0.019,-0.019
+Spain (CPI index),indice_general,ttf_ma3,-0.196,0.094,0.089
+Spain (CPI index),indice_general,epu_europe_ma3,0.804,0.039,0.034
+Spain (CPI index),indice_general,dfr,0.031,0.055,0.05
+Spain (CPI index),indice_general,dfr_lag3,0.014,0.039,0.033
+Spain (CPI index),indice_general,gdelt_tone_ma6,-0.622,-0.028,-0.027
+Spain (CPI index),indice_general,bce_shock_score,0.43,0.028,0.002
+Spain (CPI index),indice_general,bce_tone_numeric,0.012,0.072,0.027
