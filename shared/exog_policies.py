@@ -22,6 +22,11 @@ This module makes the intent explicit. Pick a policy per use-case:
     nothing relative to "average conditions".
   * ``KNOWN_AT_ORIGIN``- the single vector observed exactly at origin. Use for a
     point-in-time correction (e.g. a Ridge nowcast of the next change).
+  * ``FORWARD_PATH``   - a genuine *forecast* of the covariate's future path
+    (damped random-walk-with-drift) instead of a flat line. The drift is the
+    mean monthly change over the trailing ``drift_window`` months and fades by
+    ``phi`` per step, so recent momentum is propagated without the runaway
+    extrapolation of an undamped RW-drift. Uses only data <= origin.
 
 All helpers slice with ``df.loc[:origin]`` and therefore never read a row dated
 after ``origin``. Call :func:`assert_no_future` in tests to enforce this.
@@ -41,6 +46,45 @@ class ExogPolicy(str, Enum):
     CARRY_FORWARD = "carry_forward"
     NEUTRAL = "neutral"
     KNOWN_AT_ORIGIN = "known_at_origin"
+    FORWARD_PATH = "forward_path"
+
+
+# Defaults for the FORWARD_PATH policy (fixed a priori; not tuned on test data).
+DEFAULT_DRIFT_WINDOW = 12
+DEFAULT_PHI = 0.85
+
+
+def damped_rw_drift_path(
+    values: np.ndarray,
+    horizon: int,
+    drift_window: int = DEFAULT_DRIFT_WINDOW,
+    phi: float = DEFAULT_PHI,
+) -> np.ndarray:
+    """Damped random-walk-with-drift forecast for a single covariate series.
+
+    ``x_{T+k} = x_T + drift * sum_{j=0..k-1} phi^j`` where ``drift`` is the mean
+    monthly change over the trailing ``drift_window`` months. With ``phi < 1``
+    the per-step increment fades, preventing runaway extrapolation while still
+    propagating recent momentum (vs a flat carry-forward).
+
+    ``values`` must already be the as-of-origin series (index <= origin); this
+    function never looks past the array it is given.
+    """
+    if horizon < 1:
+        raise ValueError(f"horizon must be >= 1, got {horizon}.")
+    values = np.asarray(values, dtype=np.float64)
+    last = float(values[-1])
+    tail = values[-(drift_window + 1):]
+    diffs = np.diff(tail)
+    drift = float(np.nanmean(diffs)) if diffs.size else 0.0
+    out = np.empty(horizon, dtype=np.float64)
+    cum = 0.0
+    weight = 1.0
+    for k in range(horizon):
+        cum += weight * drift
+        out[k] = last + cum
+        weight *= phi
+    return out
 
 
 def _window(df: pd.DataFrame, origin: pd.Timestamp) -> pd.DataFrame:
@@ -68,6 +112,10 @@ def build_future_covariates(
     origin: pd.Timestamp,
     horizon: int,
     policy: ExogPolicy = ExogPolicy.CARRY_FORWARD,
+    *,
+    fillna: float | None = None,
+    drift_window: int = DEFAULT_DRIFT_WINDOW,
+    phi: float = DEFAULT_PHI,
 ) -> dict[str, np.ndarray]:
     """Future covariate arrays (each of length ``horizon``) under ``policy``.
 
@@ -81,8 +129,12 @@ def build_future_covariates(
     cols     : covariate column names.
     origin   : forecast origin; the horizon is ``origin+1 .. origin+horizon``.
     horizon  : number of future steps.
-    policy   : CARRY_FORWARD (last known value), NEUTRAL (window mean), or
-               KNOWN_AT_ORIGIN (value at origin, repeated).
+    policy   : CARRY_FORWARD (last known value), NEUTRAL (window mean),
+               KNOWN_AT_ORIGIN (value at origin, repeated), or FORWARD_PATH
+               (damped RW-with-drift forecast of the path).
+    fillna   : if given, fill residual NaNs in the as-of window with this value
+               before computing (matches the flat-hold scripts that ``fillna(0)``).
+    drift_window, phi : FORWARD_PATH hyperparameters (see ``damped_rw_drift_path``).
     """
     if horizon < 1:
         raise ValueError(f"horizon must be >= 1, got {horizon}.")
@@ -92,10 +144,17 @@ def build_future_covariates(
     for col in cols:
         if col not in window.columns:
             raise KeyError(f"Column {col!r} not in frame.")
+        series = window[col]
+        series = series.fillna(fillna) if fillna is not None else series.ffill()
+        if policy == ExogPolicy.FORWARD_PATH:
+            out[col] = damped_rw_drift_path(
+                series.to_numpy(dtype=np.float64), horizon, drift_window, phi
+            )
+            continue
         if policy in (ExogPolicy.CARRY_FORWARD, ExogPolicy.KNOWN_AT_ORIGIN):
-            val = float(window[col].ffill().iloc[-1])
+            val = float(series.iloc[-1])
         elif policy == ExogPolicy.NEUTRAL:
-            val = float(window[col].mean())
+            val = float(series.mean())
         else:  # pragma: no cover - exhaustive
             raise ValueError(f"Unknown policy {policy!r}.")
         out[col] = np.full(horizon, val, dtype=np.float64)

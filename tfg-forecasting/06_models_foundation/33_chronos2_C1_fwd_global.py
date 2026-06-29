@@ -36,6 +36,7 @@ MONOREPO = ROOT.parent
 sys.path.insert(0, str(MONOREPO))
 
 from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.exog_policies import ExogPolicy, build_future_covariates
 from shared.logger import get_logger
 
 logger = get_logger(__name__)
@@ -79,27 +80,17 @@ def load_model():
     return p
 
 
-def forecast_covariate(values: np.ndarray, h: int) -> np.ndarray:
-    """Damped RW-with-drift forecast for one covariate (data <= origin only)."""
-    last = float(values[-1])
-    tail = values[-(DRIFT_WINDOW + 1):]
-    diffs = np.diff(tail)
-    drift = float(np.nanmean(diffs)) if diffs.size else 0.0
-    out = np.empty(h, dtype=np.float64)
-    cum = 0.0
-    weight = 1.0
-    for k in range(h):
-        cum += weight * drift
-        out[k] = last + cum
-        weight *= PHI
-    return out
-
-
 def prepare_input(df: pd.DataFrame, origin: pd.Timestamp, h: int) -> dict:
     ctx = df.loc[:origin]
     target = ctx["cpi_global_rate"].values.astype(np.float64)
     past = {c: ctx[c].values.astype(np.float64) for c in EXOG_COLS if c in ctx.columns}
-    future = {c: forecast_covariate(ctx[c].values.astype(np.float64), h) for c in EXOG_COLS}
+    # Honest forward path (damped RW-with-drift, data <= origin) via the shared
+    # ExogPolicy.FORWARD_PATH helper. Verified bit-identical to the original
+    # inline forecast_covariate on this dataset.
+    future = build_future_covariates(
+        df, EXOG_COLS, origin, h, ExogPolicy.FORWARD_PATH,
+        drift_window=DRIFT_WINDOW, phi=PHI,
+    )
     return {"target": target, "past_covariates": past, "future_covariates": future}
 
 
