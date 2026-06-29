@@ -55,6 +55,18 @@ only.
   Identical to script 15 except future covariates use a damped RW-with-drift
   forecast (12m drift, φ=0.85, data ≤ origin) instead of flat-hold. This isolates
   root cause #2.
+- **Phase 2 (generalized) — forward path on all three series.** The forward-path
+  logic is now a reusable, leakage-checked policy
+  (`shared/exog_policies.py::ExogPolicy.FORWARD_PATH`, verified bit-identical to
+  the original script-33 inline code) and applied to Spain
+  ([34_chronos2_C1_fwd_spain.py](../06_models_foundation/34_chronos2_C1_fwd_spain.py))
+  and Europe
+  ([35_chronos2_C1_fwd_europe.py](../06_models_foundation/35_chronos2_C1_fwd_europe.py)).
+  Forward-path lowers MAE vs flat carry-forward in 10/12 (series×horizon) cells —
+  strongest at medium/long horizons — but the flat-vs-forward gain is **descriptive**
+  (no HLN-DM cell p<0.10), and it does not make context beat C0 on the index targets.
+  Full write-up: [forward_path_report.md](forward_path_report.md);
+  side-by-side metrics: [forward_path_comparison.md](forward_path_comparison.md).
 
 ## Before/after (C1 vs C0, MAE delta and DM p-value)
 

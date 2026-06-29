@@ -87,6 +87,8 @@ MODELS = [
     ("Spain", "C1", "institutional", "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1_inst"),
     ("Spain", "C1", "institutional", "TimesFM",         "metrics_summary_final.json",           "timesfm_C1_inst"),
     ("Spain", "C1", "institutional", "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1_inst"),
+    # Phase 2 improvement: institutional covariates with an honest forward path (script 34).
+    ("Spain", "C1", "inst+forward",  "Chronos-2 (fwd)", "chronos2_C1_fwd_spain_metrics.json",    "chronos2_C1_fwd_spain"),
     ("Spain", "C1", "energy+macro",  "Chronos-2",       "metrics_summary_final.json",           "chronos2_C1"),
     ("Spain", "C1", "energy+macro",  "TimesFM",         "metrics_summary_final.json",           "timesfm_C1"),
     ("Spain", "C1", "energy+macro",  "TimeGPT",         "metrics_summary_final.json",           "timegpt_C1"),
@@ -312,6 +314,7 @@ SIGNAL_LABELS = {
     "macro": "Macro (PPI, rates, USD)",
     "institutional": "Institutional (Fed, ECB, commodities)",
     "energy+macro": "Energy + Macro (full)",
+    "inst+forward": "Institutional + forward covariate path",
 }
 
 

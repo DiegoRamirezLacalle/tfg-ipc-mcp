@@ -14,6 +14,7 @@ Delta is model B versus model A, so negative means model B has lower MAE.
 | spain_timesfm_c1_validated | timesfm_C1_validated_predictions.parquet | timesfm_C1_validated | timesfm_C1_validated | 866 | 0.000 | 0.000 | ok |
 | spain_chronos_c0 | chronos2_C0_predictions.parquet | chronos2_C0 | chronos2_C0 | 866 | 0.000 | 0.000 | ok |
 | spain_chronos_c1_inst | chronos2_C1_inst_predictions.parquet | chronos2_C1_inst | chronos2_C1_inst | 866 | 0.000 | 0.000 | ok |
+| spain_chronos_c1_fwd | chronos2_C1_fwd_spain_predictions.parquet | chronos2_C1_fwd_spain | chronos2_C1_fwd_spain | 866 | 0.000 | 0.000 | ok |
 | spain_chronos_c1_validated | chronos2_C1_validated_predictions.parquet | chronos2_C1_validated | chronos2_C1_validated | 866 | 0.000 | 0.000 | ok |
 | spain_timesfm_c1_regime | timesfm_C1_regime_predictions.parquet | timesfm_C1_regime | timesfm_C1_regime | 866 | 0.000 | 0.000 | ok |
 | spain_chronos_c1_regime | chronos2_C1_regime_predictions.parquet | chronos2_C1_regime | chronos2_C1_regime | 866 | 0.000 | 0.000 | ok |
@@ -32,6 +33,8 @@ Delta is model B versus model A, so negative means model B has lower MAE.
 | europe_timesfm_c1_full | timesfm_C1_full_europe_predictions.parquet | timesfm_C1_full_europe | timesfm_C1_full_europe | 866 | 0.000 | 0.000 | ok |
 | europe_timesfm_c1_validated | timesfm_C1_validated_europe_predictions.parquet | timesfm_C1_validated_europe | timesfm_C1_validated_europe | 866 | 0.000 | 0.000 | ok |
 | europe_chronos_c0 | chronos2_C0_europe_predictions.parquet | chronos2_C0_europe | chronos2_C0_europe | 866 | 0.000 | 0.000 | ok |
+| europe_chronos_c1_inst | chronos2_C1_inst_europe_predictions.parquet | chronos2_C1_inst_europe | chronos2_C1_inst_europe | 866 | 0.000 | 0.000 | ok |
+| europe_chronos_c1_fwd | chronos2_C1_fwd_europe_predictions.parquet | chronos2_C1_fwd_europe | chronos2_C1_fwd_europe | 866 | 0.000 | 0.000 | ok |
 | europe_timesfm_c1_regime | timesfm_C1_regime_europe_predictions.parquet | timesfm_C1_regime_europe | timesfm_C1_regime_europe | 866 | 0.000 | 0.000 | ok |
 | europe_chronos_c1_regime | chronos2_C1_regime_europe_predictions.parquet | chronos2_C1_regime_europe | chronos2_C1_regime_europe | 866 | 0.000 | 0.000 | ok |
 | europe_sarima | rolling_predictions_europe.parquet | sarima | naive, sarima, sarimax | 866 | 0.000 | 0.000 | ok |
@@ -65,6 +68,14 @@ Delta is model B versus model A, so negative means model B has lower MAE.
 | Spain | Chronos-2 regime context | 3 | 135 | 45 | 0.8179 | 0.8179 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
 | Spain | Chronos-2 regime context | 6 | 252 | 42 | 1.2060 | 1.2060 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
 | Spain | Chronos-2 regime context | 12 | 432 | 36 | 1.9898 | 1.9898 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
+| Spain | Chronos-2 forward-path context | 1 | 47 | 47 | 0.5202 | 0.5418 | 4.2% [-11.4, 22.4] | chronos2_C0 | 0.6125 | ns | 0.7296 | ns |
+| Spain | Chronos-2 forward-path context | 3 | 135 | 45 | 0.8179 | 0.8090 | -1.1% [-11.8, 9.3] | chronos2_C1_fwd_spain | 0.8740 | ns | 0.6852 | ns |
+| Spain | Chronos-2 forward-path context | 6 | 252 | 42 | 1.2060 | 1.2181 | 1.0% [-9.2, 10.1] | chronos2_C0 | 0.8772 | ns | 0.3204 | ns |
+| Spain | Chronos-2 forward-path context | 12 | 432 | 36 | 1.9898 | 2.0892 | 5.0% [-4.9, 14.6] | chronos2_C0 | 0.4769 | ns | 0.1853 | ns |
+| Spain | Chronos-2 forward vs flat-hold | 1 | 47 | 47 | 0.5488 | 0.5418 | -1.3% [-7.3, 4.4] | chronos2_C1_fwd_spain | 0.6587 | ns | 0.9812 | ns |
+| Spain | Chronos-2 forward vs flat-hold | 3 | 135 | 45 | 0.8212 | 0.8090 | -1.5% [-5.8, 1.8] | chronos2_C1_fwd_spain | 0.4686 | ns | 0.7614 | ns |
+| Spain | Chronos-2 forward vs flat-hold | 6 | 252 | 42 | 1.2370 | 1.2181 | -1.5% [-6.1, 2.0] | chronos2_C1_fwd_spain | 0.4943 | ns | 0.8563 | ns |
+| Spain | Chronos-2 forward vs flat-hold | 12 | 432 | 36 | 2.0694 | 2.0892 | 1.0% [-2.6, 4.1] | chronos2_C1_inst | 0.6720 | ns | 0.3786 | ns |
 | Global | Chronos-2 context | 1 | 47 | 47 | 0.2519 | 0.2004 | -20.4% [-40.6, 7.0] | chronos2_C1_inst_global | 0.1283 | ns | 0.1316 | ns |
 | Global | Chronos-2 context | 3 | 135 | 45 | 0.3580 | 0.3417 | -4.5% [-23.5, 21.0] | chronos2_C1_inst_global | 0.7448 | ns | 0.8156 | ns |
 | Global | Chronos-2 context | 6 | 252 | 42 | 0.6423 | 0.5914 | -7.9% [-30.2, 22.0] | chronos2_C1_inst_global | 0.6608 | ns | 0.5835 | ns |
@@ -145,6 +156,14 @@ Delta is model B versus model A, so negative means model B has lower MAE.
 | Europe | Chronos-2 regime context | 3 | 135 | 45 | 0.8200 | 0.8193 | -0.1% [-0.5, 0.3] | chronos2_C1_regime_europe | 0.7688 | ns | 0.6421 | ns |
 | Europe | Chronos-2 regime context | 6 | 252 | 42 | 1.2521 | 1.2520 | -0.0% [-0.3, 0.3] | chronos2_C1_regime_europe | 0.9383 | ns | 0.8508 | ns |
 | Europe | Chronos-2 regime context | 12 | 432 | 36 | 2.3003 | 2.3006 | 0.0% [-0.2, 0.2] | chronos2_C0_europe | 0.9149 | ns | 0.6966 | ns |
+| Europe | Chronos-2 forward-path context | 1 | 47 | 47 | 0.5124 | 0.5639 | 10.0% [-10.9, 41.4] | chronos2_C0_europe | 0.4229 | ns | 0.7715 | ns |
+| Europe | Chronos-2 forward-path context | 3 | 135 | 45 | 0.8200 | 0.8180 | -0.2% [-15.5, 16.9] | chronos2_C1_fwd_europe | 0.9813 | ns | 0.8409 | ns |
+| Europe | Chronos-2 forward-path context | 6 | 252 | 42 | 1.2521 | 1.2478 | -0.3% [-13.8, 13.8] | chronos2_C1_fwd_europe | 0.9701 | ns | 0.8666 | ns |
+| Europe | Chronos-2 forward-path context | 12 | 432 | 36 | 2.3003 | 2.2648 | -1.5% [-12.8, 11.7] | chronos2_C1_fwd_europe | 0.8551 | ns | 0.7334 | ns |
+| Europe | Chronos-2 forward vs flat-hold | 1 | 47 | 47 | 0.5513 | 0.5639 | 2.3% [-5.4, 10.1] | chronos2_C1_inst_europe | 0.5527 | ns | 0.6959 | ns |
+| Europe | Chronos-2 forward vs flat-hold | 3 | 135 | 45 | 0.8491 | 0.8180 | -3.7% [-10.1, 3.3] | chronos2_C1_fwd_europe | 0.3979 | ns | 0.2413 | ns |
+| Europe | Chronos-2 forward vs flat-hold | 6 | 252 | 42 | 1.3213 | 1.2478 | -5.6% [-11.8, 1.7] | chronos2_C1_fwd_europe | 0.2410 | ns | 0.0542 | * |
+| Europe | Chronos-2 forward vs flat-hold | 12 | 432 | 36 | 2.4020 | 2.2648 | -5.7% [-12.4, 2.4] | chronos2_C1_fwd_europe | 0.2647 | ns | 0.0563 | * |
 | Europe | TimesFM vs SARIMA | 1 | 47 | 47 | 0.4358 | 0.4126 | -5.3% [-28.4, 29.2] | sarima | 0.7139 | ns | 0.3713 | ns |
 | Europe | TimesFM vs SARIMA | 3 | 135 | 45 | 0.6913 | 0.7171 | 3.7% [-14.5, 24.7] | timesfm_C1_full_europe | 0.7457 | ns | 0.5934 | ns |
 | Europe | TimesFM vs SARIMA | 6 | 252 | 42 | 0.9950 | 1.2259 | 23.2% [5.5, 45.3] | timesfm_C1_full_europe | 0.0435 | ** | 0.0166 | ** |
@@ -190,6 +209,14 @@ Delta is model B versus model A, so negative means model B has lower MAE.
 | Spain | Chronos-2 regime context | 3 | 45 | 45 | 1.0943 | 1.0943 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
 | Spain | Chronos-2 regime context | 6 | 42 | 42 | 1.7756 | 1.7756 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
 | Spain | Chronos-2 regime context | 12 | 36 | 36 | 3.0825 | 3.0825 | 0.0% [0.0, 0.0] | chronos2_C1_regime | NA | NA | NA | NA |
+| Spain | Chronos-2 forward-path context | 1 | 47 | 47 | 0.5202 | 0.5418 | 4.2% [-11.4, 22.4] | chronos2_C0 | 0.6125 | ns | 0.7296 | ns |
+| Spain | Chronos-2 forward-path context | 3 | 45 | 45 | 1.0943 | 1.0544 | -3.7% [-15.8, 7.1] | chronos2_C1_fwd_spain | 0.6603 | ns | 0.6183 | ns |
+| Spain | Chronos-2 forward-path context | 6 | 42 | 42 | 1.7756 | 1.8293 | 3.0% [-8.5, 14.7] | chronos2_C0 | 0.5873 | ns | 0.2900 | ns |
+| Spain | Chronos-2 forward-path context | 12 | 36 | 36 | 3.0825 | 3.3002 | 7.1% [-3.6, 19.2] | chronos2_C0 | 0.3736 | ns | 0.3077 | ns |
+| Spain | Chronos-2 forward vs flat-hold | 1 | 47 | 47 | 0.5488 | 0.5418 | -1.3% [-7.3, 4.4] | chronos2_C1_fwd_spain | 0.6587 | ns | 0.9812 | ns |
+| Spain | Chronos-2 forward vs flat-hold | 3 | 45 | 45 | 1.0696 | 1.0544 | -1.4% [-5.6, 1.9] | chronos2_C1_fwd_spain | 0.6068 | ns | 0.8514 | ns |
+| Spain | Chronos-2 forward vs flat-hold | 6 | 42 | 42 | 1.8643 | 1.8293 | -1.9% [-7.1, 2.0] | chronos2_C1_fwd_spain | 0.5154 | ns | 0.9424 | ns |
+| Spain | Chronos-2 forward vs flat-hold | 12 | 36 | 36 | 3.2432 | 3.3002 | 1.8% [-2.4, 6.3] | chronos2_C1_inst | 0.0113 | ** | 0.4061 | ns |
 | Global | Chronos-2 context | 1 | 47 | 47 | 0.2519 | 0.2004 | -20.4% [-40.6, 7.0] | chronos2_C1_inst_global | 0.1283 | ns | 0.1316 | ns |
 | Global | Chronos-2 context | 3 | 45 | 45 | 0.4898 | 0.4963 | 1.3% [-22.2, 35.4] | chronos2_C0_global | 0.9595 | ns | 0.9669 | ns |
 | Global | Chronos-2 context | 6 | 42 | 42 | 1.1443 | 0.9898 | -13.5% [-38.9, 22.2] | chronos2_C1_inst_global | 0.7711 | ns | 0.7425 | ns |
@@ -270,6 +297,14 @@ Delta is model B versus model A, so negative means model B has lower MAE.
 | Europe | Chronos-2 regime context | 3 | 45 | 45 | 1.1131 | 1.1128 | -0.0% [-0.4, 0.3] | chronos2_C1_regime_europe | 0.9193 | ns | 0.9088 | ns |
 | Europe | Chronos-2 regime context | 6 | 42 | 42 | 1.9216 | 1.9228 | 0.1% [-0.2, 0.2] | chronos2_C0_europe | 0.6967 | ns | 0.4928 | ns |
 | Europe | Chronos-2 regime context | 12 | 36 | 36 | 4.1149 | 4.1171 | 0.1% [-0.1, 0.2] | chronos2_C0_europe | NA | NA | NA | NA |
+| Europe | Chronos-2 forward-path context | 1 | 47 | 47 | 0.5124 | 0.5639 | 10.0% [-10.9, 41.4] | chronos2_C0_europe | 0.4229 | ns | 0.7715 | ns |
+| Europe | Chronos-2 forward-path context | 3 | 45 | 45 | 1.1131 | 1.0880 | -2.3% [-15.6, 12.7] | chronos2_C1_fwd_europe | 0.8607 | ns | 0.9801 | ns |
+| Europe | Chronos-2 forward-path context | 6 | 42 | 42 | 1.9216 | 1.8942 | -1.4% [-15.5, 13.9] | chronos2_C1_fwd_europe | 0.9386 | ns | 0.8242 | ns |
+| Europe | Chronos-2 forward-path context | 12 | 36 | 36 | 4.1149 | 3.8590 | -6.2% [-16.1, 4.0] | chronos2_C1_fwd_europe | 0.1575 | ns | 0.0208 | ** |
+| Europe | Chronos-2 forward vs flat-hold | 1 | 47 | 47 | 0.5513 | 0.5639 | 2.3% [-5.4, 10.1] | chronos2_C1_inst_europe | 0.5527 | ns | 0.6959 | ns |
+| Europe | Chronos-2 forward vs flat-hold | 3 | 45 | 45 | 1.1514 | 1.0880 | -5.5% [-12.2, 1.8] | chronos2_C1_fwd_europe | 0.3842 | ns | 0.3237 | ns |
+| Europe | Chronos-2 forward vs flat-hold | 6 | 42 | 42 | 2.0333 | 1.8942 | -6.8% [-13.4, 0.8] | chronos2_C1_fwd_europe | 0.4492 | ns | 0.3528 | ns |
+| Europe | Chronos-2 forward vs flat-hold | 12 | 36 | 36 | 4.0739 | 3.8590 | -5.3% [-11.5, 2.0] | chronos2_C1_fwd_europe | 0.6019 | ns | 0.4566 | ns |
 | Europe | TimesFM vs SARIMA | 1 | 47 | 47 | 0.4358 | 0.4126 | -5.3% [-28.4, 29.2] | sarima | 0.7139 | ns | 0.3713 | ns |
 | Europe | TimesFM vs SARIMA | 3 | 45 | 45 | 0.9184 | 1.0195 | 11.0% [-10.0, 37.7] | timesfm_C1_full_europe | 0.5439 | ns | 0.4011 | ns |
 | Europe | TimesFM vs SARIMA | 6 | 42 | 42 | 1.4582 | 2.0831 | 42.9% [23.4, 70.2] | timesfm_C1_full_europe | 0.0038 | ** | 0.0502 | * |

@@ -33,6 +33,7 @@ Spain,C1,macro,TimeGPT,0.8099,125.7,1.18,76.0,1.845,91.0,3.0741,99.5
 Spain,C1,institutional,Chronos-2,0.5488,53.0,0.8212,22.5,1.237,28.1,2.0694,34.3
 Spain,C1,institutional,TimesFM,0.4454,24.1,0.746,11.3,1.1,13.9,1.8781,21.9
 Spain,C1,institutional,TimeGPT,0.9052,152.3,1.1679,74.2,1.6497,70.8,2.6028,68.9
+Spain,C1,inst+forward,Chronos-2 (fwd),0.5418,51.0,0.809,20.7,1.2181,26.1,2.0892,35.6
 Spain,C1,energy+macro,Chronos-2,0.549,53.0,0.8473,26.4,1.3132,35.9,2.2659,47.0
 Spain,C1,energy+macro,TimesFM,0.4482,24.9,0.7725,15.2,1.2001,24.2,2.2176,43.9
 Spain,C1,energy+macro,TimeGPT,0.8405,134.3,1.1939,78.1,1.7722,83.5,2.6845,74.2
