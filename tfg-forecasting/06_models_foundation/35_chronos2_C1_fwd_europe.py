@@ -1,0 +1,183 @@
+"""
+35_chronos2_C1_fwd_europe.py - Chronos-2 C1 Europe (HICP), HONEST forward covariates
+
+Forward-path generalization of 21_chronos2_C1_inst_europe.py. Identical (same
+target `hicp_index`, same institutional covariates, same origins, same MASE
+scale, same native Chronos-2 covariate mechanism) EXCEPT the future covariate
+path uses the shared ExogPolicy.FORWARD_PATH (damped RW-with-drift, data <=
+origin) instead of the flat last-value carry-forward. NaNs are filled with 0.0
+to match script 21's handling.
+
+The comparison vs script 21 (flat-hold `chronos2_C1_inst_europe`) isolates the
+value of the forward path for the Europe HICP index target. Writes a new,
+clearly-named variant `chronos2_C1_fwd_europe`; does not overwrite the flat-hold.
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+import warnings
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+
+warnings.filterwarnings("ignore")
+
+ROOT = Path(__file__).resolve().parents[1]
+MONOREPO = ROOT.parent
+sys.path.insert(0, str(MONOREPO))
+
+from shared.constants import DATE_TRAIN_END, DATE_TEST_END
+from shared.exog_policies import ExogPolicy, build_future_covariates
+from shared.logger import get_logger
+
+logger = get_logger(__name__)
+
+RESULTS_DIR = ROOT / "08_results"
+HORIZONS = [1, 3, 6, 12]
+MAX_H = 12
+ORIGINS_START = "2021-01-01"
+ORIGINS_END = DATE_TEST_END
+MODEL_NAME = "chronos2_C1_fwd_europe"
+TEST_END_TS = pd.Timestamp(DATE_TEST_END)
+Q_IDX = {"p10": 2, "p50": 10, "p90": 18}
+
+EXOG_COLS = ["epu_europe_ma3", "brent_ma3", "esi_eurozone", "eurusd_ma3"]
+
+# Forward-path hyperparameters (fixed a priori; not tuned on the test window).
+DRIFT_WINDOW = 12
+PHI = 0.85
+
+FLAT_HOLD_KEY = "chronos2_C1_inst_europe"
+
+
+def load_data() -> pd.DataFrame:
+    df = pd.read_parquet(ROOT / "data" / "processed" / "features_c1_europe.parquet")
+    df.index = pd.to_datetime(df.index)
+    df.index.freq = "MS"
+    return df
+
+
+def load_model():
+    from chronos import Chronos2Pipeline
+    logger.info("[chronos2] Loading amazon/chronos-2 ...")
+    p = Chronos2Pipeline.from_pretrained("amazon/chronos-2", device_map="cpu")
+    logger.info("[chronos2] Loaded")
+    return p
+
+
+def prepare_input(df: pd.DataFrame, origin: pd.Timestamp, h: int) -> dict:
+    ctx = df.loc[:origin].copy()
+    tgt = ctx["hicp_index"].values.astype(np.float64)
+    past = {c: ctx[c].fillna(0.0).values.astype(np.float64) for c in EXOG_COLS if c in ctx.columns}
+    future = build_future_covariates(
+        df, EXOG_COLS, origin, h, ExogPolicy.FORWARD_PATH,
+        fillna=0.0, drift_window=DRIFT_WINDOW, phi=PHI,
+    )
+    return {"target": tgt, "past_covariates": past, "future_covariates": future}
+
+
+def run_rolling(df: pd.DataFrame, model) -> tuple[pd.DataFrame, float]:
+    y = df["hicp_index"]
+    origins = pd.date_range(start=ORIGINS_START, end=ORIGINS_END, freq="MS")
+    yt = y.loc[:DATE_TRAIN_END]
+    mase_scale = float(np.mean(np.abs(yt.values[12:] - yt.values[:-12])))
+    records = []
+    for origin in tqdm(origins, desc=f"{MODEL_NAME} rolling"):
+        inp = prepare_input(df, origin, MAX_H)
+        try:
+            preds = model.predict([inp], prediction_length=MAX_H)
+            q = preds[0].numpy()[0]
+        except Exception as e:
+            logger.warning(f"\n[!] {origin.date()}: {e}")
+            continue
+        p50 = q[Q_IDX["p50"]]
+        for h in HORIZONS:
+            if origin + pd.DateOffset(months=h) > TEST_END_TS:
+                continue
+            fc_dates = pd.date_range(
+                start=origin + pd.DateOffset(months=1), periods=h, freq="MS"
+            )
+            ya = y.reindex(fc_dates)
+            if ya.isna().any():
+                continue
+            for i, (d, r) in enumerate(zip(fc_dates, ya.values), 1):
+                records.append({
+                    "origin": origin, "fc_date": d, "step": i, "horizon": h,
+                    "model": MODEL_NAME, "y_true": float(r), "y_pred": float(p50[i - 1]),
+                    "error": float(r - p50[i - 1]), "abs_error": float(abs(r - p50[i - 1])),
+                })
+    return pd.DataFrame(records), mase_scale
+
+
+def compute_metrics(df_preds: pd.DataFrame, mase_scale: float) -> dict:
+    res = {}
+    for h in HORIZONS:
+        hd = df_preds[df_preds["horizon"] == h]
+        if hd.empty:
+            continue
+        yt, yp = hd["y_true"].values, hd["y_pred"].values
+        res[f"h{h}"] = {
+            "MAE":     round(float(np.mean(np.abs(yt - yp))), 4),
+            "RMSE":    round(float(np.sqrt(np.mean((yt - yp) ** 2))), 4),
+            "MASE":    round(float(np.mean(np.abs(yt - yp)) / mase_scale), 4),
+            "n_evals": int(len(hd["origin"].unique())),
+        }
+    return res
+
+
+def _delta_log(metrics: dict, mfile: str, mkey: str, tag: str) -> None:
+    p = RESULTS_DIR / mfile
+    if not p.exists():
+        logger.warning("[!] %s metrics missing (%s) - skipping", tag, mfile)
+        return
+    ref = json.loads(p.read_text(encoding="utf-8")).get(mkey, {})
+    logger.info(f"\n--- {tag} vs {MODEL_NAME} ---")
+    for h in HORIZONS:
+        rm = ref.get(f"h{h}", {}).get("MAE")
+        cm = metrics.get(f"h{h}", {}).get("MAE")
+        if rm and cm:
+            logger.info(f"  h={h}: ref={rm:.4f}  fwd={cm:.4f}  "
+                        f"delta={cm - rm:+.4f} ({(cm - rm) / rm * 100:+.1f}%)")
+
+
+def main():
+    logger.info("=" * 60)
+    logger.info(f"BACKTESTING - {MODEL_NAME}")
+    logger.info(f"Covariates: {EXOG_COLS}  (damped RW-drift forward, phi={PHI})")
+    logger.info("=" * 60)
+
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    df = load_data()
+    model = load_model()
+
+    df_preds, mase_scale = run_rolling(df, model)
+    if df_preds.empty:
+        logger.warning("[!] No predictions generated.")
+        return
+
+    metrics = compute_metrics(df_preds, mase_scale)
+
+    logger.info(f"\n{'Horizon':<12} {'MAE':>8} {'RMSE':>8} {'MASE':>8} {'N':>5}")
+    logger.info("-" * 45)
+    for h in HORIZONS:
+        k = f"h{h}"
+        if k in metrics:
+            m = metrics[k]
+            logger.info(f"h={h:<10} {m['MAE']:8.4f} {m['RMSE']:8.4f} "
+                        f"{m['MASE']:8.4f} {m['n_evals']:5d}")
+
+    _delta_log(metrics, "chronos2_C0_europe_metrics.json", "chronos2_C0_europe", "C0")
+    _delta_log(metrics, f"{FLAT_HOLD_KEY}_metrics.json", FLAT_HOLD_KEY, "C1_inst (flat-hold)")
+
+    df_preds.to_parquet(RESULTS_DIR / f"{MODEL_NAME}_predictions.parquet", index=False)
+    with open(RESULTS_DIR / f"{MODEL_NAME}_metrics.json", "w") as f:
+        json.dump({MODEL_NAME: metrics}, f, indent=2)
+    logger.info(f"\nSaved: {MODEL_NAME}_metrics.json")
+
+
+if __name__ == "__main__":
+    main()
