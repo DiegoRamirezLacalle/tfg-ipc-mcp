@@ -1,0 +1,10 @@
+contrast,n,pooled_scaled_dbar,direction,p_time,p_country,p_honest,sig_honest,n_countries_B_better
+fwd canonical vs flat-hold,16454,0.0661,B_better,0.0072,0.0038,0.0072,**,16/19
+fwd canonical vs C0,16454,0.094,B_better,0.0067,0.0209,0.0209,**,13/19
+fwd phi=1.0 (undamped) vs flat,16454,0.0632,B_better,0.0807,0.0493,0.0807,*,14/19
+fwd window=24 vs flat,16454,0.0407,B_better,0.0001,0.0027,0.0027,**,14/19
+fwd phi=1.0 vs C0,16454,0.0911,B_better,0.0009,0.0092,0.0092,**,15/19
+fwd window=24 vs C0,16454,0.0685,B_better,0.131,0.1482,0.1482,ns,10/19
+PLACEBO rand-sign vs flat,16454,-0.0181,A_better,0.0804,0.0648,0.0804,*,6/19
+PLACEBO rand-sign vs C0,16454,0.0098,B_better,0.8123,0.8613,0.8613,ns,8/19
+fwd canonical vs PLACEBO,16454,0.0842,B_better,0.0009,0.0033,0.0033,**,16/19

@@ -62,6 +62,38 @@ forward-path covariates **significantly** improve foundation HICP forecasts over
 both flat-hold context (p<0.01) and univariate C0 (p=0.02). The flat-hold context
 still fails, which is the point.
 
+## Robustness + placebo (is the win real?)
+
+Full table: [panel_robustness_dm.md](panel_robustness_dm.md)
+(scripts [37_chronos2_panel_robustness.py](../06_models_foundation/37_chronos2_panel_robustness.py),
+[16_panel_robustness_dm.py](../07_evaluation/16_panel_robustness_dm.py)).
+
+**Not tuned — every informed forward-path setting beats flat-hold.** Re-running
+with other a-priori hyperparameters (all-horizon pooled, honest p):
+
+| forward-path variant | vs flat-hold | vs C0 |
+|---|---|---|
+| canonical (φ=0.85, w=12) | p=0.007 ** (16/19) | p=0.021 ** (13/19) |
+| undamped (φ=1.0, w=12)   | p=0.081 * (14/19)  | p=0.009 ** (15/19) |
+| window=24 (φ=0.85)       | p=0.003 ** (14/19) | p=0.148 ns (10/19) |
+
+The forward-vs-flat win survives every setting (φ=0.85 is not cherry-picked);
+damping helps a little (undamped is weaker vs flat) but even the undamped path
+still beats flat-hold.
+
+**Informed, not just non-flat — the placebo fails.** A random-sign forward path
+(identical damped-drift *magnitude*, randomized *direction*, seed 20260629):
+
+| contrast | result |
+|---|---|
+| placebo vs flat-hold | **A better** (flat beats placebo), p=0.080 — a non-flat but uninformed path does not help, it slightly hurts |
+| placebo vs C0 | ns (p=0.86) — no benefit over univariate |
+| canonical forward vs placebo | **p=0.003 ** (16/19)** — informed path significantly beats placebo |
+
+So the gain is specifically the **informed direction of recent momentum**, not
+merely supplying any non-flat covariate path. This is the decisive defense
+against "you just added noise / tuned the heuristic".
+
 ## What to say — and not say
 
 **Say:** on a 19-country euro-area HICP panel, honest forward-path covariates
