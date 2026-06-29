@@ -1,5 +1,11 @@
 # Forward-path covariates — generalization across Spain, Global, Europe
 
+> **Update (Phase B):** the "not statistically significant / does not change the
+> conclusion" verdict below was a *power artifact* of having only 3 series. On a
+> 19-country euro-area HICP panel the forward-path effect is **significant** (vs
+> flat-hold p<0.01, vs C0 p=0.02). See [phase_b_panel_report.md](phase_b_panel_report.md).
+
+
 Generalizes the Global Chronos-2 `C1_fwd` idea (honest forward covariate path
 instead of flat carry-forward) to all three CPI series. Same rolling-origin
 protocol throughout: origins 2021-01→2024-12, horizons {1,3,6,12}, expanding
